@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novo Atendimento | Protege</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-page">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><img src="images/logo-protege.jpeg" alt="Protege"></div>
+    <nav>
+      <a href="dashboard.html">Dashboard</a><a href="#">Profissionais</a><a href="#">Agenda</a>
+      <a href="#">Famílias</a><a href="#">Filhos</a><a href="#">Alunos</a>
+      <a class="active" href="atendimento.html">Atendimentos</a><a href="#">Relatórios</a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div><span class="section-label">ATENDIMENTOS</span><h1>Novo atendimento</h1></div>
+      <a class="back-link" href="dashboard.html">← Voltar ao dashboard</a>
+    </header>
+
+    <section class="wizard">
+      <div class="wizard-steps">
+        <button class="wizard-step active" data-step="1">1 <span>Cadastro</span></button>
+        <button class="wizard-step" data-step="2">2 <span>Identificação</span></button>
+        <button class="wizard-step" data-step="3">3 <span>Sessão</span></button>
+        <button class="wizard-step" data-step="4">4 <span>Mãe</span></button>
+        <button class="wizard-step" data-step="5">5 <span>Ferramenta</span></button>
+        <button class="wizard-step" data-step="6">6 <span>Observações</span></button>
+        <button class="wizard-step" data-step="7">7 <span>Frequência</span></button>
+        <button class="wizard-step" data-step="8">8 <span>Revisão</span></button>
+        <button class="wizard-step" data-step="9">9 <span>Faltas</span></button>
+        <button class="wizard-step" data-step="10">10 <span>Supervisão</span></button>
+      </div>
+
+      <form id="attendanceForm">
+        <div class="wizard-panel active" data-panel="1">
+          <span class="section-label">PASSO 1 · CADASTROS</span><h2>Cadastro completo da pessoa física.</h2>
+          <div class="form-grid">
+            <label>Nome Completo<input name="nome" required></label><label>CPF<input name="cpf" placeholder="000.000.000-00"></label>
+            <label>Data de Nascimento<input name="nascimento" type="date"></label><label>Celular<input name="celular"></label>
+            <label>E-mail<input name="email" type="email"></label><label>Endereço<input name="endereco"></label>
+            <label>Cidade<input name="cidade"></label><label>Estado<input name="estado"></label>
+          </div>
+        </div>
+
+        <div class="wizard-panel" data-panel="2">
+          <span class="section-label">PASSO 2 · IDENTIFICAÇÃO DO CASO</span><h2>Preencher profissional e família/cliente.</h2>
+          <div class="form-grid"><label>Nome do Profissional<input name="profissional"></label><label>Nome da Família/Cliente<input name="familia"></label></div>
+          <div class="table-card"><div class="table-head"><h3>Filhos</h3><button type="button" class="small-btn" id="addChild">+ Adicionar filho</button></div>
+          <table id="childrenTable"><thead><tr><th>Nome</th><th>Sexo</th><th>Idade</th><th></th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div class="wizard-panel" data-panel="3">
+          <span class="section-label">PASSO 3 · LOCALIZAR A SESSÃO</span><h2>Registrar cada encontro na sessão correspondente.</h2>
+          <div class="table-card"><div class="table-head"><h3>Sessões</h3><button type="button" class="small-btn" id="addSession">+ Adicionar sessão</button></div>
+          <table id="sessionsTable"><thead><tr><th>Nº</th><th>Profissional</th><th>Texto</th><th>Observações</th><th>Conclusão</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div class="wizard-panel" data-panel="4">
+          <span class="section-label">PASSO 4 · MÃE (PERFIL E DINÂMICA)</span><h2>Descreva estado emocional, comportamento e padrões observados.</h2>
+          <label>Descrição<textarea name="mae_descricao" rows="12"></textarea></label>
+        </div>
+
+        <div class="wizard-panel" data-panel="5">
+          <span class="section-label">PASSO 5 · FERRAMENTA</span><h2>Registrar estratégia, orientação e técnica aplicada.</h2>
+          <div class="form-grid one"><label>Estratégia<textarea name="estrategia" rows="5"></textarea></label><label>Orientação<textarea name="orientacao" rows="5"></textarea></label><label>Técnica<textarea name="tecnica" rows="5"></textarea></label></div>
+        </div>
+
+        <div class="wizard-panel" data-panel="6">
+          <span class="section-label">PASSO 6 · OBSERVAÇÕES</span><h2>Registrar reações, dificuldades, avanços e pontos importantes.</h2>
+          <label>Descrição<textarea name="observacoes" rows="12"></textarea></label>
+        </div>
+
+        <div class="wizard-panel" data-panel="7">
+          <span class="section-label">PASSO 7 · FREQUÊNCIA DE PREENCHIMENTO</span><h2>Preencher após cada atendimento, não deixar acumular.</h2>
+          <label>Data do Atendimento<input name="data_atendimento" type="date"></label>
+        </div>
+
+        <div class="wizard-panel" data-panel="8">
+          <span class="section-label">PASSO 8 · ATUALIZAÇÃO SEMANAL</span><h2>Revisar semanalmente se está tudo preenchido e se há faltas.</h2>
+          <div class="form-grid"><label>Data da Revisão<input name="data_revisao" type="date"></label><label>Pontos para Supervisão<textarea name="pontos_supervisao" rows="6"></textarea></label></div>
+        </div>
+
+        <div class="wizard-panel" data-panel="9">
+          <span class="section-label">PASSO 9 · REGISTRO DE FALTAS</span><h2>Registrar faltas, remarcações e dificuldades de contato.</h2>
+          <div class="form-grid"><label>Data da Falta/Revisão<input name="data_falta" type="date"></label><label>Pontos para Supervisão<textarea name="falta_observacoes" rows="6"></textarea></label></div>
+        </div>
+
+        <div class="wizard-panel" data-panel="10">
+          <span class="section-label">PASSO 10 · USO NA SUPERVISÃO</span><h2>Revisar registros, identificar dúvidas e observar evolução da família.</h2>
+          <div class="form-grid one"><label>Dúvidas<textarea name="duvidas" rows="7"></textarea></label><label>Evolução Observada<textarea name="evolucao" rows="7"></textarea></label></div>
+        </div>
+
+        <div class="wizard-actions">
+          <button type="button" class="btn btn-secondary" id="prevStep">Anterior</button>
+          <span id="stepCounter">Passo 1 de 10</span>
+          <button type="button" class="btn btn-primary" id="nextStep">Próximo</button>
+          <button type="submit" class="btn btn-primary" id="saveAttendance" hidden>Salvar atendimento</button>
+        </div>
+        <p id="saveMessage" class="form-message"></p>
+      </form>
+    </section>
+  </main>
+  <script src="js/script.js"></script>
+</body>
+</html>

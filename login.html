@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Protege</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <a href="index.html" class="login-brand"><img src="images/logo-protege.jpeg" alt="Protege"></a>
+    <section class="login-card">
+      <span class="section-label">ÁREA RESTRITA</span>
+      <h1>Bem-vindo de volta</h1>
+      <p>Acesse o ambiente de profissionais da Protege.</p>
+      <form id="loginForm">
+        <label>E-mail<input id="email" type="email" placeholder="seu@email.com" required></label>
+        <label>Senha<input id="password" type="password" placeholder="••••••••" required></label>
+        <button class="btn btn-primary full" type="submit">Entrar</button>
+        <p id="loginMessage" class="form-message"></p>
+      </form>
+      <a href="index.html" class="back-link">← Voltar para o site</a>
+    </section>
+  </main>
+  <script src="js/script.js"></script>
+</body>
+</html>
