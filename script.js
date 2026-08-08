@@ -91,3 +91,67 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   }
 });
+
+// Cadastro de interesse dos pais/responsáveis
+(() => {
+  const form = document.getElementById("interestForm");
+  if (!form) return;
+
+  const rows = document.getElementById("interestChildren");
+  const add = document.getElementById("addInterestChild");
+  const message = document.getElementById("interestMessage");
+
+  function updateRemoveButtons() {
+    const buttons = rows.querySelectorAll(".remove-child");
+    buttons.forEach(btn => btn.disabled = buttons.length === 1);
+  }
+
+  add?.addEventListener("click", () => {
+    const row = document.createElement("div");
+    row.className = "child-row";
+    row.innerHTML = `
+      <label><span class="mobile-label">Nome do filho(a)</span><input name="childName[]" type="text" required placeholder="Nome"></label>
+      <label><span class="mobile-label">Idade</span><input name="childAge[]" type="number" required min="0" max="99" placeholder="Idade"></label>
+      <button class="small-btn remove-child" type="button" aria-label="Excluir filho">Excluir</button>`;
+    rows.appendChild(row);
+    updateRemoveButtons();
+    row.querySelector("input")?.focus();
+  });
+
+  rows.addEventListener("click", e => {
+    const button = e.target.closest(".remove-child");
+    if (!button || button.disabled) return;
+    button.closest(".child-row").remove();
+    updateRemoveButtons();
+  });
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const fd = new FormData(form);
+    const names = fd.getAll("childName[]");
+    const ages = fd.getAll("childAge[]");
+    const children = names.map((name, i) => `• ${name} — ${ages[i]} ano(s)`).join("\n");
+
+    const address = [
+      `${fd.get("logradouro")}, ${fd.get("numero")}`,
+      fd.get("complemento") ? `Complemento: ${fd.get("complemento")}` : "",
+      `${fd.get("bairro")} — ${fd.get("cidade")}/${String(fd.get("estado")).toUpperCase()}`,
+      `CEP: ${fd.get("cep")}`
+    ].filter(Boolean).join("\n");
+
+    const text = `Olá, equipe Protege! Gostaria de cadastrar meu interesse no programa.\n\n` +
+      `*PAIS / RESPONSÁVEIS*\n` +
+      `Responsável 1: ${fd.get("responsavel1")}\n` +
+      (fd.get("responsavel2") ? `Responsável 2: ${fd.get("responsavel2")}\n` : "") +
+      `\n*FILHOS*\n${children}\n\n` +
+      `*ENDEREÇO*\n${address}`;
+
+    const url = `https://wa.me/5511965980606?text=${encodeURIComponent(text)}`;
+    message.textContent = "Cadastro preparado. O WhatsApp será aberto para você confirmar o envio.";
+    window.open(url, "_blank", "noopener");
+  });
+
+  updateRemoveButtons();
+})();

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cadastro de interesse no Programa Protege - Educação Parental.">
+  <title>Quero participar | Protege Educação Parental</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html" aria-label="Protege Educação Parental">
+        <img src="logo-protege.jpeg" alt="Protege - Educação Parental">
+      </a>
+      <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
+      <nav class="main-nav">
+        <a href="index.html#sobre">Educação Parental</a>
+        <a href="index.html#como-funciona">Como funciona</a>
+        <a href="index.html#beneficios">Benefícios</a>
+        <a class="nav-interest active-link" href="cadastro.html">Quero participar</a>
+        <a class="nav-login" href="login.html">Área do profissional</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="registration-page">
+    <section class="registration-hero">
+      <div class="container registration-heading">
+        <span class="section-label">PROGRAMA PROTEGE</span>
+        <h1>Cadastre seu interesse</h1>
+        <p>Preencha os dados abaixo. Ao finalizar, o cadastro será encaminhado para a equipe Protege pelo WhatsApp.</p>
+      </div>
+    </section>
+
+    <section class="registration-section">
+      <div class="container registration-shell">
+        <form id="interestForm" class="registration-card">
+          <div class="form-section-title">
+            <span>01</span>
+            <div><h2>Dados dos pais ou responsáveis</h2><p>Informe quem participa da rotina familiar.</p></div>
+          </div>
+          <div class="form-grid">
+            <label>Nome do pai/responsável 1
+              <input name="responsavel1" type="text" required autocomplete="name" placeholder="Nome completo">
+            </label>
+            <label>Nome da mãe/responsável 2
+              <input name="responsavel2" type="text" autocomplete="name" placeholder="Nome completo (opcional)">
+            </label>
+          </div>
+
+          <div class="form-section-title">
+            <span>02</span>
+            <div><h2>Filhos</h2><p>Adicione quantos filhos forem necessários.</p></div>
+          </div>
+          <div class="children-editor">
+            <div class="children-grid-head" aria-hidden="true">
+              <span>Nome do filho(a)</span><span>Idade</span><span></span>
+            </div>
+            <div id="interestChildren" class="children-rows">
+              <div class="child-row">
+                <label><span class="mobile-label">Nome do filho(a)</span><input name="childName[]" type="text" required placeholder="Nome"></label>
+                <label><span class="mobile-label">Idade</span><input name="childAge[]" type="number" required min="0" max="99" placeholder="Idade"></label>
+                <button class="small-btn remove-child" type="button" aria-label="Excluir filho" disabled>Excluir</button>
+              </div>
+            </div>
+            <button id="addInterestChild" class="small-btn add-child-btn" type="button">+ Adicionar outro filho</button>
+          </div>
+
+          <div class="form-section-title">
+            <span>03</span>
+            <div><h2>Endereço da família</h2><p>Informe o endereço principal da família.</p></div>
+          </div>
+          <div class="form-grid address-grid">
+            <label>CEP
+              <input name="cep" type="text" inputmode="numeric" placeholder="00000-000" required>
+            </label>
+            <label class="span-2">Rua / Avenida
+              <input name="logradouro" type="text" placeholder="Nome da rua ou avenida" required>
+            </label>
+            <label>Número
+              <input name="numero" type="text" placeholder="Nº" required>
+            </label>
+            <label>Complemento
+              <input name="complemento" type="text" placeholder="Apto, bloco etc. (opcional)">
+            </label>
+            <label>Bairro
+              <input name="bairro" type="text" required>
+            </label>
+            <label>Cidade
+              <input name="cidade" type="text" required>
+            </label>
+            <label>Estado
+              <input name="estado" type="text" maxlength="2" placeholder="SP" required>
+            </label>
+          </div>
+
+          <label class="consent-row">
+            <input name="consentimento" type="checkbox" required>
+            <span>Autorizo o envio dessas informações à equipe Protege para contato sobre o programa.</span>
+          </label>
+
+          <div class="registration-actions">
+            <a class="btn btn-secondary" href="index.html">Voltar</a>
+            <button class="btn btn-primary" type="submit">Enviar cadastro pelo WhatsApp</button>
+          </div>
+          <p id="interestMessage" class="form-message" role="status" aria-live="polite"></p>
+          <p class="privacy-note">Ao clicar em enviar, o WhatsApp será aberto com os dados preenchidos para você confirmar o envio.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-wrap">
+      <div><img src="logo-protege.jpeg" alt="Protege" class="footer-logo"><p>Protege - Educação Parental</p></div>
+      <div class="footer-right"><a href="login.html">Área do profissional</a><span>© <span id="year"></span> Protege</span></div>
+    </div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
