@@ -1,0 +1,20 @@
+PROTEGE - versão preparada para GitHub Pages
+
+Envie TODOS os arquivos desta pasta para a RAIZ do repositório GitHub.
+Importante: não envie apenas index.html.
+
+Arquivos essenciais:
+- index.html
+- style.css
+- script.js
+- logo-protege.jpeg
+- login.html
+- dashboard.html
+- atendimento.html
+- .nojekyll
+
+No GitHub Pages mantenha:
+Branch: main
+Pasta: /(root)
+
+Depois de salvar, aguarde alguns minutos e atualize a página com Ctrl+F5.
