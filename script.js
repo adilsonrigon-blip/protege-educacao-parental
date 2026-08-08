@@ -144,6 +144,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = `Olá, equipe Protege! Gostaria de cadastrar meu interesse no programa.\n\n` +
       `*PAIS / RESPONSÁVEIS*\n` +
       `Responsável 1: ${fd.get("responsavel1")}\n` +
+      `Telefone/WhatsApp: ${fd.get("telefone")}\n` +
+      (fd.get("email") ? `E-mail: ${fd.get("email")}\n` : "") +
       (fd.get("responsavel2") ? `Responsável 2: ${fd.get("responsavel2")}\n` : "") +
       `\n*FILHOS*\n${children}\n\n` +
       `*ENDEREÇO*\n${address}`;
