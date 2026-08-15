@@ -1,0 +1,8 @@
+PROTEGE V7 — CORREÇÃO DEFINITIVA DO MODAL
+
+Substitua no GitHub principalmente:
+1. familias-interessadas.html
+2. style.css
+
+A V7 inclui CSS local dentro de familias-interessadas.html com !important para impedir que cache ou regras antigas deixem Status e Observações pequenos/desalinhados.
+Depois do commit, aguarde o GitHub Pages publicar e pressione Ctrl+F5.

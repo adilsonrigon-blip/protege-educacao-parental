@@ -4,7 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Famílias interessadas | Protege</title>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
+
+  <style>
+    /* V7: correção local do formulário do modal para não depender de cache/cascata externa */
+    #leadDialog .lead-edit-grid{
+      display:grid !important;
+      grid-template-columns:200px minmax(0,1fr) !important;
+      gap:18px !important;
+      align-items:start !important;
+      width:100% !important;
+      margin-top:8px !important;
+    }
+    #leadDialog .lead-field{
+      display:flex !important;
+      flex-direction:column !important;
+      gap:8px !important;
+      min-width:0 !important;
+      width:100% !important;
+      font-size:13px !important;
+      font-weight:700 !important;
+      color:#574d5c !important;
+    }
+    #leadDialog .lead-field > span{display:block !important;}
+    #leadDialog #leadEditStatus,
+    #leadDialog #leadNotes{
+      display:block !important;
+      width:100% !important;
+      max-width:none !important;
+      margin:0 !important;
+      font-family:inherit !important;
+      font-size:14px !important;
+      color:#332b3a !important;
+      background:#fff !important;
+      border:1px solid #ded5e3 !important;
+      border-radius:10px !important;
+      box-sizing:border-box !important;
+    }
+    #leadDialog #leadEditStatus{height:46px !important;padding:0 12px !important;}
+    #leadDialog #leadNotes{height:120px !important;min-height:120px !important;padding:12px 13px !important;resize:vertical !important;line-height:1.45 !important;}
+    #leadDialog .dialog-actions{
+      display:flex !important;
+      justify-content:flex-end !important;
+      align-items:center !important;
+      gap:10px !important;
+      flex-wrap:wrap !important;
+      border-top:1px solid #eee8f0 !important;
+      padding-top:18px !important;
+      margin-top:22px !important;
+    }
+    @media (max-width:760px){
+      #leadDialog .lead-edit-grid{grid-template-columns:1fr !important;}
+      #leadDialog .dialog-actions > *{width:100% !important;}
+    }
+  </style>
 </head>
 <body class="app-page" data-requires-auth="true">
   <aside class="sidebar">
