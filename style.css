@@ -95,3 +95,22 @@
 
 /* V12.1 - seleção clara de data, hora e minuto na agenda */
 .schedule-datetime-block{display:flex;flex-direction:column;gap:8px;min-width:0}.schedule-datetime-label{font-weight:700;color:var(--ink,#2e2432);font-size:.94rem}.schedule-datetime-fields{display:grid;grid-template-columns:minmax(150px,1fr) 78px 14px 78px;align-items:center;gap:8px}.schedule-datetime-fields input,.schedule-datetime-fields select{width:100%;min-height:50px;border:1px solid #ded5e3;border-radius:12px;background:#fff;padding:0 12px;font:inherit;color:#2e2432}.schedule-datetime-fields select{cursor:pointer}.time-separator{text-align:center;font-weight:800;font-size:1.15rem;color:#6b5b70}@media(max-width:760px){.schedule-datetime-fields{grid-template-columns:1fr 72px 12px 72px}.schedule-datetime-fields input,.schedule-datetime-fields select{min-height:46px;padding:0 8px}}
+
+/* V12.4 - período de agenda */
+.schedule-dialog{width:min(960px,calc(100vw - 32px))}
+.schedule-period{grid-column:1/-1;border:1px solid #eadff0;background:#fcf9fd;border-radius:18px;padding:18px;margin-top:2px}
+.schedule-period-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.schedule-period-head small{display:block;color:#8b7893;font-weight:500;margin-top:4px}
+.duration-badge{white-space:nowrap;background:#efe2f5;color:#74339c;border-radius:999px;padding:7px 12px;font-size:.8rem;font-weight:800}
+.schedule-period-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.schedule-time-card{background:#fff;border:1px solid #e7dfea;border-radius:14px;padding:14px}
+.schedule-time-card>strong{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:#302535}
+.schedule-time-card>strong small{font-size:.7rem;color:#8d7993;background:#f5eff8;border-radius:999px;padding:4px 7px}
+.schedule-date-line{display:grid;grid-template-columns:minmax(160px,1.4fr) minmax(170px,1fr);gap:12px;align-items:end}
+.schedule-clock-group{display:grid;grid-template-columns:1fr 12px 1fr;gap:5px;align-items:end}
+.schedule-mini-field{display:flex!important;flex-direction:column!important;gap:5px!important;font-weight:700!important}
+.schedule-mini-field>span{font-size:.73rem;color:#7f7184;font-weight:700}
+.schedule-mini-field input,.schedule-mini-field select{min-height:46px!important;padding:8px 10px!important}
+.schedule-clock-group .time-separator{align-self:center;margin-top:18px}
+@media(max-width:820px){.schedule-period-grid{grid-template-columns:1fr}.schedule-date-line{grid-template-columns:1.25fr 1fr}}
+@media(max-width:560px){.schedule-period{padding:13px}.schedule-period-head{align-items:flex-start}.schedule-date-line{grid-template-columns:1fr}.schedule-clock-group{grid-template-columns:1fr 12px 1fr}.duration-badge{display:none}}
