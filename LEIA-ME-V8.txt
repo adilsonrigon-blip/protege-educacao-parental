@@ -1,0 +1,10 @@
+PROTEGE V8 — CONVERSÃO EM FAMÍLIA
+
+1) ANTES de publicar os arquivos, abra Supabase > SQL Editor > New query.
+2) Abra o arquivo supabase-v8-conversao.sql, copie todo o conteúdo, cole no SQL Editor e clique Run.
+3) Confirme que aparecem as tabelas public.familias e public.filhos no Table Editor.
+4) Depois envie os arquivos da V8 para o GitHub, substituindo os existentes.
+5) Teste: Famílias interessadas > Abrir > Converter em família.
+6) O sistema cria a família e filhos, marca o interesse como Convertido e abre familias.html.
+
+A conversão é idempotente: clicar novamente não duplica a família.

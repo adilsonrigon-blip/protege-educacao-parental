@@ -44,6 +44,20 @@ const ProtegeApp = (() => {
     if (error) throw error;
   }
 
+  async function loadFamilies() {
+    if (!configured) return [];
+    const { data, error } = await db.from('familias').select('*, filhos(*)').order('created_at',{ascending:false});
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function convertLead(id) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const { data, error } = await db.rpc('converter_interesse_em_familia',{p_interesse_id:id});
+    if (error) throw error;
+    return data;
+  }
+
   async function countNewLeads() {
     try {
       const leads = await loadLeads();
@@ -57,7 +71,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -116,6 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // DASHBOARD E FILA DE FAMÍLIAS
   if (document.getElementById('recentLeads')) await initDashboardLeads();
   if (document.getElementById('leadsTable')) await initLeadsPage();
+  if (document.getElementById('familiesTable')) await initFamiliesPage();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -184,6 +199,8 @@ async function initDashboardLeads() {
   const box=document.getElementById('recentLeads');
   try {
     const leads=await ProtegeApp.loadLeads();
+    const familyMetric=document.getElementById('dashboardFamilies');
+    if(familyMetric){ try{ const families=await ProtegeApp.loadFamilies(); familyMetric.textContent=families.length; }catch(e){ familyMetric.textContent='0'; } }
     const recent=leads.slice(0,4);
     box.innerHTML=recent.length?recent.map(x=>`<a class="recent-lead" href="familias-interessadas.html?id=${encodeURIComponent(x.id)}"><div><b>${ProtegeApp.esc(x.responsavel1)}</b><small>${ProtegeApp.esc(x.cidade)}/${ProtegeApp.esc(x.estado)} · ${ProtegeApp.formatDate(x.created_at)}</small></div><span class="status-pill status-${ProtegeApp.esc(x.status)}">${ProtegeApp.statusLabel(x.status)}</span></a>`).join(''):'<div class="empty-state">Nenhum cadastro recebido ainda.</div>';
   } catch(e) { box.innerHTML='<div class="empty-state">Não foi possível carregar os cadastros.</div>'; console.error(e); }
@@ -229,8 +246,72 @@ async function initLeadsPage() {
   tbody.addEventListener('click',e=>{const b=e.target.closest('.view-lead');if(b)openLead(b.dataset.id);});
   search.addEventListener('input',render); filter.addEventListener('change',render);
   editForm.addEventListener('submit',async e=>{e.preventDefault();if(!active)return;const msg=document.getElementById('leadDialogMessage');msg.textContent='Salvando...';try{await ProtegeApp.updateLead(active.id,{status:document.getElementById('leadEditStatus').value,observacoes:document.getElementById('leadNotes').value.trim()||null});msg.textContent='Alterações salvas.';await refresh();setTimeout(()=>dialog.close(),450);}catch(err){msg.textContent='Não foi possível salvar.';console.error(err);}});
-  document.getElementById('convertLeadBtn').addEventListener('click',async()=>{if(!active)return;document.getElementById('leadEditStatus').value='convertido';document.getElementById('leadDialogMessage').textContent='Nesta primeira etapa, a conversão marca o cadastro como convertido. O cadastro completo de famílias será conectado na próxima versão.';});
+  document.getElementById('convertLeadBtn').addEventListener('click',async()=>{
+    if(!active)return;
+    const btn=document.getElementById('convertLeadBtn');
+    const msg=document.getElementById('leadDialogMessage');
+    if(active.status==='convertido'){ msg.textContent='Esta família já foi convertida.'; return; }
+    if(!confirm(`Converter o cadastro de ${active.responsavel1} em família atendida?`)) return;
+    btn.disabled=true; msg.textContent='Convertendo família e filhos...';
+    try{
+      const familyId=await ProtegeApp.convertLead(active.id);
+      msg.textContent='Família convertida com sucesso. Abrindo cadastro...';
+      await refresh();
+      setTimeout(()=>{ window.location.href=`familias.html?id=${encodeURIComponent(familyId)}`; },500);
+    }catch(err){
+      console.error(err);
+      msg.textContent=err?.message?.includes('converter_interesse_em_familia')
+        ? 'A função de conversão ainda não existe no banco. Execute o arquivo supabase-v8-conversao.sql no Supabase.'
+        : `Não foi possível converter: ${err?.message || 'erro inesperado'}`;
+    }finally{ btn.disabled=false; }
+  });
   await refresh();
+}
+
+
+async function initFamiliesPage() {
+  const tbody=document.querySelector('#familiesTable tbody');
+  const search=document.getElementById('familySearch');
+  const dialog=document.getElementById('familyDialog');
+  let families=[];
+
+  function childrenOf(x){ return x.filhos || []; }
+  function render(){
+    const q=(search?.value||'').toLowerCase().trim();
+    const items=families.filter(x=>!q||[x.responsavel1,x.responsavel2,x.telefone,x.email,x.cidade,...childrenOf(x).map(c=>c.nome)].filter(Boolean).join(' ').toLowerCase().includes(q));
+    tbody.innerHTML=items.length?items.map(x=>`<tr>
+      <td>${ProtegeApp.formatDate(x.created_at)}</td>
+      <td><b>${ProtegeApp.esc(x.responsavel1)}</b>${x.responsavel2?`<small>${ProtegeApp.esc(x.responsavel2)}</small>`:''}</td>
+      <td>${ProtegeApp.esc(x.telefone)}${x.email?`<small>${ProtegeApp.esc(x.email)}</small>`:''}</td>
+      <td>${childrenOf(x).length}</td>
+      <td>${ProtegeApp.esc(x.cidade||'')}/${ProtegeApp.esc(x.estado||'')}</td>
+      <td><span class="status-pill status-aprovado">${ProtegeApp.esc(x.status||'ativa')}</span></td>
+      <td><button class="small-btn view-family" data-id="${ProtegeApp.esc(x.id)}">Abrir</button></td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhuma família convertida ainda.</td></tr>';
+  }
+  function openFamily(id){
+    const f=families.find(x=>x.id===id); if(!f)return;
+    document.getElementById('familyDialogName').textContent=f.responsavel1;
+    const ch=childrenOf(f);
+    document.getElementById('familyDetails').innerHTML=`
+      <div class="detail-card"><span>Responsáveis</span><b>${ProtegeApp.esc(f.responsavel1)}</b>${f.responsavel2?`<small>${ProtegeApp.esc(f.responsavel2)}</small>`:''}</div>
+      <div class="detail-card"><span>Contato</span><b>${ProtegeApp.esc(f.telefone)}</b><small>${ProtegeApp.esc(f.email||'Sem e-mail')}</small></div>
+      <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc(f.logradouro||'')}, ${ProtegeApp.esc(f.numero||'')}${f.complemento?' · '+ProtegeApp.esc(f.complemento):''}</b><small>${ProtegeApp.esc(f.bairro||'')} · ${ProtegeApp.esc(f.cidade||'')}/${ProtegeApp.esc(f.estado||'')} · CEP ${ProtegeApp.esc(f.cep||'')}</small></div>
+      <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade ?? '—'} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
+    document.getElementById('familyWhatsapp').href=`https://wa.me/55${ProtegeApp.onlyDigits(f.telefone)}`;
+    document.getElementById('newAttendanceForFamily').href=`atendimento.html?familia=${encodeURIComponent(f.id)}`;
+    dialog.showModal();
+  }
+  try{
+    families=await ProtegeApp.loadFamilies();
+    document.getElementById('metricFamilies').textContent=families.length;
+    document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0);
+    render();
+    const id=new URLSearchParams(location.search).get('id');
+    if(id && families.some(f=>f.id===id)){ openFamily(id); history.replaceState({},'',location.pathname); }
+  }catch(err){ console.error(err); tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as famílias. Execute a migração V8 no Supabase.</td></tr>'; }
+  search?.addEventListener('input',render);
+  tbody.addEventListener('click',e=>{const b=e.target.closest('.view-family');if(b)openFamily(b.dataset.id);});
 }
 
 function initAttendanceWizard() {
