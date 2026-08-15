@@ -1,0 +1,11 @@
+PROTEGE V10 - GESTÃO DE ATENDIMENTOS
+
+Novidades:
+- nova página atendimentos.html com dados reais do Supabase;
+- busca e filtro por status;
+- métricas de total, realizados, agendados e rascunhos;
+- botão Abrir com visualização das 10 etapas registradas;
+- links de navegação atualizados.
+
+Não é necessário executar SQL novo.
+Publique todos os arquivos desta pasta no GitHub Pages substituindo os existentes.

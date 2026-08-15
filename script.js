@@ -168,6 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('familiesTable')) await initFamiliesPage();
   if (document.getElementById('professionalsTable')) await initProfessionalsPage();
   if (document.getElementById('dashboardAttendances')) await initDashboardCore();
+  if (document.getElementById('attendancesTable')) await initAttendancesPage();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -369,6 +370,36 @@ async function initDashboardCore(){
     const box=document.getElementById('dashboardAttendanceList'); const recent=attendances.slice(0,4);
     box.innerHTML=recent.length?recent.map(a=>`<div><span class="time">${new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(new Date(a.data_hora))}</span><div><b>${ProtegeApp.esc(a.familias?.responsavel1||'Família')}</b><small>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')} · ${ProtegeApp.esc(a.status)}</small></div><span class="status-dot"></span></div>`).join(''):'<div class="empty-state">Nenhum atendimento registrado.</div>';
   }catch(err){console.error(err);}
+}
+
+
+async function initAttendancesPage(){
+  const tbody=document.querySelector('#attendancesTable tbody');
+  const search=document.getElementById('attendanceSearch');
+  const statusFilter=document.getElementById('attendanceStatusFilter');
+  const dialog=document.getElementById('attendanceDetailDialog');
+  const close1=document.getElementById('closeAttendanceDetail');
+  const close2=document.getElementById('closeAttendanceDetailBottom');
+  let items=[];
+  const labels={demanda:'Demanda / motivo',objetivo:'Objetivo do encontro',participantes:'Participantes',contexto:'Contexto atual',sessao_relato:'Relato da sessão',sessao_conclusao:'Conclusões / combinados',dinamica_parental:'Perfil e dinâmica parental',estrategia:'Estratégia',orientacao:'Orientação',tecnica:'Técnica',observacoes:'Observações',encaminhamentos:'Encaminhamentos',proximo_passo:'Próximo passo',data_revisao:'Data da revisão',pontos_revisao:'Pontos para revisão',data_falta:'Data da ocorrência',falta_observacoes:'Falta / remarcação / contato',duvidas:'Dúvidas para supervisão',evolucao:'Evolução observada'};
+  const stepGroups=[
+    ['1 · Demanda',['demanda','objetivo']],['2 · Contexto',['participantes','contexto']],['3 · Sessão',['sessao_relato','sessao_conclusao']],['4 · Dinâmica',['dinamica_parental']],['5 · Ferramenta',['estrategia','orientacao','tecnica']],['6 · Observações',['observacoes']],['7 · Registro',['encaminhamentos','proximo_passo']],['8 · Revisão',['data_revisao','pontos_revisao']],['9 · Faltas',['data_falta','falta_observacoes']],['10 · Supervisão',['duvidas','evolucao']]
+  ];
+  function familyName(a){const f=a.familias||{};return [f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';}
+  function memberName(a){return a?.dados?.membro_atendido||a?.filhos?.nome||(a.tipo_alvo==='familia'?'Família completa':a.tipo_alvo==='responsaveis'?'Responsável(is)':'—');}
+  function statusText(s){return ({realizado:'Realizado',agendado:'Agendado',rascunho:'Rascunho'})[s]||s||'—';}
+  function statusClass(s){return s==='realizado'?'status-aprovado':s==='agendado'?'status-em_contato':'status-novo';}
+  function updateMetrics(){
+    document.getElementById('attendanceMetricTotal').textContent=items.length;
+    document.getElementById('attendanceMetricDone').textContent=items.filter(x=>x.status==='realizado').length;
+    document.getElementById('attendanceMetricScheduled').textContent=items.filter(x=>x.status==='agendado').length;
+    document.getElementById('attendanceMetricDraft').textContent=items.filter(x=>x.status==='rascunho').length;
+  }
+  function filtered(){const q=(search?.value||'').trim().toLowerCase(),st=statusFilter?.value||'';return items.filter(a=>{if(st&&a.status!==st)return false;if(!q)return true;return [familyName(a),memberName(a),a.profissionais?.nome||'',a.status||''].join(' ').toLowerCase().includes(q);});}
+  function render(){const rows=filtered();tbody.innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_hora)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(memberName(a))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn view-attendance" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum atendimento encontrado.</td></tr>';}
+  function openDetail(id){const a=items.find(x=>x.id===id);if(!a)return;document.getElementById('attendanceDetailTitle').textContent=memberName(a);document.getElementById('attendanceDetailMeta').textContent=`${ProtegeApp.formatDate(a.data_hora)} · ${a.profissionais?.nome||'Profissional não informado'}`;document.getElementById('attendanceDetailSummary').innerHTML=`<div class="detail-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div><div class="detail-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div><div class="detail-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div><div class="detail-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>`;const dados=a.dados||{};document.getElementById('attendanceDetailSteps').innerHTML=stepGroups.map(([title,keys])=>{const content=keys.map(k=>{const v=String(dados[k]||'').trim();return v?`<div class="attendance-detail-field"><span>${ProtegeApp.esc(labels[k]||k)}</span><p>${ProtegeApp.esc(v).replace(/\n/g,'<br>')}</p></div>`:''}).join('');return `<section class="attendance-detail-step"><h4>${ProtegeApp.esc(title)}</h4>${content||'<p class="attendance-empty-value">Sem registro nesta etapa.</p>'}</section>`;}).join('');document.getElementById('attendanceFamilyLink').href=`familias.html?id=${encodeURIComponent(a.familia_id)}`;dialog.showModal();}
+  try{items=await ProtegeApp.loadAttendances(null,500);updateMetrics();render();}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="6" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
+  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const b=e.target.closest('.view-attendance');if(b)openDetail(b.dataset.id);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 
 function formDataToObject(form){
