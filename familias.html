@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Famílias | Protege</title><link rel="stylesheet" href="style.css?v=12"></head>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Famílias | Protege</title><link rel="stylesheet" href="style.css?v=13"></head>
 <body class="app-page" data-requires-auth="true">
 <aside class="sidebar"><div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div><nav>
-<a href="dashboard.html">Dashboard</a><a href="familias-interessadas.html">Famílias interessadas <span id="sidebarLeadCount" class="nav-badge">0</span></a><a href="profissionais.html">Profissionais</a><a href="agenda.html">Agenda</a><a class="active" href="familias.html">Famílias</a><a href="#">Filhos</a><a href="atendimentos.html">Atendimentos</a><a href="#">Relatórios</a>
-</nav><button id="logoutBtn" class="sidebar-logout">Sair</button></aside>
+<a href="dashboard.html">Dashboard</a><a data-admin-only href="familias-interessadas.html">Famílias interessadas <span id="sidebarLeadCount" class="nav-badge">0</span></a><a data-admin-only href="profissionais.html">Profissionais</a><a href="agenda.html">Agenda</a><a class="active" href="familias.html">Famílias</a><a href="#">Filhos</a><a href="atendimentos.html">Atendimentos</a><a href="#">Relatórios</a>
+<a href="minha-conta.html">Minha conta</a></nav><button id="logoutBtn" class="sidebar-logout">Sair</button></aside>
 <main class="app-main">
 <header class="app-topbar"><div><span class="section-label">ACOMPANHAMENTO</span><h1>Famílias</h1><p class="app-subtitle">Ficha da família, filhos e histórico de atendimentos.</p></div><a class="btn btn-primary" href="atendimento.html">+ Novo atendimento</a></header>
 <section class="metric-grid lead-metrics"><article class="metric"><span>Famílias</span><strong id="metricFamilies">0</strong><small>Em cadastro</small></article><article class="metric"><span>Filhos</span><strong id="metricChildren">0</strong><small>Vinculados</small></article></section>
@@ -13,4 +13,4 @@
 <div id="familyDetails" class="lead-details"></div>
 <section class="family-history"><div class="history-head"><div><span class="section-label">HISTÓRICO</span><h3>Atendimentos</h3></div></div><div id="familyHistory" class="history-list"><div class="empty-state">Carregando histórico...</div></div></section>
 <div class="dialog-actions"><a id="familyWhatsapp" class="btn btn-secondary" href="#" target="_blank" rel="noopener">WhatsApp</a><a id="newAttendanceForFamily" class="btn btn-primary" href="atendimento.html">+ Novo atendimento</a></div></div></dialog>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=5"></script><script src="script.js?v=12"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js?v=5"></script><script src="script.js?v=13"></script></body></html>

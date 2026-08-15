@@ -1,0 +1,20 @@
+PROTEGE V13 — USUÁRIOS, SENHAS E PERFIS
+
+O que muda
+- Cada profissional passa a ter e-mail + senha no Supabase Auth.
+- Perfil PROFISSIONAL: vê e altera somente a própria Agenda e os próprios Atendimentos.
+- Perfil ADMINISTRADOR: vê e altera toda a plataforma.
+- Admin cria/edita profissionais e pode definir uma nova senha.
+- Cada usuário pode alterar a própria senha em “Minha conta”.
+
+ORDEM DE INSTALAÇÃO
+1. No Supabase > SQL Editor, execute supabase-v13-usuarios-perfis.sql.
+2. No Supabase > Edge Functions, crie/deploy uma função chamada administrar-profissional usando o arquivo supabase/functions/administrar-profissional/index.ts.
+   IMPORTANTE: a SERVICE ROLE/SECRET KEY fica apenas no Supabase/Edge Function. NUNCA coloque essa chave no GitHub ou config.js.
+3. Publique os arquivos do site no GitHub Pages.
+4. Entre com o usuário admin atual.
+5. Abra Profissionais e crie um novo profissional com senha temporária.
+6. Saia e teste o login do profissional: ele deverá enxergar somente sua própria agenda e seus próprios atendimentos.
+
+Observação
+O SQL já transforma o login administrativo existente em perfil admin. Se o e-mail do administrador principal mudar, ajuste apenas o e-mail no bloco BOOTSTRAP do SQL antes de executar.

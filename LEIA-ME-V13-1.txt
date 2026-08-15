@@ -1,0 +1,13 @@
+PROTEGE V13.1 — CONSOLIDADA
+
+Esta versão consolida:
+- V12.5: correção dos botões Abrir em Famílias interessadas, Famílias e Atendimentos/Evoluções;
+- V12.4: Agenda com término automático de 1 hora;
+- V13: autenticação por profissional, perfis profissional/admin, Minha conta e gestão segura de usuários via Edge Function.
+
+ORDEM RECOMENDADA:
+1. Execute supabase-v13-usuarios-perfis.sql no SQL Editor.
+2. Publique a Edge Function supabase/functions/administrar-profissional/index.ts.
+3. Só depois envie os arquivos da V13.1 ao GitHub Pages.
+
+Não coloque a service_role key em config.js ou em arquivos públicos do GitHub.
