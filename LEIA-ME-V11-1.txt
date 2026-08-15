@@ -1,0 +1,10 @@
+PROTEGE V11.1 - CORRECAO DO LINK AGENDA
+
+Correção: o link Agenda do Dashboard agora aponta explicitamente para agenda.html.
+
+Para corrigir rapidamente no GitHub, envie/substitua:
+1. dashboard.html
+2. agenda.html
+
+Depois faça Commit changes, aguarde a publicação e pressione Ctrl+F5.
+Nenhum SQL novo é necessário.

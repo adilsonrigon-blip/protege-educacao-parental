@@ -1,0 +1,14 @@
+PROTEGE V12 - AGENDA COMPLETA
+
+1. No Supabase, abra SQL Editor > New query.
+2. Execute TODO o arquivo supabase-v12-agenda.sql.
+3. Confirme no Table Editor que apareceu a tabela agenda.
+4. Depois envie todos os arquivos deste pacote para o GitHub, substituindo os existentes.
+5. Faça Commit changes e aguarde o GitHub Pages atualizar.
+6. Pressione Ctrl+F5.
+
+Fluxo da V12:
+Agenda > Novo agendamento > família > membro > profissional > data/hora > salvar.
+Na agenda, é possível confirmar, remarcar/editar, registrar falta, cancelar e iniciar atendimento.
+Ao iniciar atendimento, o formulário de atendimento é pré-preenchido e, quando salvo, o agendamento é marcado como realizado e vinculado ao atendimento.
+A seção Consultar agenda permite pesquisar por período, status e família/pessoa.

@@ -109,6 +109,32 @@ const ProtegeApp = (() => {
     return data;
   }
 
+  async function loadSchedules(start=null,end=null) {
+    if (!configured) return [];
+    let q=db.from('agenda').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').order('data_inicio',{ascending:true});
+    if(start) q=q.gte('data_inicio',start);
+    if(end) q=q.lt('data_inicio',end);
+    const {data,error}=await q; if(error) throw error; return data||[];
+  }
+
+  async function getSchedule(id) {
+    if (!configured) return null;
+    const {data,error}=await db.from('agenda').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').eq('id',id).single();
+    if(error) throw error; return data;
+  }
+
+  async function saveSchedule(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const session=await currentSession();
+    const body={...payload,created_by:session?.user?.id||null,updated_at:new Date().toISOString()};
+    const {data,error}=await db.from('agenda').insert(body).select().single(); if(error) throw error; return data;
+  }
+
+  async function updateSchedule(id,patch) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const {data,error}=await db.from('agenda').update({...patch,updated_at:new Date().toISOString()}).eq('id',id).select().single(); if(error) throw error; return data;
+  }
+
   async function countNewLeads() {
     try {
       const leads = await loadLeads();
@@ -122,7 +148,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -185,6 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('professionalsTable')) await initProfessionalsPage();
   if (document.getElementById('dashboardAttendances')) await initDashboardCore();
   if (document.getElementById('attendancesTable')) await initAttendancesPage();
+  if (document.getElementById('agendaDayList')) await initAgendaPage();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -379,15 +406,18 @@ async function initProfessionalsPage(){
 
 async function initDashboardCore(){
   try{
-    const [families,attendances]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadAttendances(null,50)]);
-    document.getElementById('dashboardFamilies').textContent=families.length; document.getElementById('dashboardAttendances').textContent=attendances.length;
-    const now=new Date(),todayKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    document.getElementById('dashboardToday').textContent=attendances.filter(a=>{const d=new Date(a.data_hora);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`===todayKey;}).length;
-    const box=document.getElementById('dashboardAttendanceList'); const recent=attendances.slice(0,4);
-    box.innerHTML=recent.length?recent.map(a=>`<div><span class="time">${new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(new Date(a.data_hora))}</span><div><b>${ProtegeApp.esc(a.familias?.responsavel1||'Família')}</b><small>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')} · ${ProtegeApp.esc(a.status)}</small></div><span class="status-dot"></span></div>`).join(''):'<div class="empty-state">Nenhum atendimento registrado.</div>';
+    const [families,attendances,schedules]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadAttendances(null,500),ProtegeApp.loadSchedules()]);
+    document.getElementById('dashboardFamilies').textContent=families.length;
+    document.getElementById('dashboardAttendances').textContent=attendances.length;
+    const localKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;};
+    const now=new Date(),todayKey=localKey(now);
+    const today=schedules.filter(a=>localKey(a.data_inicio)===todayKey&&a.status!=='cancelado').sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));
+    document.getElementById('dashboardToday').textContent=today.length;
+    const future=schedules.filter(a=>new Date(a.data_inicio)>=now&&!['cancelado','realizado'].includes(a.status)).sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));
+    const display=(today.length?today:future).slice(0,4),box=document.getElementById('dashboardAttendanceList');
+    box.innerHTML=display.length?display.map(a=>{const fam=a.familias?[a.familias.responsavel1,a.familias.responsavel2].filter(Boolean).join(' / '):'Família';const d=new Date(a.data_inicio);const time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),day=localKey(a.data_inicio)===todayKey?'Hoje':d.toLocaleDateString('pt-BR');return `<a class="agenda-item" href="agenda.html?data=${localKey(a.data_inicio)}"><strong>${time}</strong><div><b>${ProtegeApp.esc(fam)}</b><small>${ProtegeApp.esc(a.atendimento_para)} · ${day}</small></div><span class="agenda-dot"></span></a>`;}).join(''):'<div class="empty-state">Nenhum compromisso agendado.</div>';
   }catch(err){console.error(err);}
 }
-
 
 async function initAttendancesPage(){
   const tbody=document.querySelector('#attendancesTable tbody');
@@ -446,6 +476,7 @@ async function initAttendancesPage(){
     [items,professionals]=await Promise.all([ProtegeApp.loadAttendances(null,500),ProtegeApp.loadProfessionals()]);
     evolutionProfessional.innerHTML='<option value="">Selecione</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
     updateMetrics();render();
+    const openId=new URLSearchParams(location.search).get('id'); if(openId&&items.some(a=>a.id===openId)){await openDetail(openId,new URLSearchParams(location.search).get('evolucao')==='1'); history.replaceState({},'',location.pathname);}
   }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="6" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
   evolutionForm?.addEventListener('submit',async e=>{
     e.preventDefault();if(!activeAttendance)return;
@@ -508,13 +539,47 @@ async function initAttendanceWizard() {
     [families,professionals]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);
     familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' / '+ProtegeApp.esc(f.responsavel2):''}</option>`).join('');
     professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
-    const qid=new URLSearchParams(location.search).get('familia');if(qid&&families.some(f=>f.id===qid))familySel.value=qid;
+    const params=new URLSearchParams(location.search),qid=params.get('familia'),agendaId=params.get('agenda');
+    if(qid&&families.some(f=>f.id===qid))familySel.value=qid;
     const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());dateInput.value=d.toISOString().slice(0,16);refreshFamily();
+    if(agendaId){try{const ag=await ProtegeApp.getSchedule(agendaId);if(ag){familySel.value=ag.familia_id;refreshFamily();professionalSel.value=ag.profissional_id||'';dateInput.value=(()=>{const x=new Date(ag.data_inicio);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,16)})();let tv=ag.tipo_alvo==='familia'?`familia:${ag.familia_id}`:ag.tipo_alvo==='filho'&&ag.filho_id?`filho:${ag.filho_id}`:'';if(ag.tipo_alvo==='responsavel'){const f=selectedFamily();tv=ag.atendimento_para===f?.responsavel2?`responsavel2:${ag.familia_id}`:`responsavel1:${ag.familia_id}`;}targetSel.value=tv;statusSel.value='realizado';document.getElementById('attendanceSetupMessage').innerHTML=`Atendimento iniciado a partir da agenda para <b>${ProtegeApp.esc(ag.atendimento_para)}</b>.`;}}catch(err){console.error(err);}}
     if(!professionals.length)document.getElementById('attendanceSetupMessage').innerHTML='Nenhum profissional cadastrado. <a href="profissionais.html"><b>Cadastre um profissional antes de salvar.</b></a>';
   }catch(err){console.error(err);document.getElementById('attendanceSetupMessage').textContent='Não foi possível carregar famílias/profissionais. Execute a migração V9.';}
   familySel.addEventListener('change',refreshFamily);
   next?.addEventListener('click',()=>{if(current<total){current++;render();}});prev?.addEventListener('click',()=>{if(current>1){current--;render();}});steps.forEach(s=>s.addEventListener('click',()=>{current=Number(s.dataset.step);render();}));
-  form.addEventListener('submit',async e=>{e.preventDefault();message.textContent='';if(!familySel.value||!professionalSel.value||!targetSel.value||!dateInput.value){message.textContent='Selecione família, profissional, pessoa atendida e data/hora.';return;}const alvo=selectedTarget();if(!alvo){message.textContent='Selecione quem será atendido.';return;}save.disabled=true;save.textContent='Salvando...';try{const dados=formDataToObject(form);dados.membro_atendido=alvo.nome;dados.atendimento_para=targetSel.value;const row=await ProtegeApp.saveAttendance({familia_id:familySel.value,profissional_id:professionalSel.value,filho_id:alvo.filho_id,tipo_alvo:alvo.tipo_alvo,data_hora:new Date(dateInput.value).toISOString(),status:statusSel.value,etapa_atual:10,dados,observacoes:String(dados.observacoes||'').trim()||null});message.innerHTML=`Atendimento salvo com sucesso para <b>${ProtegeApp.esc(alvo.nome)}</b>. <a href="familias.html?id=${encodeURIComponent(row.familia_id)}"><b>Abrir ficha da família</b></a>.`;message.scrollIntoView({behavior:'smooth'});}catch(err){console.error(err);message.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}finally{save.disabled=false;save.textContent='Salvar atendimento';}});
+  form.addEventListener('submit',async e=>{e.preventDefault();message.textContent='';if(!familySel.value||!professionalSel.value||!targetSel.value||!dateInput.value){message.textContent='Selecione família, profissional, pessoa atendida e data/hora.';return;}const alvo=selectedTarget();if(!alvo){message.textContent='Selecione quem será atendido.';return;}save.disabled=true;save.textContent='Salvando...';try{const dados=formDataToObject(form);dados.membro_atendido=alvo.nome;dados.atendimento_para=targetSel.value;const row=await ProtegeApp.saveAttendance({familia_id:familySel.value,profissional_id:professionalSel.value,filho_id:alvo.filho_id,tipo_alvo:alvo.tipo_alvo,data_hora:new Date(dateInput.value).toISOString(),status:statusSel.value,etapa_atual:10,dados,observacoes:String(dados.observacoes||'').trim()||null});const agendaId=new URLSearchParams(location.search).get('agenda');if(agendaId)await ProtegeApp.updateSchedule(agendaId,{status:'realizado',atendimento_id:row.id});message.innerHTML=`Atendimento salvo com sucesso para <b>${ProtegeApp.esc(alvo.nome)}</b>. <a href="familias.html?id=${encodeURIComponent(row.familia_id)}"><b>Abrir ficha da família</b></a>.`;message.scrollIntoView({behavior:'smooth'});}catch(err){console.error(err);message.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}finally{save.disabled=false;save.textContent='Salvar atendimento';}});
   render();
+}
+
+
+async function initAgendaPage(){
+  const dateInput=document.getElementById('agendaDate'),list=document.getElementById('agendaDayList'),professionalFilter=document.getElementById('agendaProfessionalFilter');
+  if(!dateInput||!list)return;
+  const dialog=document.getElementById('scheduleDialog'),form=document.getElementById('scheduleForm');
+  const familySel=document.getElementById('scheduleFamily'),targetSel=document.getElementById('scheduleTarget'),professionalSel=document.getElementById('scheduleProfessional');
+  let items=[],families=[],professionals=[],editingId=null;
+  const localKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;};
+  const toInputDate=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10);};
+  const toLocalDT=v=>{const x=new Date(v);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,16);};
+  const qs=new URLSearchParams(location.search); dateInput.value=qs.get('data')||toInputDate(new Date());
+  function familyName(a){return a.familias?[a.familias.responsavel1,a.familias.responsavel2].filter(Boolean).join(' / '):'—';}
+  function statusText(s){return ({agendado:'Agendado',confirmado:'Confirmado',realizado:'Realizado',cancelado:'Cancelado',falta:'Falta'})[s]||s||'—';}
+  function statusClass(s){return ({realizado:'status-aprovado',confirmado:'status-aprovado',agendado:'status-em_contato',cancelado:'status-nao_aprovado',falta:'status-nao_aprovado'})[s]||'';}
+  function typeText(s){return ({atendimento:'Atendimento',retorno:'Retorno',reuniao:'Reunião',supervisao:'Supervisão',outro:'Outro'})[s]||s;}
+  function selectedFamily(){return families.find(f=>f.id===familySel.value);}
+  function targetOptions(f){if(!f)return '<option value="">Selecione a família</option>';const out=[`<option value="familia:${ProtegeApp.esc(f.id)}">Família completa</option>`];if(f.responsavel1)out.push(`<option value="responsavel1:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel1)} · Responsável</option>`);if(f.responsavel2)out.push(`<option value="responsavel2:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel2)} · Responsável</option>`);(f.filhos||[]).forEach(c=>out.push(`<option value="filho:${ProtegeApp.esc(c.id)}">${ProtegeApp.esc(c.nome)} · Filho(a)${c.idade!=null?' · '+c.idade+' ano(s)':''}</option>`));return '<option value="">Selecione quem será atendido</option>'+out.join('');}
+  function selectedTarget(){const f=selectedFamily(),[kind,id]=(targetSel.value||'').split(':');if(!f||!kind)return null;if(kind==='familia')return {tipo_alvo:'familia',filho_id:null,nome:'Família completa'};if(kind==='responsavel1')return {tipo_alvo:'responsavel',filho_id:null,nome:f.responsavel1};if(kind==='responsavel2')return {tipo_alvo:'responsavel',filho_id:null,nome:f.responsavel2};if(kind==='filho'){const c=(f.filhos||[]).find(x=>x.id===id);return {tipo_alvo:'filho',filho_id:id,nome:c?.nome||'Filho(a)'};}return null;}
+  function refreshTarget(){targetSel.innerHTML=targetOptions(selectedFamily());}
+  function selected(){return items.filter(a=>localKey(a.data_inicio)===dateInput.value&&(!professionalFilter.value||a.profissional_id===professionalFilter.value)).sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));}
+  function render(){const rows=selected(),dayDate=new Date(dateInput.value+'T12:00:00');document.getElementById('agendaDayTitle').textContent=dayDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});document.getElementById('agendaMetricDay').textContent=rows.length;document.getElementById('agendaMetricScheduled').textContent=rows.filter(x=>['agendado','confirmado'].includes(x.status)).length;document.getElementById('agendaMetricDone').textContent=rows.filter(x=>x.status==='realizado').length;document.getElementById('agendaMetricMissed').textContent=rows.filter(x=>x.status==='falta').length;list.innerHTML=rows.length?rows.map(a=>{const d=new Date(a.data_inicio),time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});let actions=`<a class="small-btn" href="familias.html?id=${encodeURIComponent(a.familia_id)}">Família</a>`;if(a.atendimento_id)actions+=`<a class="small-btn" href="atendimentos.html?id=${encodeURIComponent(a.atendimento_id)}">Abrir atendimento</a>`;else if(!['cancelado','falta','realizado'].includes(a.status))actions+=`<a class="small-btn agenda-action-success" href="atendimento.html?agenda=${encodeURIComponent(a.id)}">Iniciar atendimento</a>`;actions+=`<button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Remarcar / editar</button>`;if(a.status==='agendado')actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="confirmado">Confirmar</button>`;if(!['realizado','cancelado'].includes(a.status))actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="falta">Falta</button><button class="small-btn agenda-action-danger schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="cancelado">Cancelar</button>`;return `<article class="agenda-card" data-status="${ProtegeApp.esc(a.status)}"><div class="agenda-time"><strong>${time}</strong><span>${ProtegeApp.esc(typeText(a.tipo))}</span></div><div class="agenda-card-main"><div><span class="section-label">${ProtegeApp.esc(a.atendimento_para)}</span><h3>${ProtegeApp.esc(familyName(a))}</h3><p>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')}</p>${a.observacoes?`<p class="agenda-notes">${ProtegeApp.esc(a.observacoes)}</p>`:''}</div><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></div><div class="agenda-card-actions">${actions}</div></article>`;}).join(''):'<div class="empty-state agenda-empty">Nenhum compromisso nesta data.</div>';}
+  function shift(days){const d=new Date(dateInput.value+'T12:00:00');d.setDate(d.getDate()+days);dateInput.value=toInputDate(d);render();}
+  async function reload(){items=await ProtegeApp.loadSchedules();render();}
+  function openNew(){editingId=null;form.reset();document.getElementById('scheduleId').value='';document.getElementById('scheduleDialogTitle').textContent='Novo agendamento';familySel.value='';refreshTarget();professionalSel.value='';const d=new Date(dateInput.value+'T09:00:00');document.getElementById('scheduleStart').value=toLocalDT(d);const e=new Date(d.getTime()+60*60*1000);document.getElementById('scheduleEnd').value=toLocalDT(e);document.getElementById('scheduleStatus').value='agendado';document.getElementById('scheduleMessage').textContent='';dialog.showModal();}
+  async function openEdit(id){const a=items.find(x=>x.id===id)||await ProtegeApp.getSchedule(id);editingId=id;document.getElementById('scheduleId').value=id;document.getElementById('scheduleDialogTitle').textContent='Editar / remarcar';familySel.value=a.familia_id;refreshTarget();let val=a.tipo_alvo==='familia'?`familia:${a.familia_id}`:a.tipo_alvo==='filho'&&a.filho_id?`filho:${a.filho_id}`:'';if(a.tipo_alvo==='responsavel'){const f=selectedFamily();if(a.atendimento_para===f?.responsavel2)val=`responsavel2:${a.familia_id}`;else val=`responsavel1:${a.familia_id}`;}targetSel.value=val;professionalSel.value=a.profissional_id||'';document.getElementById('scheduleType').value=a.tipo;document.getElementById('scheduleStart').value=toLocalDT(a.data_inicio);document.getElementById('scheduleEnd').value=a.data_fim?toLocalDT(a.data_fim):'';document.getElementById('scheduleStatus').value=a.status;document.getElementById('scheduleNotes').value=a.observacoes||'';document.getElementById('scheduleMessage').textContent='';dialog.showModal();}
+  async function runQuery(){const s=document.getElementById('agendaQueryStart').value,e=document.getElementById('agendaQueryEnd').value,st=document.getElementById('agendaQueryStatus').value,q=document.getElementById('agendaQuerySearch').value.trim().toLowerCase();let rows=items.filter(a=>(!s||localKey(a.data_inicio)>=s)&&(!e||localKey(a.data_inicio)<=e)&&(!st||a.status===st));if(q)rows=rows.filter(a=>[familyName(a),a.atendimento_para,a.profissionais?.nome||'',a.tipo].join(' ').toLowerCase().includes(q));rows.sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));document.getElementById('agendaQueryRows').innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_inicio)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(a.atendimento_para)}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(typeText(a.tipo))}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum compromisso encontrado.</td></tr>';}
+  try{[items,families,professionals]=await Promise.all([ProtegeApp.loadSchedules(),ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc([f.responsavel1,f.responsavel2].filter(Boolean).join(' / '))}</option>`).join('');const today=toInputDate(new Date());document.getElementById('agendaQueryStart').value=today;const future=new Date();future.setDate(future.getDate()+30);document.getElementById('agendaQueryEnd').value=toInputDate(future);render();}catch(err){console.error(err);list.innerHTML='<div class="empty-state">Não foi possível carregar a agenda. Execute o SQL da V12 no Supabase.</div>';}
+  familySel.addEventListener('change',refreshTarget);dateInput.addEventListener('change',render);professionalFilter.addEventListener('change',render);document.getElementById('agendaPrevDay')?.addEventListener('click',()=>shift(-1));document.getElementById('agendaNextDay')?.addEventListener('click',()=>shift(1));document.getElementById('agendaToday')?.addEventListener('click',()=>{dateInput.value=toInputDate(new Date());render();});document.getElementById('openScheduleDialog')?.addEventListener('click',openNew);document.getElementById('closeScheduleDialog')?.addEventListener('click',()=>dialog.close());document.getElementById('cancelScheduleDialog')?.addEventListener('click',()=>dialog.close());document.getElementById('agendaQueryButton')?.addEventListener('click',runQuery);
+  document.addEventListener('click',async e=>{const edit=e.target.closest('.edit-schedule');if(edit){await openEdit(edit.dataset.id);return;}const st=e.target.closest('.schedule-status');if(st){try{await ProtegeApp.updateSchedule(st.dataset.id,{status:st.dataset.status});await reload();}catch(err){alert('Não foi possível atualizar: '+(err?.message||'erro'));}}});
+  form.addEventListener('submit',async e=>{e.preventDefault();const t=selectedTarget(),msg=document.getElementById('scheduleMessage');if(!familySel.value||!professionalSel.value||!t){msg.textContent='Preencha família, pessoa atendida e profissional.';return;}const start=document.getElementById('scheduleStart').value,end=document.getElementById('scheduleEnd').value;if(!start){msg.textContent='Informe data e hora de início.';return;}const body={familia_id:familySel.value,filho_id:t.filho_id,profissional_id:professionalSel.value,atendimento_para:t.nome,tipo_alvo:t.tipo_alvo,tipo:document.getElementById('scheduleType').value,data_inicio:new Date(start).toISOString(),data_fim:end?new Date(end).toISOString():null,status:document.getElementById('scheduleStatus').value,observacoes:document.getElementById('scheduleNotes').value.trim()||null};try{document.getElementById('saveScheduleButton').disabled=true;if(editingId)await ProtegeApp.updateSchedule(editingId,body);else await ProtegeApp.saveSchedule(body);msg.textContent='Agendamento salvo com sucesso.';await reload();setTimeout(()=>dialog.close(),350);}catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}finally{document.getElementById('saveScheduleButton').disabled=false;}});
 }
 

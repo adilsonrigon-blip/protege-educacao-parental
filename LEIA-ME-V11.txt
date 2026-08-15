@@ -1,0 +1,14 @@
+PROTEGE V11 — Agenda real + Dashboard com dados reais
+
+1. Não é necessário executar novo SQL no Supabase.
+2. Envie os arquivos desta pasta para a raiz do repositório GitHub, substituindo os arquivos existentes.
+3. Aguarde o GitHub Pages atualizar e pressione Ctrl+F5.
+
+NOVIDADES
+- Nova página agenda.html lendo atendimentos diretamente do Supabase.
+- Filtro por data e profissional.
+- Navegação dia anterior / hoje / próximo dia.
+- Acesso direto à família, atendimento e + Evolução pela Agenda.
+- Dashboard mostra Famílias, Atendimentos e Agenda hoje com dados reais.
+- Bloco Agenda do Dashboard prioriza atendimentos de hoje; se não houver, mostra os próximos.
+- Links de Agenda do menu agora funcionam.
