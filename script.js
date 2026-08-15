@@ -93,6 +93,22 @@ const ProtegeApp = (() => {
     return data;
   }
 
+  async function loadAttendanceEvolutions(attendanceId) {
+    if (!configured) return [];
+    const { data, error } = await db.from('atendimento_evolucoes').select('*, profissionais(nome)').eq('atendimento_id',attendanceId).order('created_at',{ascending:true});
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function saveAttendanceEvolution(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const session = await currentSession();
+    const body = {...payload, created_by:session?.user?.id || null};
+    const { data, error } = await db.from('atendimento_evolucoes').insert(body).select('*, profissionais(nome)').single();
+    if (error) throw error;
+    return data;
+  }
+
   async function countNewLeads() {
     try {
       const leads = await loadLeads();
@@ -106,7 +122,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -380,15 +396,20 @@ async function initAttendancesPage(){
   const dialog=document.getElementById('attendanceDetailDialog');
   const close1=document.getElementById('closeAttendanceDetail');
   const close2=document.getElementById('closeAttendanceDetailBottom');
-  let items=[];
+  const evolutionForm=document.getElementById('attendanceEvolutionForm');
+  const evolutionList=document.getElementById('attendanceEvolutionList');
+  const evolutionProfessional=document.getElementById('evolutionProfessional');
+  const evolutionMessage=document.getElementById('evolutionMessage');
+  let items=[],professionals=[],activeAttendance=null;
   const labels={demanda:'Demanda / motivo',objetivo:'Objetivo do encontro',participantes:'Participantes',contexto:'Contexto atual',sessao_relato:'Relato da sessão',sessao_conclusao:'Conclusões / combinados',dinamica_parental:'Perfil e dinâmica parental',estrategia:'Estratégia',orientacao:'Orientação',tecnica:'Técnica',observacoes:'Observações',encaminhamentos:'Encaminhamentos',proximo_passo:'Próximo passo',data_revisao:'Data da revisão',pontos_revisao:'Pontos para revisão',data_falta:'Data da ocorrência',falta_observacoes:'Falta / remarcação / contato',duvidas:'Dúvidas para supervisão',evolucao:'Evolução observada'};
   const stepGroups=[
     ['1 · Demanda',['demanda','objetivo']],['2 · Contexto',['participantes','contexto']],['3 · Sessão',['sessao_relato','sessao_conclusao']],['4 · Dinâmica',['dinamica_parental']],['5 · Ferramenta',['estrategia','orientacao','tecnica']],['6 · Observações',['observacoes']],['7 · Registro',['encaminhamentos','proximo_passo']],['8 · Revisão',['data_revisao','pontos_revisao']],['9 · Faltas',['data_falta','falta_observacoes']],['10 · Supervisão',['duvidas','evolucao']]
   ];
+  const stepNames={1:'Demanda',2:'Contexto',3:'Sessão',4:'Dinâmica',5:'Ferramenta',6:'Observações',7:'Registro',8:'Revisão',9:'Faltas',10:'Supervisão'};
   function familyName(a){const f=a.familias||{};return [f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';}
   function memberName(a){return a?.dados?.membro_atendido||a?.filhos?.nome||(a.tipo_alvo==='familia'?'Família completa':a.tipo_alvo==='responsaveis'?'Responsável(is)':'—');}
-  function statusText(s){return ({realizado:'Realizado',agendado:'Agendado',rascunho:'Rascunho'})[s]||s||'—';}
-  function statusClass(s){return s==='realizado'?'status-aprovado':s==='agendado'?'status-em_contato':'status-novo';}
+  function statusText(s){return ({realizado:'Realizado',agendado:'Agendado',rascunho:'Rascunho',cancelado:'Cancelado'})[s]||s||'—';}
+  function statusClass(s){return s==='realizado'?'status-aprovado':s==='agendado'?'status-em_contato':s==='cancelado'?'status-nao_aprovado':'status-novo';}
   function updateMetrics(){
     document.getElementById('attendanceMetricTotal').textContent=items.length;
     document.getElementById('attendanceMetricDone').textContent=items.filter(x=>x.status==='realizado').length;
@@ -397,8 +418,48 @@ async function initAttendancesPage(){
   }
   function filtered(){const q=(search?.value||'').trim().toLowerCase(),st=statusFilter?.value||'';return items.filter(a=>{if(st&&a.status!==st)return false;if(!q)return true;return [familyName(a),memberName(a),a.profissionais?.nome||'',a.status||''].join(' ').toLowerCase().includes(q);});}
   function render(){const rows=filtered();tbody.innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_hora)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(memberName(a))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn view-attendance" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum atendimento encontrado.</td></tr>';}
-  function openDetail(id){const a=items.find(x=>x.id===id);if(!a)return;document.getElementById('attendanceDetailTitle').textContent=memberName(a);document.getElementById('attendanceDetailMeta').textContent=`${ProtegeApp.formatDate(a.data_hora)} · ${a.profissionais?.nome||'Profissional não informado'}`;document.getElementById('attendanceDetailSummary').innerHTML=`<div class="detail-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div><div class="detail-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div><div class="detail-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div><div class="detail-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>`;const dados=a.dados||{};document.getElementById('attendanceDetailSteps').innerHTML=stepGroups.map(([title,keys])=>{const content=keys.map(k=>{const v=String(dados[k]||'').trim();return v?`<div class="attendance-detail-field"><span>${ProtegeApp.esc(labels[k]||k)}</span><p>${ProtegeApp.esc(v).replace(/\n/g,'<br>')}</p></div>`:''}).join('');return `<section class="attendance-detail-step"><h4>${ProtegeApp.esc(title)}</h4>${content||'<p class="attendance-empty-value">Sem registro nesta etapa.</p>'}</section>`;}).join('');document.getElementById('attendanceFamilyLink').href=`familias.html?id=${encodeURIComponent(a.familia_id)}`;dialog.showModal();}
-  try{items=await ProtegeApp.loadAttendances(null,500);updateMetrics();render();}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="6" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
+  function renderEvolutions(evolutions){
+    evolutionList.innerHTML=evolutions.length?evolutions.map(ev=>`<article class="evolution-item"><div class="evolution-marker"><span>${Number(ev.etapa)}</span></div><div class="evolution-body"><div class="evolution-meta"><span class="evolution-step-badge">Etapa ${Number(ev.etapa)} · ${ProtegeApp.esc(stepNames[ev.etapa]||'')}</span><time>${ProtegeApp.formatDate(ev.created_at)}</time></div>${ev.titulo?`<h4>${ProtegeApp.esc(ev.titulo)}</h4>`:''}<p>${ProtegeApp.esc(ev.conteudo).replace(/\n/g,'<br>')}</p><small>Registrado por <b>${ProtegeApp.esc(ev.profissionais?.nome||'Profissional não informado')}</b></small></div></article>`).join(''):'<div class="empty-state evolution-empty">Nenhuma evolução acrescentada ainda. O registro inicial permanece preservado acima.</div>';
+  }
+  async function refreshEvolutions(){
+    if(!activeAttendance)return;
+    evolutionList.innerHTML='<div class="empty-state">Carregando evoluções...</div>';
+    try{renderEvolutions(await ProtegeApp.loadAttendanceEvolutions(activeAttendance.id));}
+    catch(err){console.error(err);evolutionList.innerHTML='<div class="empty-state">Não foi possível carregar as evoluções. Confirme se o SQL da V10.1 foi executado.</div>';}
+  }
+  async function openDetail(id){
+    const a=items.find(x=>x.id===id);if(!a)return;activeAttendance=a;
+    document.getElementById('attendanceDetailTitle').textContent=memberName(a);
+    document.getElementById('attendanceDetailMeta').textContent=`${ProtegeApp.formatDate(a.data_hora)} · ${a.profissionais?.nome||'Profissional não informado'}`;
+    document.getElementById('attendanceDetailSummary').innerHTML=`<div class="detail-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div><div class="detail-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div><div class="detail-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div><div class="detail-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>`;
+    const dados=a.dados||{};
+    document.getElementById('attendanceDetailSteps').innerHTML=stepGroups.map(([title,keys])=>{const content=keys.map(k=>{const v=String(dados[k]||'').trim();return v?`<div class="attendance-detail-field"><span>${ProtegeApp.esc(labels[k]||k)}</span><p>${ProtegeApp.esc(v).replace(/\n/g,'<br>')}</p></div>`:''}).join('');return `<section class="attendance-detail-step"><h4>${ProtegeApp.esc(title)}</h4>${content||'<p class="attendance-empty-value">Sem registro nesta etapa.</p>'}</section>`;}).join('');
+    document.getElementById('attendanceFamilyLink').href=`familias.html?id=${encodeURIComponent(a.familia_id)}`;
+    evolutionForm.reset();evolutionMessage.textContent='';
+    const originalProfessional=professionals.find(p=>p.id===a.profissional_id);
+    if(originalProfessional)evolutionProfessional.value=originalProfessional.id;
+    dialog.showModal();
+    await refreshEvolutions();
+  }
+  try{
+    [items,professionals]=await Promise.all([ProtegeApp.loadAttendances(null,500),ProtegeApp.loadProfessionals()]);
+    evolutionProfessional.innerHTML='<option value="">Selecione</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
+    updateMetrics();render();
+  }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="6" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
+  evolutionForm?.addEventListener('submit',async e=>{
+    e.preventDefault();if(!activeAttendance)return;
+    const step=Number(document.getElementById('evolutionStep').value),professionalId=evolutionProfessional.value,title=document.getElementById('evolutionTitle').value.trim(),content=document.getElementById('evolutionContent').value.trim(),saveBtn=document.getElementById('saveEvolution');
+    evolutionMessage.textContent='';
+    if(!professionalId||!content){evolutionMessage.textContent='Selecione o profissional e informe a nova evolução.';return;}
+    saveBtn.disabled=true;saveBtn.textContent='Salvando...';
+    try{
+      await ProtegeApp.saveAttendanceEvolution({atendimento_id:activeAttendance.id,profissional_id:professionalId,etapa:step,titulo:title||null,conteudo:content});
+      evolutionForm.reset();evolutionProfessional.value=professionalId;document.getElementById('evolutionStep').value=String(step);
+      evolutionMessage.textContent='Evolução acrescentada ao histórico.';
+      await refreshEvolutions();
+    }catch(err){console.error(err);evolutionMessage.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}
+    finally{saveBtn.disabled=false;saveBtn.textContent='+ Adicionar evolução';}
+  });
   search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const b=e.target.closest('.view-attendance');if(b)openDetail(b.dataset.id);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 

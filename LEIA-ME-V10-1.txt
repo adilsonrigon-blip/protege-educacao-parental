@@ -1,0 +1,18 @@
+PROTEGE V10.1 - EVOLUÇÕES DO ATENDIMENTO
+
+O que muda:
+- O registro inicial do atendimento continua preservado.
+- Em Atendimentos > Abrir, aparece a seção Histórico de evoluções.
+- Cada evolução é vinculada a uma das 10 etapas.
+- Cada nova entrada grava data/hora e profissional responsável.
+- Evoluções são acrescentadas; não há edição/substituição pelo site.
+
+ANTES DE PUBLICAR NO GITHUB:
+1. Abra o Supabase > SQL Editor > New query.
+2. Execute o arquivo supabase-v10-1-evolucoes.sql.
+3. Confirme que a tabela atendimento_evolucoes foi criada.
+4. Depois envie os arquivos desta versão ao GitHub.
+
+TESTE:
+Atendimentos > Abrir > escolha etapa e profissional > escreva uma nova informação > Adicionar evolução.
+A nova entrada deve aparecer na linha do tempo sem alterar o registro inicial.
