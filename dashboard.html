@@ -6,11 +6,12 @@
   <title>Dashboard | Protege</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="app-page">
+<body class="app-page" data-requires-auth="true">
   <aside class="sidebar">
     <div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div>
     <nav>
       <a class="active" href="dashboard.html">Dashboard</a>
+      <a href="familias-interessadas.html">Famílias interessadas <span id="sidebarLeadCount" class="nav-badge">0</span></a>
       <a href="#">Profissionais</a>
       <a href="#">Agenda</a>
       <a href="#">Famílias</a>
@@ -31,13 +32,17 @@
     </header>
 
     <section class="metric-grid">
-      <article class="metric"><span>Profissionais</span><strong>18</strong><small>Ativos</small></article>
+      <article class="metric"><span>Novos interesses</span><strong id="dashboardNewLeads">0</strong><small>Aguardando contato</small></article>
       <article class="metric"><span>Famílias</span><strong>64</strong><small>Em acompanhamento</small></article>
       <article class="metric"><span>Atendimentos</span><strong>532</strong><small>Registrados</small></article>
       <article class="metric"><span>Agenda hoje</span><strong>09</strong><small>Atendimentos</small></article>
     </section>
 
     <section class="dashboard-grid">
+      <article class="panel">
+        <div class="panel-head"><div><span class="section-label">NOVOS CADASTROS</span><h2>Famílias interessadas</h2></div><a href="familias-interessadas.html">Ver todos</a></div>
+        <div id="recentLeads" class="recent-leads"><div class="empty-state">Carregando...</div></div>
+      </article>
       <article class="panel">
         <div class="panel-head"><div><span class="section-label">AGENDA</span><h2>Próximos atendimentos</h2></div><a href="#">Ver agenda</a></div>
         <div class="agenda-list">
@@ -56,6 +61,8 @@
       </article>
     </section>
   </main>
-  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=5"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

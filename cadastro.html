@@ -29,7 +29,7 @@
       <div class="container registration-heading">
         <span class="section-label">PROGRAMA PROTEGE</span>
         <h1>Cadastre seu interesse</h1>
-        <p>Preencha os dados abaixo. Ao finalizar, o cadastro será encaminhado para a equipe Protege pelo WhatsApp.</p>
+        <p>Preencha os dados abaixo. Ao finalizar, seus dados serão enviados com segurança para a equipe Protege, que entrará em contato com você.</p>
       </div>
     </section>
 
@@ -108,10 +108,10 @@
 
           <div class="registration-actions">
             <a class="btn btn-secondary" href="index.html">Voltar</a>
-            <button class="btn btn-primary" type="submit">Enviar cadastro pelo WhatsApp</button>
+            <button id="interestSubmitBtn" class="btn btn-primary" type="submit">Enviar cadastro</button>
           </div>
           <p id="interestMessage" class="form-message" role="status" aria-live="polite"></p>
-          <p class="privacy-note">Ao clicar em enviar, o WhatsApp será aberto com os dados preenchidos para você confirmar o envio.</p>
+          <p class="privacy-note">Os dados serão utilizados pela equipe Protege exclusivamente para contato e avaliação de participação no programa.</p>
         </form>
       </div>
     </section>
@@ -123,6 +123,8 @@
       <div class="footer-right"><a href="login.html">Área do profissional</a><span>© <span id="year"></span> Protege</span></div>
     </div>
   </footer>
-  <script src="script.js?v=3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=5"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

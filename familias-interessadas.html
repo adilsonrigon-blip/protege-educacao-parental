@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Famílias interessadas | Protege</title>
+  <link rel="stylesheet" href="style.css?v=5">
+</head>
+<body class="app-page" data-requires-auth="true">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a class="active" href="familias-interessadas.html">Famílias interessadas <span id="sidebarLeadCount" class="nav-badge">0</span></a>
+      <a href="#">Profissionais</a>
+      <a href="#">Agenda</a>
+      <a href="#">Famílias</a>
+      <a href="#">Filhos</a>
+      <a href="atendimento.html">Atendimentos</a>
+      <a href="#">Relatórios</a>
+    </nav>
+    <button id="logoutBtn" class="sidebar-logout">Sair</button>
+  </aside>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div><span class="section-label">CAPTAÇÃO</span><h1>Famílias interessadas</h1><p class="app-subtitle">Cadastros enviados pelo formulário “Quero participar”.</p></div>
+      <a class="btn btn-secondary" href="cadastro.html" target="_blank">Abrir formulário público</a>
+    </header>
+
+    <section class="metric-grid lead-metrics">
+      <article class="metric"><span>Novos</span><strong id="metricNew">0</strong><small>Aguardando contato</small></article>
+      <article class="metric"><span>Em contato</span><strong id="metricContact">0</strong><small>Em acompanhamento</small></article>
+      <article class="metric"><span>Aprovados</span><strong id="metricApproved">0</strong><small>Prontos para conversão</small></article>
+      <article class="metric"><span>Total</span><strong id="metricTotal">0</strong><small>Cadastros recebidos</small></article>
+    </section>
+
+    <section class="panel leads-panel">
+      <div class="panel-head leads-toolbar">
+        <div><span class="section-label">CADASTROS</span><h2>Fila de interesse</h2></div>
+        <div class="toolbar-controls">
+          <input id="leadSearch" class="table-search" type="search" placeholder="Buscar nome, telefone ou cidade">
+          <select id="leadStatusFilter" class="table-filter">
+            <option value="">Todos os status</option>
+            <option value="novo">Novo</option>
+            <option value="em_contato">Em contato</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="nao_aprovado">Não aprovado</option>
+            <option value="convertido">Convertido</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="data-table" id="leadsTable">
+          <thead><tr><th>Recebido</th><th>Responsável</th><th>Contato</th><th>Filhos</th><th>Cidade</th><th>Status</th><th></th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty-state">Carregando cadastros...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="leadDialog" class="lead-dialog">
+    <form method="dialog" class="dialog-shell" id="leadEditForm">
+      <div class="dialog-head"><div><span class="section-label">FAMÍLIA INTERESSADA</span><h2 id="dialogFamilyName">Cadastro</h2></div><button class="dialog-close" value="cancel" aria-label="Fechar">×</button></div>
+      <div id="leadDetails" class="lead-details"></div>
+      <div class="form-grid">
+        <label>Status
+          <select id="leadEditStatus" name="status">
+            <option value="novo">Novo</option><option value="em_contato">Em contato</option><option value="aprovado">Aprovado</option><option value="nao_aprovado">Não aprovado</option><option value="convertido">Convertido</option>
+          </select>
+        </label>
+        <label class="span-2">Observações da equipe
+          <textarea id="leadNotes" name="observacoes" rows="5" placeholder="Registre tentativas de contato, disponibilidade, encaminhamentos..."></textarea>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <a id="leadWhatsapp" class="btn btn-secondary" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <button type="button" id="convertLeadBtn" class="btn btn-secondary">Converter em família</button>
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+      </div>
+      <p id="leadDialogMessage" class="form-message"></p>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=5"></script>
+  <script src="script.js?v=5"></script>
+</body>
+</html>

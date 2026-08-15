@@ -1,20 +1,9 @@
-PROTEGE - versão preparada para GitHub Pages
+PROTEGE V5 - PUBLICAÇÃO
 
-Envie TODOS os arquivos desta pasta para a RAIZ do repositório GitHub.
-Importante: não envie apenas index.html.
+1. NÃO envie o ZIP diretamente para o GitHub.
+2. Extraia o ZIP.
+3. No GitHub > Add file > Upload files, envie TODOS os arquivos da pasta extraída.
+4. Confirme Commit changes na branch main.
+5. Aguarde 1-3 minutos e atualize o site com Ctrl+F5.
 
-Arquivos essenciais:
-- index.html
-- style.css
-- script.js
-- logo-protege.jpeg
-- login.html
-- dashboard.html
-- atendimento.html
-- .nojekyll
-
-No GitHub Pages mantenha:
-Branch: main
-Pasta: /(root)
-
-Depois de salvar, aguarde alguns minutos e atualize a página com Ctrl+F5.
+IMPORTANTE: para que os cadastros funcionem entre computadores/celulares, configure o Supabase conforme README.md. Sem Supabase, a V5 funciona em modo de teste local no mesmo navegador.
