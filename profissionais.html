@@ -13,17 +13,20 @@
     <header class="app-topbar"><div><span class="section-label">EQUIPE</span><h1>Profissionais</h1><p class="app-subtitle">Cadastre quem realiza os acompanhamentos da Protege.</p></div></header>
     <section class="panel professional-form-panel">
       <div class="panel-head"><div><span class="section-label">NOVO PROFISSIONAL</span><h2>Dados do profissional</h2></div></div>
-      <form id="professionalForm" class="form-grid professional-form">
-        <label>Nome completo<input id="professionalName" name="nome" required></label>
-        <label>E-mail<input id="professionalEmail" name="email" type="email"></label>
-        <label>Telefone<input name="telefone"></label>
+      <form id="professionalForm" class="form-grid professional-form professional-access-form">
+        <label>Nome completo<input id="professionalName" name="nome" required autocomplete="name"></label>
+        <label>E-mail de acesso<input id="professionalEmail" name="email" type="email" required autocomplete="email"></label>
+        <label>Senha inicial<div class="password-field-wrap"><input id="professionalPassword" name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo de 8 caracteres"><button type="button" id="toggleProfessionalPassword" class="password-toggle">Mostrar</button></div></label>
+        <label>Telefone<input name="telefone" inputmode="tel"></label>
         <label>Especialidade / função<input name="especialidade" placeholder="Ex.: Educadora parental"></label>
+        <label>Perfil de acesso<select id="professionalProfile" name="perfil" required><option value="profissional">Profissional</option><option value="admin">Administrador</option></select></label>
         <label>Status<select name="status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></label>
-        <div class="form-submit-cell"><button class="btn btn-primary" type="submit">Salvar profissional</button></div>
-      </form><p id="professionalMessage" class="form-message"></p>
+        <div class="access-help"><strong>Profissional:</strong> acesso individual. <strong>Administrador:</strong> poderá gerenciar todos os dados e usuários.</div>
+        <div class="form-submit-cell"><button id="saveProfessionalButton" class="btn btn-primary" type="submit">Criar profissional e acesso</button></div>
+      </form><p id="professionalMessage" class="form-message" role="status"></p>
     </section>
     <section class="panel leads-panel"><div class="panel-head"><div><span class="section-label">EQUIPE</span><h2>Profissionais cadastrados</h2></div></div>
-      <div class="table-responsive"><table class="data-table" id="professionalsTable"><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>Status</th></tr></thead><tbody><tr><td colspan="5" class="empty-state">Carregando...</td></tr></tbody></table></div>
+      <div class="table-responsive"><table class="data-table" id="professionalsTable"><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>Perfil</th><th>Status</th></tr></thead><tbody><tr><td colspan="6" class="empty-state">Carregando...</td></tr></tbody></table></div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=126"></script><script src="script-v126.js?v=126"></script>

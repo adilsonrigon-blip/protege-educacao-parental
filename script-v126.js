@@ -1,4 +1,4 @@
-console.info("Protege build V12.6 - recuperacao limpa");
+console.info("Protege build V13.0.1 - profissionais com acesso");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -76,6 +76,29 @@ const ProtegeApp = (() => {
     return data;
   }
 
+  async function manageProfessionalAccess(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const session = await currentSession();
+    if (!session?.access_token) throw new Error('Sessão expirada. Entre novamente.');
+    const response = await fetch(`${config.SUPABASE_URL}/functions/v1/administrar-profissional`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'apikey': config.SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result?.error || `Falha ao administrar profissional (${response.status}).`);
+    return result;
+  }
+
+  async function loadProfessionalsWithAccess() {
+    const result = await manageProfessionalAccess({action:'list'});
+    return result?.profissionais || [];
+  }
+
+  async function createProfessionalWithAccess(payload) {
+    return manageProfessionalAccess({action:'create', ...payload});
+  }
+
   async function loadAttendances(familyId=null, limit=100) {
     if (!configured) return [];
     let q = db.from('atendimentos').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').order('data_hora',{ascending:false}).limit(limit);
@@ -149,7 +172,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -398,10 +421,23 @@ async function initFamiliesPage() {
 async function initProfessionalsPage(){
   const tbody=document.querySelector('#professionalsTable tbody'); const form=document.getElementById('professionalForm'); const msg=document.getElementById('professionalMessage');
   async function refresh(){
-    try{const items=await ProtegeApp.loadProfessionals();tbody.innerHTML=items.length?items.map(p=>`<tr><td><b>${ProtegeApp.esc(p.nome)}</b></td><td>${ProtegeApp.esc(p.email||'—')}</td><td>${ProtegeApp.esc(p.telefone||'—')}</td><td>${ProtegeApp.esc(p.especialidade||'—')}</td><td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td></tr>`).join(''):'<tr><td colspan="5" class="empty-state">Nenhum profissional cadastrado.</td></tr>';}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="5" class="empty-state">Execute a migração V9 no Supabase para habilitar profissionais.</td></tr>';}
+    try{
+      const items=await ProtegeApp.loadProfessionalsWithAccess();
+      tbody.innerHTML=items.length?items.map(p=>`<tr><td><b>${ProtegeApp.esc(p.nome)}</b></td><td>${ProtegeApp.esc(p.email||'—')}</td><td>${ProtegeApp.esc(p.telefone||'—')}</td><td>${ProtegeApp.esc(p.especialidade||'—')}</td><td><span class="access-pill ${p.perfil==='admin'?'access-admin':'access-professional'}">${p.perfil==='admin'?'Administrador':'Profissional'}</span></td><td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum profissional cadastrado.</td></tr>';
+    }catch(err){console.error(err);tbody.innerHTML=`<tr><td colspan="6" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;}
   }
-  try{const session=await ProtegeApp.currentSession();if(session?.user?.email)document.getElementById('professionalEmail').value=session.user.email;}catch{}
-  form?.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Salvando...';const fd=new FormData(form);try{await ProtegeApp.saveProfessional({nome:String(fd.get('nome')).trim(),email:String(fd.get('email')||'').trim()||null,telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,status:String(fd.get('status')||'ativo')});msg.textContent='Profissional salvo com sucesso.';form.reset();await refresh();}catch(err){console.error(err);msg.textContent=err?.message?.includes('duplicate')?'Já existe um profissional com este e-mail.':`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}});
+  const passwordInput=document.getElementById('professionalPassword'); const togglePassword=document.getElementById('toggleProfessionalPassword');
+  togglePassword?.addEventListener('click',()=>{const showing=passwordInput.type==='text';passwordInput.type=showing?'password':'text';togglePassword.textContent=showing?'Mostrar':'Ocultar';});
+  form?.addEventListener('submit',async e=>{
+    e.preventDefault(); const fd=new FormData(form); const saveBtn=document.getElementById('saveProfessionalButton');
+    const nome=String(fd.get('nome')||'').trim(), email=String(fd.get('email')||'').trim().toLowerCase(), password=String(fd.get('password')||'');
+    if(!nome||!email){msg.textContent='Informe nome e e-mail.';return;} if(password.length<8){msg.textContent='A senha deve ter pelo menos 8 caracteres.';return;}
+    msg.textContent='Criando profissional e acesso...'; saveBtn.disabled=true;
+    try{
+      await ProtegeApp.createProfessionalWithAccess({nome,email,password,telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,perfil:String(fd.get('perfil')||'profissional'),status:String(fd.get('status')||'ativo')});
+      msg.textContent='Profissional e usuário de acesso criados com sucesso.'; form.reset(); document.getElementById('professionalProfile').value='profissional'; await refresh();
+    }catch(err){console.error(err);msg.textContent=`Não foi possível criar: ${err?.message||'erro inesperado'}`;}finally{saveBtn.disabled=false;}
+  });
   await refresh();
 }
 
