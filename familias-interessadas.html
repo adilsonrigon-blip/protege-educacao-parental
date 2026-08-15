@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Famílias interessadas | Protege</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body class="app-page" data-requires-auth="true">
   <aside class="sidebar">
@@ -63,13 +63,15 @@
     <form method="dialog" class="dialog-shell" id="leadEditForm">
       <div class="dialog-head"><div><span class="section-label">FAMÍLIA INTERESSADA</span><h2 id="dialogFamilyName">Cadastro</h2></div><button class="dialog-close" value="cancel" aria-label="Fechar">×</button></div>
       <div id="leadDetails" class="lead-details"></div>
-      <div class="form-grid">
-        <label>Status
+      <div class="form-grid lead-edit-grid">
+        <label class="lead-field">
+          <span>Status</span>
           <select id="leadEditStatus" name="status">
             <option value="novo">Novo</option><option value="em_contato">Em contato</option><option value="aprovado">Aprovado</option><option value="nao_aprovado">Não aprovado</option><option value="convertido">Convertido</option>
           </select>
         </label>
-        <label class="span-2">Observações da equipe
+        <label class="lead-field lead-notes-field">
+          <span>Observações da equipe</span>
           <textarea id="leadNotes" name="observacoes" rows="5" placeholder="Registre tentativas de contato, disponibilidade, encaminhamentos..."></textarea>
         </label>
       </div>

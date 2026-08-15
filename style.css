@@ -40,3 +40,23 @@
 .lead-dialog{width:min(780px,calc(100% - 28px));border:0;border-radius:20px;padding:0;box-shadow:0 24px 80px rgba(50,35,55,.25)}.lead-dialog::backdrop{background:rgba(35,26,38,.48)}
 .dialog-shell{padding:26px}.dialog-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}.dialog-head h2{margin:5px 0 0}.dialog-close{border:0;background:#f2edf4;border-radius:50%;width:38px;height:38px;font-size:25px;cursor:pointer;color:#65596a}.lead-details{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}.detail-card{border:1px solid #ece5ef;border-radius:14px;padding:14px;background:#fcfafc}.detail-wide{grid-column:1/-1}.detail-card>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#927f9c;margin-bottom:6px}.detail-card b,.detail-card small{display:block}.detail-card small{color:#807783;margin-top:4px}.child-chip{display:inline-flex;gap:8px;align-items:baseline;background:#f4eef7;border-radius:999px;padding:7px 10px;margin:4px 6px 0 0}.child-chip small{margin:0}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:20px}
 @media(max-width:760px){.toolbar-controls{width:100%;justify-content:stretch}.table-search,.table-filter{width:100%;min-width:0}.lead-details{grid-template-columns:1fr}.detail-wide{grid-column:auto}.dialog-actions .btn{width:100%;text-align:center}.leads-toolbar{align-items:stretch}}
+
+
+/* ===== V6 · Correção visual do modal Famílias interessadas ===== */
+.lead-dialog .dialog-shell{padding:28px}
+.lead-dialog .lead-edit-grid{grid-template-columns:190px minmax(0,1fr);gap:18px;align-items:start;margin-top:4px}
+.lead-dialog .lead-field{display:grid;gap:8px;min-width:0;font-size:12px;font-weight:800;color:#574d5c}
+.lead-dialog .lead-field>span{display:block}
+.lead-dialog .lead-field select,
+.lead-dialog .lead-field textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1px solid #ded5e3;border-radius:10px;outline:none;box-shadow:none}
+.lead-dialog .lead-field select{min-height:44px;padding:0 38px 0 12px}
+.lead-dialog .lead-field textarea{min-height:120px;padding:12px 13px;resize:vertical;line-height:1.45}
+.lead-dialog .lead-field select:focus,
+.lead-dialog .lead-field textarea:focus{border-color:#a77ac2;box-shadow:0 0 0 3px rgba(122,63,160,.08)}
+.lead-dialog .dialog-actions{border-top:1px solid #eee8f0;padding-top:18px;margin-top:22px}
+.lead-dialog .form-message{margin:10px 0 0;text-align:right}
+@media(max-width:760px){
+  .lead-dialog .lead-edit-grid{grid-template-columns:1fr}
+  .lead-dialog .dialog-shell{padding:20px}
+  .lead-dialog .form-message{text-align:left}
+}
