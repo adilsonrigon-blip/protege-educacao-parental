@@ -1,0 +1,10 @@
+PROTEGE V12.1 - Horário da Agenda
+
+Correção do formulário de agendamento:
+- Data separada da hora.
+- Hora selecionável de 00 a 23.
+- Minutos em intervalos de 5 minutos (00, 05, 10 ... 55).
+- Validação para impedir término anterior ao início.
+
+Não é necessário executar novo SQL.
+Para atualização rápida, substitua agenda.html, script.js e style.css no GitHub.
