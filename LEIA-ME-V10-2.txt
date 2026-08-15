@@ -1,0 +1,10 @@
+PROTEGE V10.2 — correção da tela de Atendimentos
+
+Correções:
+- cards dos indicadores corrigidos
+- botão + Evolução diretamente em cada atendimento
+- ao clicar em + Evolução, abre o atendimento e posiciona diretamente no formulário de evolução
+- registro inicial continua preservado
+
+Não exige novo SQL se o supabase-v10-1-evolucoes.sql já foi executado.
+Para atualizar rapidamente, substitua no GitHub: atendimentos.html, script.js e style.css.

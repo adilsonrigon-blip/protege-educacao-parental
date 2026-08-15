@@ -417,7 +417,7 @@ async function initAttendancesPage(){
     document.getElementById('attendanceMetricDraft').textContent=items.filter(x=>x.status==='rascunho').length;
   }
   function filtered(){const q=(search?.value||'').trim().toLowerCase(),st=statusFilter?.value||'';return items.filter(a=>{if(st&&a.status!==st)return false;if(!q)return true;return [familyName(a),memberName(a),a.profissionais?.nome||'',a.status||''].join(' ').toLowerCase().includes(q);});}
-  function render(){const rows=filtered();tbody.innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_hora)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(memberName(a))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn view-attendance" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum atendimento encontrado.</td></tr>';}
+  function render(){const rows=filtered();tbody.innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_hora)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(memberName(a))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><div class="attendance-row-actions"><button class="small-btn view-attendance" data-id="${ProtegeApp.esc(a.id)}">Abrir</button><button class="small-btn add-evolution" data-id="${ProtegeApp.esc(a.id)}">+ Evolução</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum atendimento encontrado.</td></tr>';}
   function renderEvolutions(evolutions){
     evolutionList.innerHTML=evolutions.length?evolutions.map(ev=>`<article class="evolution-item"><div class="evolution-marker"><span>${Number(ev.etapa)}</span></div><div class="evolution-body"><div class="evolution-meta"><span class="evolution-step-badge">Etapa ${Number(ev.etapa)} · ${ProtegeApp.esc(stepNames[ev.etapa]||'')}</span><time>${ProtegeApp.formatDate(ev.created_at)}</time></div>${ev.titulo?`<h4>${ProtegeApp.esc(ev.titulo)}</h4>`:''}<p>${ProtegeApp.esc(ev.conteudo).replace(/\n/g,'<br>')}</p><small>Registrado por <b>${ProtegeApp.esc(ev.profissionais?.nome||'Profissional não informado')}</b></small></div></article>`).join(''):'<div class="empty-state evolution-empty">Nenhuma evolução acrescentada ainda. O registro inicial permanece preservado acima.</div>';
   }
@@ -427,7 +427,7 @@ async function initAttendancesPage(){
     try{renderEvolutions(await ProtegeApp.loadAttendanceEvolutions(activeAttendance.id));}
     catch(err){console.error(err);evolutionList.innerHTML='<div class="empty-state">Não foi possível carregar as evoluções. Confirme se o SQL da V10.1 foi executado.</div>';}
   }
-  async function openDetail(id){
+  async function openDetail(id,focusEvolution=false){
     const a=items.find(x=>x.id===id);if(!a)return;activeAttendance=a;
     document.getElementById('attendanceDetailTitle').textContent=memberName(a);
     document.getElementById('attendanceDetailMeta').textContent=`${ProtegeApp.formatDate(a.data_hora)} · ${a.profissionais?.nome||'Profissional não informado'}`;
@@ -440,6 +440,7 @@ async function initAttendancesPage(){
     if(originalProfessional)evolutionProfessional.value=originalProfessional.id;
     dialog.showModal();
     await refreshEvolutions();
+    if(focusEvolution){setTimeout(()=>{evolutionForm?.scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('evolutionContent')?.focus();},80);}
   }
   try{
     [items,professionals]=await Promise.all([ProtegeApp.loadAttendances(null,500),ProtegeApp.loadProfessionals()]);
@@ -460,7 +461,7 @@ async function initAttendancesPage(){
     }catch(err){console.error(err);evolutionMessage.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}
     finally{saveBtn.disabled=false;saveBtn.textContent='+ Adicionar evolução';}
   });
-  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const b=e.target.closest('.view-attendance');if(b)openDetail(b.dataset.id);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 
 function formDataToObject(form){
