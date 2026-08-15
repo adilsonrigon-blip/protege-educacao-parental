@@ -58,6 +58,41 @@ const ProtegeApp = (() => {
     return data;
   }
 
+  async function loadProfessionals() {
+    if (!configured) return [];
+    const { data, error } = await db.from('profissionais').select('*').order('nome',{ascending:true});
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function saveProfessional(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const session = await currentSession();
+    const body = {...payload, updated_at:new Date().toISOString()};
+    if (session?.user && payload.email && session.user.email && payload.email.toLowerCase() === session.user.email.toLowerCase()) body.auth_user_id = session.user.id;
+    const { data, error } = await db.from('profissionais').insert(body).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function loadAttendances(familyId=null, limit=100) {
+    if (!configured) return [];
+    let q = db.from('atendimentos').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').order('data_hora',{ascending:false}).limit(limit);
+    if (familyId) q = q.eq('familia_id',familyId);
+    const { data, error } = await q;
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function saveAttendance(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const session = await currentSession();
+    const body = {...payload, created_by: session?.user?.id || null, updated_at:new Date().toISOString()};
+    const { data, error } = await db.from('atendimentos').insert(body).select().single();
+    if (error) throw error;
+    return data;
+  }
+
   async function countNewLeads() {
     try {
       const leads = await loadLeads();
@@ -71,7 +106,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -131,6 +166,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('recentLeads')) await initDashboardLeads();
   if (document.getElementById('leadsTable')) await initLeadsPage();
   if (document.getElementById('familiesTable')) await initFamiliesPage();
+  if (document.getElementById('professionalsTable')) await initProfessionalsPage();
+  if (document.getElementById('dashboardAttendances')) await initDashboardCore();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -280,16 +317,20 @@ async function initFamiliesPage() {
     const q=(search?.value||'').toLowerCase().trim();
     const items=families.filter(x=>!q||[x.responsavel1,x.responsavel2,x.telefone,x.email,x.cidade,...childrenOf(x).map(c=>c.nome)].filter(Boolean).join(' ').toLowerCase().includes(q));
     tbody.innerHTML=items.length?items.map(x=>`<tr>
-      <td>${ProtegeApp.formatDate(x.created_at)}</td>
-      <td><b>${ProtegeApp.esc(x.responsavel1)}</b>${x.responsavel2?`<small>${ProtegeApp.esc(x.responsavel2)}</small>`:''}</td>
-      <td>${ProtegeApp.esc(x.telefone)}${x.email?`<small>${ProtegeApp.esc(x.email)}</small>`:''}</td>
-      <td>${childrenOf(x).length}</td>
-      <td>${ProtegeApp.esc(x.cidade||'')}/${ProtegeApp.esc(x.estado||'')}</td>
-      <td><span class="status-pill status-aprovado">${ProtegeApp.esc(x.status||'ativa')}</span></td>
-      <td><button class="small-btn view-family" data-id="${ProtegeApp.esc(x.id)}">Abrir</button></td>
-    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhuma família convertida ainda.</td></tr>';
+      <td>${ProtegeApp.formatDate(x.created_at)}</td><td><b>${ProtegeApp.esc(x.responsavel1)}</b>${x.responsavel2?`<small>${ProtegeApp.esc(x.responsavel2)}</small>`:''}</td>
+      <td>${ProtegeApp.esc(x.telefone)}${x.email?`<small>${ProtegeApp.esc(x.email)}</small>`:''}</td><td>${childrenOf(x).length}</td>
+      <td>${ProtegeApp.esc(x.cidade||'')}/${ProtegeApp.esc(x.estado||'')}</td><td><span class="status-pill status-aprovado">${ProtegeApp.esc(x.status||'ativa')}</span></td>
+      <td><button class="small-btn view-family" data-id="${ProtegeApp.esc(x.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhuma família convertida ainda.</td></tr>';
   }
-  function openFamily(id){
+  async function renderHistory(f){
+    const box=document.getElementById('familyHistory');
+    box.innerHTML='<div class="empty-state">Carregando histórico...</div>';
+    try{
+      const items=await ProtegeApp.loadAttendances(f.id,30);
+      box.innerHTML=items.length?items.map(a=>`<div class="history-item"><div><b>${ProtegeApp.formatDate(a.data_hora)}</b><small>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')} · ${ProtegeApp.esc(a.tipo_alvo||'família')}${a.filhos?.nome?` · ${ProtegeApp.esc(a.filhos.nome)}`:''}</small></div><span class="status-pill">${ProtegeApp.esc(a.status)}</span></div>`).join(''):'<div class="empty-state">Nenhum atendimento registrado para esta família.</div>';
+    }catch(err){console.error(err);box.innerHTML='<div class="empty-state">Histórico indisponível. Execute a migração V9 no Supabase.</div>';}
+  }
+  async function openFamily(id){
     const f=families.find(x=>x.id===id); if(!f)return;
     document.getElementById('familyDialogName').textContent=f.responsavel1;
     const ch=childrenOf(f);
@@ -300,30 +341,62 @@ async function initFamiliesPage() {
       <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade ?? '—'} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
     document.getElementById('familyWhatsapp').href=`https://wa.me/55${ProtegeApp.onlyDigits(f.telefone)}`;
     document.getElementById('newAttendanceForFamily').href=`atendimento.html?familia=${encodeURIComponent(f.id)}`;
-    dialog.showModal();
+    dialog.showModal(); await renderHistory(f);
   }
   try{
-    families=await ProtegeApp.loadFamilies();
-    document.getElementById('metricFamilies').textContent=families.length;
-    document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0);
-    render();
-    const id=new URLSearchParams(location.search).get('id');
-    if(id && families.some(f=>f.id===id)){ openFamily(id); history.replaceState({},'',location.pathname); }
-  }catch(err){ console.error(err); tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as famílias. Execute a migração V8 no Supabase.</td></tr>'; }
-  search?.addEventListener('input',render);
-  tbody.addEventListener('click',e=>{const b=e.target.closest('.view-family');if(b)openFamily(b.dataset.id);});
+    families=await ProtegeApp.loadFamilies(); document.getElementById('metricFamilies').textContent=families.length; document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0); render();
+    const id=new URLSearchParams(location.search).get('id'); if(id && families.some(f=>f.id===id)){ await openFamily(id); history.replaceState({},'',location.pathname); }
+  }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as famílias.</td></tr>';}
+  search?.addEventListener('input',render); tbody.addEventListener('click',async e=>{const b=e.target.closest('.view-family');if(b)await openFamily(b.dataset.id);});
 }
 
-function initAttendanceWizard() {
+async function initProfessionalsPage(){
+  const tbody=document.querySelector('#professionalsTable tbody'); const form=document.getElementById('professionalForm'); const msg=document.getElementById('professionalMessage');
+  async function refresh(){
+    try{const items=await ProtegeApp.loadProfessionals();tbody.innerHTML=items.length?items.map(p=>`<tr><td><b>${ProtegeApp.esc(p.nome)}</b></td><td>${ProtegeApp.esc(p.email||'—')}</td><td>${ProtegeApp.esc(p.telefone||'—')}</td><td>${ProtegeApp.esc(p.especialidade||'—')}</td><td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td></tr>`).join(''):'<tr><td colspan="5" class="empty-state">Nenhum profissional cadastrado.</td></tr>';}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="5" class="empty-state">Execute a migração V9 no Supabase para habilitar profissionais.</td></tr>';}
+  }
+  try{const session=await ProtegeApp.currentSession();if(session?.user?.email)document.getElementById('professionalEmail').value=session.user.email;}catch{}
+  form?.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Salvando...';const fd=new FormData(form);try{await ProtegeApp.saveProfessional({nome:String(fd.get('nome')).trim(),email:String(fd.get('email')||'').trim()||null,telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,status:String(fd.get('status')||'ativo')});msg.textContent='Profissional salvo com sucesso.';form.reset();await refresh();}catch(err){console.error(err);msg.textContent=err?.message?.includes('duplicate')?'Já existe um profissional com este e-mail.':`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}});
+  await refresh();
+}
+
+async function initDashboardCore(){
+  try{
+    const [families,attendances]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadAttendances(null,50)]);
+    document.getElementById('dashboardFamilies').textContent=families.length; document.getElementById('dashboardAttendances').textContent=attendances.length;
+    const now=new Date(),todayKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    document.getElementById('dashboardToday').textContent=attendances.filter(a=>{const d=new Date(a.data_hora);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`===todayKey;}).length;
+    const box=document.getElementById('dashboardAttendanceList'); const recent=attendances.slice(0,4);
+    box.innerHTML=recent.length?recent.map(a=>`<div><span class="time">${new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(new Date(a.data_hora))}</span><div><b>${ProtegeApp.esc(a.familias?.responsavel1||'Família')}</b><small>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')} · ${ProtegeApp.esc(a.status)}</small></div><span class="status-dot"></span></div>`).join(''):'<div class="empty-state">Nenhum atendimento registrado.</div>';
+  }catch(err){console.error(err);}
+}
+
+function formDataToObject(form){
+  const fd=new FormData(form),out={};
+  for(const [k,v] of fd.entries()){if(k in out)out[k]=Array.isArray(out[k])?[...out[k],v]:[out[k],v];else out[k]=v;}
+  return out;
+}
+
+async function initAttendanceWizard() {
   const form=document.getElementById('attendanceForm'); if(!form)return;
-  let current=1; const total=10;
-  const panels=[...document.querySelectorAll('.wizard-panel')],steps=[...document.querySelectorAll('.wizard-step')];
-  const counter=document.getElementById('stepCounter'),prev=document.getElementById('prevStep'),next=document.getElementById('nextStep'),save=document.getElementById('saveAttendance'),message=document.getElementById('saveMessage');
+  let current=1; const total=10; let families=[]; let professionals=[];
+  const familySel=document.getElementById('attendanceFamily'),professionalSel=document.getElementById('attendanceProfessional'),targetSel=document.getElementById('attendanceTarget'),childSel=document.getElementById('attendanceChild'),childWrap=document.getElementById('attendanceChildWrap'),dateInput=document.getElementById('attendanceDateTime'),statusSel=document.getElementById('attendanceStatus');
+  const panels=[...document.querySelectorAll('.wizard-panel')],steps=[...document.querySelectorAll('.wizard-step')],counter=document.getElementById('stepCounter'),prev=document.getElementById('prevStep'),next=document.getElementById('nextStep'),save=document.getElementById('saveAttendance'),message=document.getElementById('saveMessage');
   function render(){panels.forEach(p=>p.classList.toggle('active',Number(p.dataset.panel)===current));steps.forEach(s=>s.classList.toggle('active',Number(s.dataset.step)===current));counter.textContent=`Passo ${current} de ${total}`;prev.disabled=current===1;prev.style.opacity=current===1?'.45':'1';next.hidden=current===total;save.hidden=current!==total;window.scrollTo({top:0,behavior:'smooth'});}
-  next?.addEventListener('click',()=>{if(current<total){current++;render();}}); prev?.addEventListener('click',()=>{if(current>1){current--;render();}}); steps.forEach(s=>s.addEventListener('click',()=>{current=Number(s.dataset.step);render();}));
-  document.getElementById('addChild')?.addEventListener('click',()=>{const tbody=document.querySelector('#childrenTable tbody');if(tbody.children.length>=7)return alert('É possível cadastrar até 7 filhos.');const tr=document.createElement('tr');tr.innerHTML=`<td><input name="filho_nome[]"></td><td><select name="filho_sexo[]"><option value="">Selecione</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select></td><td><input name="filho_idade[]" type="number" min="0" max="100"></td><td><button type="button" class="small-btn remove-row">Excluir</button></td>`;tbody.appendChild(tr);});
-  document.getElementById('addSession')?.addEventListener('click',()=>{const tbody=document.querySelector('#sessionsTable tbody'),n=tbody.children.length+1,tr=document.createElement('tr');tr.innerHTML=`<td>${n}</td><td><input name="sessao_profissional[]"></td><td><input name="sessao_texto[]"></td><td><input name="sessao_observacoes[]"></td><td><input name="sessao_conclusao[]"></td>`;tbody.appendChild(tr);});
-  form.addEventListener('click',e=>{if(e.target.classList.contains('remove-row'))e.target.closest('tr').remove();});
-  form.addEventListener('submit',e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form).entries());localStorage.setItem('ultimoAtendimentoProtege',JSON.stringify(data));message.textContent='Atendimento salvo no protótipo. A persistência dos atendimentos será conectada ao banco na etapa seguinte.';message.scrollIntoView({behavior:'smooth'});});
+  function selectedFamily(){return families.find(f=>f.id===familySel.value);}
+  function refreshFamily(){const f=selectedFamily();const ch=f?.filhos||[];childSel.innerHTML='<option value="">Selecione</option>'+ch.map(c=>`<option value="${ProtegeApp.esc(c.id)}">${ProtegeApp.esc(c.nome)} · ${c.idade??'—'} ano(s)</option>`).join('');document.getElementById('attendanceFamilySummary').innerHTML=f?`<span>Família selecionada</span><b>${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' e '+ProtegeApp.esc(f.responsavel2):''}</b><small>${ch.length?ch.map(c=>ProtegeApp.esc(c.nome)).join(', '):'Sem filhos cadastrados'} · ${ProtegeApp.esc(f.cidade||'')}/${ProtegeApp.esc(f.estado||'')}</small>`:'Selecione uma família acima.';}
+  function refreshTarget(){const isChild=targetSel.value==='filho';childWrap.hidden=!isChild;childSel.required=isChild;if(!isChild)childSel.value='';}
+  try{
+    [families,professionals]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);
+    familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' / '+ProtegeApp.esc(f.responsavel2):''}</option>`).join('');
+    professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
+    const qid=new URLSearchParams(location.search).get('familia');if(qid&&families.some(f=>f.id===qid))familySel.value=qid;
+    const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());dateInput.value=d.toISOString().slice(0,16);refreshFamily();refreshTarget();
+    if(!professionals.length)document.getElementById('attendanceSetupMessage').innerHTML='Nenhum profissional cadastrado. <a href="profissionais.html"><b>Cadastre um profissional antes de salvar.</b></a>';
+  }catch(err){console.error(err);document.getElementById('attendanceSetupMessage').textContent='Não foi possível carregar famílias/profissionais. Execute a migração V9.';}
+  familySel.addEventListener('change',refreshFamily);targetSel.addEventListener('change',refreshTarget);
+  next?.addEventListener('click',()=>{if(current<total){current++;render();}});prev?.addEventListener('click',()=>{if(current>1){current--;render();}});steps.forEach(s=>s.addEventListener('click',()=>{current=Number(s.dataset.step);render();}));
+  form.addEventListener('submit',async e=>{e.preventDefault();message.textContent='';if(!familySel.value||!professionalSel.value||!dateInput.value){message.textContent='Selecione família, profissional e data/hora.';return;}if(targetSel.value==='filho'&&!childSel.value){message.textContent='Selecione o filho deste atendimento.';return;}save.disabled=true;save.textContent='Salvando...';try{const dados=formDataToObject(form);const row=await ProtegeApp.saveAttendance({familia_id:familySel.value,profissional_id:professionalSel.value,filho_id:childSel.value||null,tipo_alvo:targetSel.value,data_hora:new Date(dateInput.value).toISOString(),status:statusSel.value,etapa_atual:10,dados,observacoes:String(dados.observacoes||'').trim()||null});message.innerHTML=`Atendimento salvo com sucesso. <a href="familias.html?id=${encodeURIComponent(row.familia_id)}"><b>Abrir ficha da família</b></a>.`;message.scrollIntoView({behavior:'smooth'});}catch(err){console.error(err);message.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}finally{save.disabled=false;save.textContent='Salvar atendimento';}});
   render();
 }
+

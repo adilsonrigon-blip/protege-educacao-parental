@@ -1,0 +1,11 @@
+PROTEGE V9 — Ficha da Família + Profissionais + Atendimentos
+
+1) No Supabase, abra SQL Editor > New query.
+2) Execute o arquivo supabase-v9-atendimentos.sql.
+3) Confirme no Table Editor as tabelas: profissionais e atendimentos.
+4) Depois envie os arquivos da pasta protege_v9 para o GitHub, substituindo os existentes.
+5) Faça login, abra Profissionais e cadastre pelo menos um profissional.
+6) Abra Famílias > Abrir para conferir a ficha e o histórico.
+7) Clique em + Novo atendimento, escolha família/profissional e salve o wizard.
+
+A V9 preserva o fluxo público e a conversão de famílias da V8.

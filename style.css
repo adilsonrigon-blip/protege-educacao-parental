@@ -60,3 +60,10 @@
   .lead-dialog .dialog-shell{padding:20px}
   .lead-dialog .form-message{text-align:left}
 }
+
+/* ===== V9 · Profissionais, ficha da família e atendimentos ===== */
+.professional-form-panel{margin-bottom:24px}.professional-form{grid-template-columns:repeat(3,minmax(0,1fr));align-items:end}.professional-form label,.attendance-meta label{display:grid;gap:7px;font-size:13px;font-weight:750}.professional-form input,.professional-form select,.attendance-meta input,.attendance-meta select{width:100%;min-height:44px;border:1px solid #ded5e3;border-radius:10px;padding:0 12px;background:#fff;font:inherit;color:var(--ink)}.form-submit-cell{display:flex;align-items:end;height:100%}.form-submit-cell .btn{width:100%;min-height:44px}
+.family-dialog{width:min(900px,calc(100% - 28px))}.family-history{border-top:1px solid #eee8f0;padding-top:20px}.history-head h3{margin:4px 0 12px}.history-list{display:grid;gap:8px;max-height:260px;overflow:auto}.history-item{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 14px;border:1px solid #eee8f0;border-radius:12px;background:#fcfafc}.history-item b,.history-item small{display:block}.history-item small{color:var(--muted);margin-top:3px}
+.attendance-setup{margin-bottom:24px}.attendance-meta{grid-template-columns:repeat(3,minmax(0,1fr))}.attendance-summary{margin-bottom:18px}.attendance-summary>span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#927f9c;margin-bottom:6px}.attendance-summary b,.attendance-summary small{display:block}.attendance-summary small{color:#807783;margin-top:4px}.wizard-panel textarea,.wizard-panel input,.wizard-panel select{font:inherit}
+@media(max-width:900px){.professional-form,.attendance-meta{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.professional-form,.attendance-meta{grid-template-columns:1fr}.history-item{align-items:flex-start;flex-direction:column}}

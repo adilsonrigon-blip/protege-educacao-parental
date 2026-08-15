@@ -1,25 +1,15 @@
-# Protege Educação Parental — V5
+# Protege — Educação Parental · V9
 
-Nesta versão foi iniciada a transformação do site em plataforma operacional.
+Versão com Supabase real para **Profissionais**, **Ficha da Família** e **Atendimentos**.
 
-## Novidades
-- Formulário público grava famílias interessadas no banco Supabase.
-- Grade de filhos vinculada ao cadastro da família.
-- Login profissional preparado para Supabase Auth.
-- Nova página `familias-interessadas.html` com busca, filtro, status, observações e WhatsApp.
-- Dashboard mostra novos interesses e os cadastros mais recentes.
-- Modo de teste local continua funcionando enquanto o Supabase ainda não estiver conectado.
+## Antes de publicar
+1. Execute `supabase-v9-atendimentos.sql` no SQL Editor do Supabase.
+2. Confirme as tabelas `profissionais` e `atendimentos`.
+3. Envie todos os arquivos desta pasta para a raiz do repositório GitHub Pages.
 
-## Para ativar o banco real
-1. Crie um projeto gratuito no Supabase.
-2. Abra SQL Editor e execute todo o arquivo `supabase.sql`.
-3. Em Authentication > Users, crie o primeiro usuário profissional (e-mail e senha).
-4. Em Project Settings > API, copie a Project URL e a chave anon/public.
-5. Abra `config.js` e cole os dois valores.
-6. Envie todos os arquivos desta pasta para o repositório GitHub, substituindo os existentes.
-
-## Segurança inicial
-O SQL habilita Row Level Security (RLS): visitantes anônimos podem inserir novos cadastros, mas somente usuários autenticados podem ler ou alterar a fila de famílias interessadas.
-
-## Próxima etapa
-Converter um cadastro aprovado em Família/Filhos definitivos e conectar os atendimentos ao banco.
+## Teste recomendado
+1. Entre em `profissionais.html` e cadastre pelo menos um profissional.
+2. Abra `familias.html` e clique em **Abrir** para ver a ficha e o histórico.
+3. Clique em **+ Novo atendimento**, selecione família, profissional, alvo e data/hora.
+4. Preencha as 10 etapas e salve.
+5. Volte à ficha da família: o atendimento deve aparecer no histórico.
