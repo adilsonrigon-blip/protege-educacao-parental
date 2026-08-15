@@ -321,12 +321,12 @@ async function initLeadsPage() {
       <div class="detail-card"><span>Contato</span><b>${ProtegeApp.esc(active.telefone)}</b><small>${ProtegeApp.esc(active.email||'Sem e-mail')}</small></div>
       <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc(active.logradouro)}, ${ProtegeApp.esc(active.numero)}${active.complemento?' · '+ProtegeApp.esc(active.complemento):''}</b><small>${ProtegeApp.esc(active.bairro)} · ${ProtegeApp.esc(active.cidade)}/${ProtegeApp.esc(active.estado)} · CEP ${ProtegeApp.esc(active.cep)}</small></div>
       <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${ProtegeApp.esc(c.idade)} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
-    showScheduleModal();
+    dialog.showModal();
   }
   function openFromQuery(){ const id=new URLSearchParams(location.search).get('id'); if(id&&leads.some(x=>x.id===id)){openLead(id); history.replaceState({},'',location.pathname);} }
   tbody.addEventListener('click',e=>{const b=e.target.closest('.view-lead');if(b)openLead(b.dataset.id);});
   search.addEventListener('input',render); filter.addEventListener('change',render);
-  editForm.addEventListener('submit',async e=>{e.preventDefault();if(!active)return;const msg=document.getElementById('leadDialogMessage');msg.textContent='Salvando...';try{await ProtegeApp.updateLead(active.id,{status:document.getElementById('leadEditStatus').value,observacoes:document.getElementById('leadNotes').value.trim()||null});msg.textContent='Alterações salvas.';await refresh();setTimeout(()=>closeScheduleModal(),450);}catch(err){msg.textContent='Não foi possível salvar.';console.error(err);}});
+  editForm.addEventListener('submit',async e=>{e.preventDefault();if(!active)return;const msg=document.getElementById('leadDialogMessage');msg.textContent='Salvando...';try{await ProtegeApp.updateLead(active.id,{status:document.getElementById('leadEditStatus').value,observacoes:document.getElementById('leadNotes').value.trim()||null});msg.textContent='Alterações salvas.';await refresh();setTimeout(()=>dialog.close(),450);}catch(err){msg.textContent='Não foi possível salvar.';console.error(err);}});
   document.getElementById('convertLeadBtn').addEventListener('click',async()=>{
     if(!active)return;
     const btn=document.getElementById('convertLeadBtn');
@@ -385,7 +385,7 @@ async function initFamiliesPage() {
       <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade ?? '—'} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
     document.getElementById('familyWhatsapp').href=`https://wa.me/55${ProtegeApp.onlyDigits(f.telefone)}`;
     document.getElementById('newAttendanceForFamily').href=`atendimento.html?familia=${encodeURIComponent(f.id)}`;
-    showScheduleModal(); await renderHistory(f);
+    dialog.showModal(); await renderHistory(f);
   }
   try{
     families=await ProtegeApp.loadFamilies(); document.getElementById('metricFamilies').textContent=families.length; document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0); render();
@@ -468,7 +468,7 @@ async function initAttendancesPage(){
     evolutionForm.reset();evolutionMessage.textContent='';
     const originalProfessional=professionals.find(p=>p.id===a.profissional_id);
     if(originalProfessional)evolutionProfessional.value=originalProfessional.id;
-    showScheduleModal();
+    dialog.showModal();
     await refreshEvolutions();
     if(focusEvolution){setTimeout(()=>{evolutionForm?.scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('evolutionContent')?.focus();},80);}
   }
@@ -492,7 +492,7 @@ async function initAttendancesPage(){
     }catch(err){console.error(err);evolutionMessage.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}
     finally{saveBtn.disabled=false;saveBtn.textContent='+ Adicionar evolução';}
   });
-  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>closeScheduleModal());close2?.addEventListener('click',()=>closeScheduleModal());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 
 function formDataToObject(form){
@@ -556,7 +556,7 @@ async function initAgendaPage(){
   const dateInput=document.getElementById('agendaDate'),list=document.getElementById('agendaDayList'),professionalFilter=document.getElementById('agendaProfessionalFilter');
   if(!dateInput||!list)return;
   const dialog=document.getElementById('scheduleDialog'),backdrop=document.getElementById('scheduleDialogBackdrop'),form=document.getElementById('scheduleForm');
-  const showScheduleModal=()=>{if(backdrop){backdrop.hidden=false;document.body.classList.add('schedule-modal-open');}else if(dialog?.showModal){showScheduleModal();}};
+  const showScheduleModal=()=>{if(backdrop){backdrop.hidden=false;document.body.classList.add('schedule-modal-open');}else if(dialog?.showModal){dialog.showModal();}};
   const closeScheduleModal=()=>{if(backdrop){backdrop.hidden=true;document.body.classList.remove('schedule-modal-open');}else if(dialog?.close){dialog.close();}};
   const familySel=document.getElementById('scheduleFamily'),targetSel=document.getElementById('scheduleTarget'),professionalSel=document.getElementById('scheduleProfessional');
   let items=[],families=[],professionals=[],editingId=null;
