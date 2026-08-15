@@ -1,0 +1,20 @@
+PROTEGE V12.6 — RECUPERAÇÃO LIMPA
+
+Esta versão foi reconstruída a partir do ZIP atual do repositório enviado pelo usuário.
+Objetivo: restaurar a base estável V12.5 e eliminar mistura/cache de arquivos da V13.
+
+IMPORTANTE:
+1. Não execute nenhum SQL desta pasta agora.
+2. No GitHub, envie TODOS os arquivos desta pasta para a raiz do repositório e substitua os arquivos HTML existentes.
+3. Esta versão usa nomes novos para os arquivos de frontend:
+   - style-v126.css
+   - script-v126.js
+   - config-v126.js
+   Isso força o navegador/GitHub Pages a carregar a mesma versão dos três arquivos e evita cache cruzado.
+4. Aguarde o GitHub Pages terminar a publicação.
+5. Abra dashboard.html?v=126 e pressione Ctrl+F5.
+
+TESTE NESTA ORDEM:
+Dashboard > Profissionais > Famílias interessadas > Famílias > Agenda > Atendimentos.
+
+A V13 (perfis Admin/Profissional) NÃO está ativada nesta recuperação. Depois de validar toda a V12.6, ela deve ser reconstruída sobre esta base estável.
