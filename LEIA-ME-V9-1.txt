@@ -1,0 +1,10 @@
+PROTEGE V9.1 - Ajuste Atendimento para
+
+O campo "Atendimento para" agora é preenchido automaticamente com os membros da família selecionada:
+- Família completa
+- Responsável 1
+- Responsável 2 (quando houver)
+- Todos os filhos cadastrados
+
+Não é necessário executar novo SQL no Supabase.
+Para atualizar mais rápido no GitHub, substitua atendimento.html e script.js.

@@ -380,23 +380,48 @@ function formDataToObject(form){
 async function initAttendanceWizard() {
   const form=document.getElementById('attendanceForm'); if(!form)return;
   let current=1; const total=10; let families=[]; let professionals=[];
-  const familySel=document.getElementById('attendanceFamily'),professionalSel=document.getElementById('attendanceProfessional'),targetSel=document.getElementById('attendanceTarget'),childSel=document.getElementById('attendanceChild'),childWrap=document.getElementById('attendanceChildWrap'),dateInput=document.getElementById('attendanceDateTime'),statusSel=document.getElementById('attendanceStatus');
+  const familySel=document.getElementById('attendanceFamily'),professionalSel=document.getElementById('attendanceProfessional'),targetSel=document.getElementById('attendanceTarget'),dateInput=document.getElementById('attendanceDateTime'),statusSel=document.getElementById('attendanceStatus');
   const panels=[...document.querySelectorAll('.wizard-panel')],steps=[...document.querySelectorAll('.wizard-step')],counter=document.getElementById('stepCounter'),prev=document.getElementById('prevStep'),next=document.getElementById('nextStep'),save=document.getElementById('saveAttendance'),message=document.getElementById('saveMessage');
   function render(){panels.forEach(p=>p.classList.toggle('active',Number(p.dataset.panel)===current));steps.forEach(s=>s.classList.toggle('active',Number(s.dataset.step)===current));counter.textContent=`Passo ${current} de ${total}`;prev.disabled=current===1;prev.style.opacity=current===1?'.45':'1';next.hidden=current===total;save.hidden=current!==total;window.scrollTo({top:0,behavior:'smooth'});}
   function selectedFamily(){return families.find(f=>f.id===familySel.value);}
-  function refreshFamily(){const f=selectedFamily();const ch=f?.filhos||[];childSel.innerHTML='<option value="">Selecione</option>'+ch.map(c=>`<option value="${ProtegeApp.esc(c.id)}">${ProtegeApp.esc(c.nome)} · ${c.idade??'—'} ano(s)</option>`).join('');document.getElementById('attendanceFamilySummary').innerHTML=f?`<span>Família selecionada</span><b>${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' e '+ProtegeApp.esc(f.responsavel2):''}</b><small>${ch.length?ch.map(c=>ProtegeApp.esc(c.nome)).join(', '):'Sem filhos cadastrados'} · ${ProtegeApp.esc(f.cidade||'')}/${ProtegeApp.esc(f.estado||'')}</small>`:'Selecione uma família acima.';}
-  function refreshTarget(){const isChild=targetSel.value==='filho';childWrap.hidden=!isChild;childSel.required=isChild;if(!isChild)childSel.value='';}
+  function refreshFamily(){
+    const f=selectedFamily();
+    const ch=f?.filhos||[];
+    if(!f){
+      targetSel.innerHTML='<option value="">Selecione primeiro uma família</option>';
+      document.getElementById('attendanceFamilySummary').innerHTML='Selecione uma família acima.';
+      return;
+    }
+    const members=[];
+    members.push(`<option value="familia:${ProtegeApp.esc(f.id)}">Família completa</option>`);
+    if(f.responsavel1) members.push(`<option value="responsavel1:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel1)} · Responsável</option>`);
+    if(f.responsavel2) members.push(`<option value="responsavel2:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel2)} · Responsável</option>`);
+    ch.forEach(c=>members.push(`<option value="filho:${ProtegeApp.esc(c.id)}">${ProtegeApp.esc(c.nome)} · Filho(a)${c.idade!=null?' · '+c.idade+' ano(s)':''}</option>`));
+    targetSel.innerHTML='<option value="">Selecione quem será atendido</option>'+members.join('');
+    document.getElementById('attendanceFamilySummary').innerHTML=`<span>Família selecionada</span><b>${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' e '+ProtegeApp.esc(f.responsavel2):''}</b><small>${ch.length?ch.map(c=>ProtegeApp.esc(c.nome)).join(', '):'Sem filhos cadastrados'} · ${ProtegeApp.esc(f.cidade||'')}/${ProtegeApp.esc(f.estado||'')}</small>`;
+  }
+  function selectedTarget(){
+    const raw=targetSel.value||'';
+    const [kind,id]=raw.split(':');
+    const f=selectedFamily();
+    if(!f||!kind) return null;
+    if(kind==='familia') return {tipo_alvo:'familia',filho_id:null,nome:`Família ${f.responsavel1}${f.responsavel2?' / '+f.responsavel2:''}`};
+    if(kind==='responsavel1') return {tipo_alvo:'responsaveis',filho_id:null,nome:f.responsavel1||'Responsável'};
+    if(kind==='responsavel2') return {tipo_alvo:'responsaveis',filho_id:null,nome:f.responsavel2||'Responsável'};
+    if(kind==='filho') {const c=(f.filhos||[]).find(x=>x.id===id);return {tipo_alvo:'filho',filho_id:id,nome:c?.nome||'Filho(a)'};}
+    return null;
+  }
   try{
     [families,professionals]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);
     familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' / '+ProtegeApp.esc(f.responsavel2):''}</option>`).join('');
     professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
     const qid=new URLSearchParams(location.search).get('familia');if(qid&&families.some(f=>f.id===qid))familySel.value=qid;
-    const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());dateInput.value=d.toISOString().slice(0,16);refreshFamily();refreshTarget();
+    const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());dateInput.value=d.toISOString().slice(0,16);refreshFamily();
     if(!professionals.length)document.getElementById('attendanceSetupMessage').innerHTML='Nenhum profissional cadastrado. <a href="profissionais.html"><b>Cadastre um profissional antes de salvar.</b></a>';
   }catch(err){console.error(err);document.getElementById('attendanceSetupMessage').textContent='Não foi possível carregar famílias/profissionais. Execute a migração V9.';}
-  familySel.addEventListener('change',refreshFamily);targetSel.addEventListener('change',refreshTarget);
+  familySel.addEventListener('change',refreshFamily);
   next?.addEventListener('click',()=>{if(current<total){current++;render();}});prev?.addEventListener('click',()=>{if(current>1){current--;render();}});steps.forEach(s=>s.addEventListener('click',()=>{current=Number(s.dataset.step);render();}));
-  form.addEventListener('submit',async e=>{e.preventDefault();message.textContent='';if(!familySel.value||!professionalSel.value||!dateInput.value){message.textContent='Selecione família, profissional e data/hora.';return;}if(targetSel.value==='filho'&&!childSel.value){message.textContent='Selecione o filho deste atendimento.';return;}save.disabled=true;save.textContent='Salvando...';try{const dados=formDataToObject(form);const row=await ProtegeApp.saveAttendance({familia_id:familySel.value,profissional_id:professionalSel.value,filho_id:childSel.value||null,tipo_alvo:targetSel.value,data_hora:new Date(dateInput.value).toISOString(),status:statusSel.value,etapa_atual:10,dados,observacoes:String(dados.observacoes||'').trim()||null});message.innerHTML=`Atendimento salvo com sucesso. <a href="familias.html?id=${encodeURIComponent(row.familia_id)}"><b>Abrir ficha da família</b></a>.`;message.scrollIntoView({behavior:'smooth'});}catch(err){console.error(err);message.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}finally{save.disabled=false;save.textContent='Salvar atendimento';}});
+  form.addEventListener('submit',async e=>{e.preventDefault();message.textContent='';if(!familySel.value||!professionalSel.value||!targetSel.value||!dateInput.value){message.textContent='Selecione família, profissional, pessoa atendida e data/hora.';return;}const alvo=selectedTarget();if(!alvo){message.textContent='Selecione quem será atendido.';return;}save.disabled=true;save.textContent='Salvando...';try{const dados=formDataToObject(form);dados.membro_atendido=alvo.nome;dados.atendimento_para=targetSel.value;const row=await ProtegeApp.saveAttendance({familia_id:familySel.value,profissional_id:professionalSel.value,filho_id:alvo.filho_id,tipo_alvo:alvo.tipo_alvo,data_hora:new Date(dateInput.value).toISOString(),status:statusSel.value,etapa_atual:10,dados,observacoes:String(dados.observacoes||'').trim()||null});message.innerHTML=`Atendimento salvo com sucesso para <b>${ProtegeApp.esc(alvo.nome)}</b>. <a href="familias.html?id=${encodeURIComponent(row.familia_id)}"><b>Abrir ficha da família</b></a>.`;message.scrollIntoView({behavior:'smooth'});}catch(err){console.error(err);message.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}finally{save.disabled=false;save.textContent='Salvar atendimento';}});
   render();
 }
 
