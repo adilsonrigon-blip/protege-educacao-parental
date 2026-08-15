@@ -122,3 +122,8 @@
 .account-password-form{max-width:850px}
 body[data-user-role="profissional"] .admin-only{display:none!important}
 @media(max-width:760px){.professional-actions{grid-column:1/-1}.professional-actions .btn{width:100%}}
+
+/* V13.2 hotfix profissionais */
+.access-role-badge{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:1px solid #eadff0;border-radius:999px;background:#fff;color:#6b5b70;font-size:13px;white-space:nowrap}
+.access-role-badge strong{color:#7d2fa1}
+@media(max-width:760px){.access-role-badge{margin-top:10px}}

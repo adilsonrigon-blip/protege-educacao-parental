@@ -454,6 +454,7 @@ async function initProfessionalsPage(){
   const tbody=document.querySelector('#professionalsTable tbody');
   const form=document.getElementById('professionalForm');
   const msg=document.getElementById('professionalMessage');
+  if(!tbody || !form){ console.error('Tela de profissionais incompleta: HTML incompatível com script.js'); return; }
   const idField=document.getElementById('professionalId');
   const password=document.getElementById('professionalPassword');
   const submit=document.getElementById('professionalSubmit');
