@@ -1,0 +1,14 @@
+PROTEGE - ROLLBACK PARA V12.5 ESTÁVEL
+
+Objetivo: restaurar o site completo para a última versão validada antes da V13.
+
+1. No GitHub, envie TODOS os arquivos desta pasta para a raiz do repositório.
+2. Confirme a substituição dos arquivos existentes.
+3. Faça Commit directly to main.
+4. Aguarde 1-2 minutos.
+5. Abra o site e pressione Ctrl+F5.
+
+Não execute nenhum SQL para este rollback.
+Não apague tabelas do Supabase. As tabelas extras da V13 podem permanecer; a V12.5 simplesmente não as utiliza.
+
+Depois de validar Dashboard, Profissionais, Famílias Interessadas, Famílias, Agenda e Atendimentos, a V13 será reconstruída sobre esta base estável em uma atualização completa, sem misturar arquivos de versões diferentes.

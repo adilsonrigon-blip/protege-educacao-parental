@@ -3,7 +3,6 @@ const ProtegeApp = (() => {
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
   const db = configured ? window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY) : null;
   const LOCAL_LEADS_KEY = 'protegeFamiliasInteressadas';
-  let cachedProfile = null;
 
   function getLocalLeads() {
     try { return JSON.parse(localStorage.getItem(LOCAL_LEADS_KEY) || '[]'); } catch { return []; }
@@ -21,50 +20,10 @@ const ProtegeApp = (() => {
     return data.session;
   }
 
-  async function getCurrentProfile(force=false) {
-    if (!configured) return {user_id:'local',nome:'Profissional',email:'modo@demonstracao.local',perfil:'admin',ativo:true,profissional_id:null};
-    if (cachedProfile && !force) return cachedProfile;
-    const session = await currentSession();
-    if (!session?.user) return null;
-    const { data, error } = await db.from('usuarios_perfis').select('*, profissionais(*)').eq('user_id',session.user.id).maybeSingle();
-    if (error) throw error;
-    cachedProfile = data || null;
-    return cachedProfile;
-  }
-
   async function requireAuth() {
-    if (!document.body.dataset.requiresAuth) return null;
+    if (!document.body.dataset.requiresAuth) return;
     const session = await currentSession();
-    if (!session) { window.location.href = 'login.html'; return null; }
-    if (!configured) return getCurrentProfile();
-    try {
-      const profile = await getCurrentProfile(true);
-      if (!profile || !profile.ativo) {
-        await db.auth.signOut();
-        window.location.href='login.html?acesso=inativo';
-        return null;
-      }
-      document.body.dataset.userRole = profile.perfil;
-      if (document.body.dataset.adminPage === 'true' && profile.perfil !== 'admin') {
-        window.location.href='dashboard.html?acesso=restrito';
-        return profile;
-      }
-      return profile;
-    } catch (err) {
-      console.error('Perfil de acesso:',err);
-      window.location.href='login.html?acesso=perfil';
-      return null;
-    }
-  }
-
-  async function applyAccessUI() {
-    if (!document.body.dataset.requiresAuth) return null;
-    const profile = await getCurrentProfile();
-    if (!profile) return null;
-    document.querySelectorAll('[data-admin-only]').forEach(el=>{ el.hidden = profile.perfil !== 'admin'; });
-    document.querySelectorAll('[data-user-name]').forEach(el=>el.textContent=profile.nome || 'Profissional');
-    document.querySelectorAll('[data-user-role]').forEach(el=>el.textContent=profile.perfil === 'admin' ? 'Administrador' : 'Profissional');
-    return profile;
+    if (!session) window.location.href = 'login.html';
   }
 
   async function loadLeads() {
@@ -101,30 +60,19 @@ const ProtegeApp = (() => {
 
   async function loadProfessionals() {
     if (!configured) return [];
-    const { data, error } = await db.from('profissionais').select('*, usuarios_perfis(perfil,ativo,user_id)').order('nome',{ascending:true});
+    const { data, error } = await db.from('profissionais').select('*').order('nome',{ascending:true});
     if (error) throw error;
     return data || [];
   }
 
-  async function manageProfessional(payload) {
+  async function saveProfessional(payload) {
     if (!configured) throw new Error('Supabase não configurado.');
-    const { data, error } = await db.functions.invoke('administrar-profissional',{body:payload});
-    if (error) {
-      let msg = error.message || 'Falha ao chamar a função segura.';
-      try { if (error.context) { const j=await error.context.json(); msg=j?.error||msg; } } catch {}
-      throw new Error(msg);
-    }
-    if (data?.error) throw new Error(data.error);
-    return data;
-  }
-
-  async function saveProfessional(payload) { return manageProfessional({action:'create',...payload}); }
-  async function updateProfessional(payload) { return manageProfessional({action:'update',...payload}); }
-  async function resetProfessionalPassword(profissional_id,password) { return manageProfessional({action:'password',profissional_id,password}); }
-  async function changeOwnPassword(password) {
-    if (!configured) throw new Error('Supabase não configurado.');
-    const { error } = await db.auth.updateUser({password});
+    const session = await currentSession();
+    const body = {...payload, updated_at:new Date().toISOString()};
+    if (session?.user && payload.email && session.user.email && payload.email.toLowerCase() === session.user.email.toLowerCase()) body.auth_user_id = session.user.id;
+    const { data, error } = await db.from('profissionais').insert(body).select().single();
     if (error) throw error;
+    return data;
   }
 
   async function loadAttendances(familyId=null, limit=100) {
@@ -200,12 +148,11 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,getCurrentProfile,requireAuth,applyAccessUI,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,updateProfessional,resetProfessionalPassword,changeOwnPassword,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const accessProfile = await ProtegeApp.requireAuth();
-  await ProtegeApp.applyAccessUI();
+  await ProtegeApp.requireAuth();
 
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
@@ -238,8 +185,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
           const { error } = await ProtegeApp.db.auth.signInWithPassword({email,password});
           if (error) throw error;
-          const profile = await ProtegeApp.getCurrentProfile(true);
-          if (!profile || !profile.ativo) { await ProtegeApp.db.auth.signOut(); throw new Error('Usuário sem perfil ativo na Protege.'); }
         }
         message.textContent = 'Acesso realizado. Abrindo painel...';
         setTimeout(()=>window.location.href='dashboard.html',350);
@@ -260,14 +205,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   initInterestForm();
 
   // DASHBOARD E FILA DE FAMÍLIAS
-  if (document.getElementById('recentLeads') && accessProfile?.perfil==='admin') await initDashboardLeads();
-  if (document.getElementById('leadsTable') && accessProfile?.perfil==='admin') await initLeadsPage();
+  if (document.getElementById('recentLeads')) await initDashboardLeads();
+  if (document.getElementById('leadsTable')) await initLeadsPage();
   if (document.getElementById('familiesTable')) await initFamiliesPage();
-  if (document.getElementById('professionalsTable') && accessProfile?.perfil==='admin') await initProfessionalsPage();
+  if (document.getElementById('professionalsTable')) await initProfessionalsPage();
   if (document.getElementById('dashboardAttendances')) await initDashboardCore();
   if (document.getElementById('attendancesTable')) await initAttendancesPage();
   if (document.getElementById('agendaDayList')) await initAgendaPage();
-  if (document.getElementById('myAccountForm')) await initMyAccountPage();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -451,33 +395,13 @@ async function initFamiliesPage() {
 }
 
 async function initProfessionalsPage(){
-  const tbody=document.querySelector('#professionalsTable tbody');
-  const form=document.getElementById('professionalForm');
-  const msg=document.getElementById('professionalMessage');
-  if(!tbody || !form){ console.error('Tela de profissionais incompleta: HTML incompatível com script.js'); return; }
-  const idField=document.getElementById('professionalId');
-  const password=document.getElementById('professionalPassword');
-  const submit=document.getElementById('professionalSubmit');
-  const cancel=document.getElementById('professionalCancelEdit');
-  let items=[];
+  const tbody=document.querySelector('#professionalsTable tbody'); const form=document.getElementById('professionalForm'); const msg=document.getElementById('professionalMessage');
   async function refresh(){
-    try{
-      items=await ProtegeApp.loadProfessionals();
-      tbody.innerHTML=items.length?items.map(p=>`<tr><td><b>${ProtegeApp.esc(p.nome)}</b></td><td>${ProtegeApp.esc(p.email||'—')}</td><td>${ProtegeApp.esc(p.telefone||'—')}</td><td>${ProtegeApp.esc(p.especialidade||'—')}</td><td>${ProtegeApp.esc(p.usuarios_perfis?.[0]?.perfil==='admin'?'Administrador':'Profissional')}</td><td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td><td><button class="small-btn edit-professional" data-id="${p.id}">Editar</button> <button class="small-btn password-professional" data-id="${p.id}">Nova senha</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum profissional cadastrado.</td></tr>';
-    }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar os profissionais. Confirme a migração V13.</td></tr>';}
+    try{const items=await ProtegeApp.loadProfessionals();tbody.innerHTML=items.length?items.map(p=>`<tr><td><b>${ProtegeApp.esc(p.nome)}</b></td><td>${ProtegeApp.esc(p.email||'—')}</td><td>${ProtegeApp.esc(p.telefone||'—')}</td><td>${ProtegeApp.esc(p.especialidade||'—')}</td><td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td></tr>`).join(''):'<tr><td colspan="5" class="empty-state">Nenhum profissional cadastrado.</td></tr>';}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="5" class="empty-state">Execute a migração V9 no Supabase para habilitar profissionais.</td></tr>';}
   }
-  function resetForm(){form.reset();idField.value='';submit.textContent='Criar profissional e acesso';cancel.hidden=true;password.required=true;document.getElementById('professionalRole').value='profissional';document.getElementById('professionalStatus').value='ativo';msg.textContent='';}
-  function edit(id){const p=items.find(x=>x.id===id);if(!p)return;idField.value=p.id;document.getElementById('professionalName').value=p.nome||'';document.getElementById('professionalEmail').value=p.email||'';document.getElementById('professionalPhone').value=p.telefone||'';document.getElementById('professionalSpecialty').value=p.especialidade||'';document.getElementById('professionalRole').value=p.usuarios_perfis?.[0]?.perfil||'profissional';document.getElementById('professionalStatus').value=p.status||'ativo';password.value='';password.required=false;submit.textContent='Salvar alterações';cancel.hidden=false;window.scrollTo({top:0,behavior:'smooth'});}
-  form?.addEventListener('submit',async e=>{
-    e.preventDefault();msg.textContent='Salvando...';const fd=new FormData(form);const payload={profissional_id:idField.value||undefined,nome:String(fd.get('nome')).trim(),email:String(fd.get('email')).trim(),telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,perfil:String(fd.get('perfil')||'profissional'),status:String(fd.get('status')||'ativo'),password:String(fd.get('password')||'')};
-    try{
-      if(idField.value){await ProtegeApp.updateProfessional(payload);msg.textContent='Profissional atualizado com sucesso.';}else{if(payload.password.length<8)throw new Error('A senha inicial deve ter pelo menos 8 caracteres.');await ProtegeApp.saveProfessional(payload);msg.textContent='Profissional e usuário de acesso criados com sucesso.';}
-      resetForm();await refresh();
-    }catch(err){console.error(err);msg.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}
-  });
-  cancel?.addEventListener('click',resetForm);
-  tbody?.addEventListener('click',async e=>{const b=e.target.closest('.edit-professional');if(b){edit(b.dataset.id);return;}const r=e.target.closest('.password-professional');if(r){const nova=prompt('Digite a nova senha (mínimo de 8 caracteres):');if(nova===null)return;if(nova.length<8){alert('A senha deve ter pelo menos 8 caracteres.');return;}try{await ProtegeApp.resetProfessionalPassword(r.dataset.id,nova);alert('Senha alterada com sucesso.');}catch(err){alert('Não foi possível alterar a senha: '+(err?.message||'erro'));}}});
-  resetForm();await refresh();
+  try{const session=await ProtegeApp.currentSession();if(session?.user?.email)document.getElementById('professionalEmail').value=session.user.email;}catch{}
+  form?.addEventListener('submit',async e=>{e.preventDefault();msg.textContent='Salvando...';const fd=new FormData(form);try{await ProtegeApp.saveProfessional({nome:String(fd.get('nome')).trim(),email:String(fd.get('email')||'').trim()||null,telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,status:String(fd.get('status')||'ativo')});msg.textContent='Profissional salvo com sucesso.';form.reset();await refresh();}catch(err){console.error(err);msg.textContent=err?.message?.includes('duplicate')?'Já existe um profissional com este e-mail.':`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}});
+  await refresh();
 }
 
 async function initDashboardCore(){
@@ -660,23 +584,13 @@ async function initAgendaPage(){
   function render(){const rows=selected(),dayDate=new Date(dateInput.value+'T12:00:00');document.getElementById('agendaDayTitle').textContent=dayDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});document.getElementById('agendaMetricDay').textContent=rows.length;document.getElementById('agendaMetricScheduled').textContent=rows.filter(x=>['agendado','confirmado'].includes(x.status)).length;document.getElementById('agendaMetricDone').textContent=rows.filter(x=>x.status==='realizado').length;document.getElementById('agendaMetricMissed').textContent=rows.filter(x=>x.status==='falta').length;list.innerHTML=rows.length?rows.map(a=>{const d=new Date(a.data_inicio),time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});let actions=`<a class="small-btn" href="familias.html?id=${encodeURIComponent(a.familia_id)}">Família</a>`;if(a.atendimento_id)actions+=`<a class="small-btn" href="atendimentos.html?id=${encodeURIComponent(a.atendimento_id)}">Abrir atendimento</a>`;else if(!['cancelado','falta','realizado'].includes(a.status))actions+=`<a class="small-btn agenda-action-success" href="atendimento.html?agenda=${encodeURIComponent(a.id)}">Iniciar atendimento</a>`;actions+=`<button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Remarcar / editar</button>`;if(a.status==='agendado')actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="confirmado">Confirmar</button>`;if(!['realizado','cancelado'].includes(a.status))actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="falta">Falta</button><button class="small-btn agenda-action-danger schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="cancelado">Cancelar</button>`;return `<article class="agenda-card" data-status="${ProtegeApp.esc(a.status)}"><div class="agenda-time"><strong>${time}</strong><span>${ProtegeApp.esc(typeText(a.tipo))}</span></div><div class="agenda-card-main"><div><span class="section-label">${ProtegeApp.esc(a.atendimento_para)}</span><h3>${ProtegeApp.esc(familyName(a))}</h3><p>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')}</p>${a.observacoes?`<p class="agenda-notes">${ProtegeApp.esc(a.observacoes)}</p>`:''}</div><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></div><div class="agenda-card-actions">${actions}</div></article>`;}).join(''):'<div class="empty-state agenda-empty">Nenhum compromisso nesta data.</div>';}
   function shift(days){const d=new Date(dateInput.value+'T12:00:00');d.setDate(d.getDate()+days);dateInput.value=toInputDate(d);render();}
   async function reload(){items=await ProtegeApp.loadSchedules();render();}
-  function openNew(){editingId=null;form.reset();document.getElementById('scheduleId').value='';document.getElementById('scheduleDialogTitle').textContent='Novo agendamento';familySel.value='';refreshTarget();if(!professionalSel.disabled)professionalSel.value='';const d=new Date(dateInput.value+'T09:00:00');setDateTimeParts('scheduleStart',d);const e=new Date(d.getTime()+60*60*1000);setDateTimeParts('scheduleEnd',e);syncHiddenDateTimes();document.getElementById('scheduleStatus').value='agendado';document.getElementById('scheduleMessage').textContent='';showScheduleModal();}
+  function openNew(){editingId=null;form.reset();document.getElementById('scheduleId').value='';document.getElementById('scheduleDialogTitle').textContent='Novo agendamento';familySel.value='';refreshTarget();professionalSel.value='';const d=new Date(dateInput.value+'T09:00:00');setDateTimeParts('scheduleStart',d);const e=new Date(d.getTime()+60*60*1000);setDateTimeParts('scheduleEnd',e);syncHiddenDateTimes();document.getElementById('scheduleStatus').value='agendado';document.getElementById('scheduleMessage').textContent='';showScheduleModal();}
   async function openEdit(id){const a=items.find(x=>x.id===id)||await ProtegeApp.getSchedule(id);editingId=id;document.getElementById('scheduleId').value=id;document.getElementById('scheduleDialogTitle').textContent='Editar / remarcar';familySel.value=a.familia_id;refreshTarget();let val=a.tipo_alvo==='familia'?`familia:${a.familia_id}`:a.tipo_alvo==='filho'&&a.filho_id?`filho:${a.filho_id}`:'';if(a.tipo_alvo==='responsavel'){const f=selectedFamily();if(a.atendimento_para===f?.responsavel2)val=`responsavel2:${a.familia_id}`;else val=`responsavel1:${a.familia_id}`;}targetSel.value=val;professionalSel.value=a.profissional_id||'';document.getElementById('scheduleType').value=a.tipo;setDateTimeParts('scheduleStart',a.data_inicio);if(a.data_fim){setDateTimeParts('scheduleEnd',a.data_fim);}else{document.getElementById('scheduleEndDate').value='';}syncHiddenDateTimes();document.getElementById('scheduleStatus').value=a.status;document.getElementById('scheduleNotes').value=a.observacoes||'';document.getElementById('scheduleMessage').textContent='';showScheduleModal();}
   async function runQuery(){const s=document.getElementById('agendaQueryStart').value,e=document.getElementById('agendaQueryEnd').value,st=document.getElementById('agendaQueryStatus').value,q=document.getElementById('agendaQuerySearch').value.trim().toLowerCase();let rows=items.filter(a=>(!s||localKey(a.data_inicio)>=s)&&(!e||localKey(a.data_inicio)<=e)&&(!st||a.status===st));if(q)rows=rows.filter(a=>[familyName(a),a.atendimento_para,a.profissionais?.nome||'',a.tipo].join(' ').toLowerCase().includes(q));rows.sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));document.getElementById('agendaQueryRows').innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_inicio)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(a.atendimento_para)}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(typeText(a.tipo))}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum compromisso encontrado.</td></tr>';}
-  try{[items,families,professionals]=await Promise.all([ProtegeApp.loadSchedules(),ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);const profile=await ProtegeApp.getCurrentProfile();const activeProfessionals=professionals.filter(p=>p.status==='ativo');if(profile?.perfil==='admin'){professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+activeProfessionals.map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+activeProfessionals.map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');}else{const own=activeProfessionals[0];professionalFilter.innerHTML=own?`<option value="${ProtegeApp.esc(own.id)}">Minha agenda · ${ProtegeApp.esc(own.nome)}</option>`:'<option value="">Meu perfil</option>';professionalFilter.value=own?.id||'';professionalFilter.disabled=true;professionalSel.innerHTML=own?`<option value="${ProtegeApp.esc(own.id)}">${ProtegeApp.esc(own.nome)}</option>`:'<option value="">Profissional não vinculado</option>';professionalSel.value=own?.id||'';professionalSel.disabled=true;}familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc([f.responsavel1,f.responsavel2].filter(Boolean).join(' / '))}</option>`).join('');const today=toInputDate(new Date());document.getElementById('agendaQueryStart').value=today;const future=new Date();future.setDate(future.getDate()+30);document.getElementById('agendaQueryEnd').value=toInputDate(future);render();}catch(err){console.error(err);list.innerHTML='<div class="empty-state">Não foi possível carregar a agenda. Execute o SQL da V12 no Supabase.</div>';}
+  try{[items,families,professionals]=await Promise.all([ProtegeApp.loadSchedules(),ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc([f.responsavel1,f.responsavel2].filter(Boolean).join(' / '))}</option>`).join('');const today=toInputDate(new Date());document.getElementById('agendaQueryStart').value=today;const future=new Date();future.setDate(future.getDate()+30);document.getElementById('agendaQueryEnd').value=toInputDate(future);render();}catch(err){console.error(err);list.innerHTML='<div class="empty-state">Não foi possível carregar a agenda. Execute o SQL da V12 no Supabase.</div>';}
   familySel.addEventListener('change',refreshTarget);dateInput.addEventListener('change',render);professionalFilter.addEventListener('change',render);document.getElementById('agendaPrevDay')?.addEventListener('click',()=>shift(-1));document.getElementById('agendaNextDay')?.addEventListener('click',()=>shift(1));document.getElementById('agendaToday')?.addEventListener('click',()=>{dateInput.value=toInputDate(new Date());render();});document.getElementById('openScheduleDialog')?.addEventListener('click',openNew);document.getElementById('closeScheduleDialog')?.addEventListener('click',()=>closeScheduleModal());document.getElementById('cancelScheduleDialog')?.addEventListener('click',()=>closeScheduleModal());document.getElementById('agendaQueryButton')?.addEventListener('click',runQuery);backdrop?.addEventListener('click',e=>{if(e.target===backdrop)closeScheduleModal();});
   document.addEventListener('click',async e=>{const edit=e.target.closest('.edit-schedule');if(edit){await openEdit(edit.dataset.id);return;}const st=e.target.closest('.schedule-status');if(st){try{await ProtegeApp.updateSchedule(st.dataset.id,{status:st.dataset.status});await reload();}catch(err){alert('Não foi possível atualizar: '+(err?.message||'erro'));}}});
   ['scheduleStartDate','scheduleStartHour','scheduleStartMinute'].forEach(id=>document.getElementById(id)?.addEventListener('change',autoFillScheduleEnd));
   form.addEventListener('submit',async e=>{e.preventDefault();const t=selectedTarget(),msg=document.getElementById('scheduleMessage');if(!familySel.value||!professionalSel.value||!t){msg.textContent='Preencha família, pessoa atendida e profissional.';return;}syncHiddenDateTimes();const start=document.getElementById('scheduleStart').value,end=document.getElementById('scheduleEnd').value;if(!start){msg.textContent='Informe data e hora de início.';return;}if(end&&new Date(end)<=new Date(start)){msg.textContent='O horário de término deve ser posterior ao início.';return;}const body={familia_id:familySel.value,filho_id:t.filho_id,profissional_id:professionalSel.value,atendimento_para:t.nome,tipo_alvo:t.tipo_alvo,tipo:document.getElementById('scheduleType').value,data_inicio:new Date(start).toISOString(),data_fim:end?new Date(end).toISOString():null,status:document.getElementById('scheduleStatus').value,observacoes:document.getElementById('scheduleNotes').value.trim()||null};try{document.getElementById('saveScheduleButton').disabled=true;if(editingId)await ProtegeApp.updateSchedule(editingId,body);else await ProtegeApp.saveSchedule(body);msg.textContent='Agendamento salvo com sucesso.';await reload();setTimeout(()=>closeScheduleModal(),350);}catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}finally{document.getElementById('saveScheduleButton').disabled=false;}});
 }
 
-
-
-async function initMyAccountPage(){
-  const profile=await ProtegeApp.getCurrentProfile();
-  document.getElementById('myAccountName').textContent=profile?.nome||'—';
-  document.getElementById('myAccountEmail').textContent=profile?.email||'—';
-  document.getElementById('myAccountRole').textContent=profile?.perfil==='admin'?'Administrador':'Profissional';
-  const form=document.getElementById('myAccountForm'),msg=document.getElementById('myAccountMessage');
-  form?.addEventListener('submit',async e=>{e.preventDefault();const p1=document.getElementById('newPassword').value,p2=document.getElementById('confirmPassword').value;if(p1.length<8){msg.textContent='A senha deve ter pelo menos 8 caracteres.';return;}if(p1!==p2){msg.textContent='As senhas não coincidem.';return;}try{msg.textContent='Alterando senha...';await ProtegeApp.changeOwnPassword(p1);form.reset();msg.textContent='Senha alterada com sucesso.';}catch(err){msg.textContent='Não foi possível alterar: '+(err?.message||'erro');}});
-}
