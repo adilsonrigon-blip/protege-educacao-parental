@@ -457,3 +457,28 @@
   .public-cadastro-v138 .registration-card-v138{padding:22px}
   .public-cadastro-v138 .registration-actions{margin:24px -22px -22px;padding:16px 22px}
 }
+
+
+/* V13.8.1 — correções após revisão geral */
+html,body{max-width:100%;overflow-x:hidden}
+.app-content,.app-main,.panel{min-width:0}
+.data-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.data-table{min-width:760px}
+.create-record-dialog[open]{display:block}
+.create-record-dialog .dialog-close{flex:0 0 auto}
+.create-dialog-shell,.cadastro-workspace-page dialog .dialog-shell{overscroll-behavior:contain}
+.create-dialog-shell input,.create-dialog-shell select,.create-dialog-shell textarea,
+.cadastro-workspace-page dialog input,.cadastro-workspace-page dialog select,
+.cadastro-workspace-page dialog textarea{max-width:100%;box-sizing:border-box}
+@media(max-width:1366px){
+  .app-main{padding-left:30px;padding-right:30px}
+  .workspace-list-panel{padding-left:22px;padding-right:22px}
+  .cadastro-workspace-page dialog.lead-dialog,
+  .cadastro-workspace-page dialog.family-dialog,
+  .cadastro-workspace-page dialog.professional-detail-dialog,
+  .create-record-dialog{width:min(820px,72vw)!important}
+}
+@media(max-width:900px){
+  .app-main{padding-left:20px;padding-right:20px}
+  .workspace-topbar{align-items:stretch}
+}

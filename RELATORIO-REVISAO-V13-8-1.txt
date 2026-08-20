@@ -1,0 +1,52 @@
+PROTEGE V13.8.1 — REVISÃO GERAL E CORREÇÕES
+
+Escopo revisado estaticamente:
+- navegação entre HTMLs
+- integridade/sintaxe do JavaScript
+- estrutura básica das páginas
+- drawers/modais do novo modelo V13.8
+- risco de submit acidental em botões
+- cache dos arquivos CSS/JS
+- overflow horizontal e comportamento em notebooks/telas menores
+
+Correções aplicadas:
+- inicialização defensiva dos drawers, evitando listeners duplicados
+- fallback de abertura/fechamento de <dialog>
+- botões sem type explícito protegidos contra submit acidental
+- hardening de overflow horizontal e tabelas
+- melhorias de responsividade para 1366px, 900px e menores
+- cache bump para V13.8.1
+
+Limitação da auditoria:
+Não foi possível executar um teste ponta-a-ponta autenticado contra o Supabase publicado a partir deste ambiente.
+Assim, regras RLS, Edge Function e operações reais de INSERT/UPDATE devem ser confirmadas no navegador após o deploy.
+
+Checklist pós-deploy:
+1. Login Administrador
+2. Dashboard e todos os links do menu
+3. ONG: Novo > Salvar > Abrir > Editar > Salvar
+4. Profissional: Novo > senha > perfil > ONG > Salvar > Abrir > Editar
+5. Família: Abrir > Editar > ONG > Salvar
+6. Famílias interessadas: Abrir e conversão
+7. Agenda: criar, editar/remarcar, falta, cancelar, iniciar atendimento
+8. Atendimento: salvar todas as etapas e gerar/imprimir relatório
+9. Relatórios: filtros e totais
+10. Login Profissional: confirmar que não enxerga/altera dados administrativos indevidos
+
+Arquivos para GitHub:
+- Substitua os HTMLs, script-v126.js e style-v126.css do pacote.
+- Não há SQL novo nesta revisão.
+- Não há alteração da Edge Function nesta revisão.
+
+Achados automáticos:
+[OK] JavaScript — Sintaxe validada: node --check sem erros
+[ATENÇÃO] cadastro.html — Link local sem arquivo: index.html
+[ATENÇÃO] cadastro.html — Link local sem arquivo: index.html
+[ATENÇÃO] cadastro.html — Link local sem arquivo: index.html
+[ATENÇÃO] cadastro.html — Link local sem arquivo: index.html
+[ATENÇÃO] cadastro.html — Link local sem arquivo: login.html
+[ATENÇÃO] cadastro.html — Link local sem arquivo: index.html
+[ATENÇÃO] cadastro.html — Link local sem arquivo: login.html
+[ATENÇÃO] Cadastros — Bloco initCadastroWorkspace não localizado: Mantido código atual
+[CORRIGIDO] ongs.html — Botões sem type explícito: Evitado submit acidental
+[CORRIGIDO] profissionais.html — Botões sem type explícito: Evitado submit acidental

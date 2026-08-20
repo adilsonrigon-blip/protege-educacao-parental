@@ -1,4 +1,4 @@
-console.info("Protege build V13.8 - novo modelo visual de cadastros");
+console.info("Protege build V13.8.1 - revisão e hardening");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
