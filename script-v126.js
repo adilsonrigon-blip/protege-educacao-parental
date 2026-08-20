@@ -1,4 +1,4 @@
-console.info("Protege build V13.6.1 - hotfix ONGs");
+console.info("Protege build V13.7 - edição de cadastros");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -76,10 +76,32 @@ const ProtegeApp = (() => {
     return data || [];
   }
 
+  async function auditPatch(patch={}) {
+    const session=await currentSession();
+    return {...patch,updated_at:new Date().toISOString(),updated_by:session?.user?.id||null,updated_by_email:session?.user?.email||null};
+  }
+
   async function updateFamilyOng(id, ong_id) {
     if (!configured) throw new Error('Supabase não configurado.');
-    const { data, error } = await db.from('familias').update({ong_id:ong_id||null,updated_at:new Date().toISOString()}).eq('id',id).select('*, filhos(*), ongs(id,nome,status)').single();
+    const body=await auditPatch({ong_id:ong_id||null});
+    const { data, error } = await db.from('familias').update(body).eq('id',id).select('*, filhos(*), ongs(id,nome,status)').single();
     if (error) throw error;
+    return data;
+  }
+
+  async function updateFamily(id, patch) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const body=await auditPatch(patch);
+    const {data,error}=await db.from('familias').update(body).eq('id',id).select('*, filhos(*), ongs(id,nome,status)').single();
+    if(error) throw error;
+    return data;
+  }
+
+  async function updateChild(id, patch) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const body=await auditPatch(patch);
+    const {data,error}=await db.from('filhos').update(body).eq('id',id).select().single();
+    if(error) throw error;
     return data;
   }
 
@@ -145,6 +167,10 @@ const ProtegeApp = (() => {
 
   async function updateProfessionalOng(profissional_id, ong_id) {
     return manageProfessionalAccess({action:'set-ong', profissional_id, ong_id:ong_id||null});
+  }
+
+  async function updateProfessionalDetails(profissional_id, patch) {
+    return manageProfessionalAccess({action:'update-details', profissional_id, ...patch});
   }
 
   async function loadAttendances(familyId=null, limit=100) {
@@ -220,7 +246,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,updateFamily,updateChild,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,updateProfessionalDetails,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -534,7 +560,22 @@ async function initFamiliesPage() {
       <div class="detail-card"><span>Contato</span><b>${ProtegeApp.esc(f.telefone||'—')}</b><small>${ProtegeApp.esc(f.email||'Sem e-mail')}</small></div>
       <div class="detail-card"><span>ONG vinculada</span><b>${ProtegeApp.esc(f.ongs?.nome||'Nenhuma')}</b></div>
       <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc(f.logradouro||'')}${f.numero?', '+ProtegeApp.esc(f.numero):''}${f.complemento?' · '+ProtegeApp.esc(f.complemento):''}</b><small>${ProtegeApp.esc(f.bairro||'')} · ${ProtegeApp.esc(f.cidade||'')}${f.estado?'/'+ProtegeApp.esc(f.estado):''} · CEP ${ProtegeApp.esc(f.cep||'')}</small></div>
-      <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade??'—'} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
+      <div class="detail-card"><span>Data de cadastro</span><b>${ProtegeApp.formatDate(f.created_at)}</b></div>
+      <div class="detail-card"><span>Última alteração</span><b>${ProtegeApp.formatDate(f.updated_at)}</b><small>${ProtegeApp.esc(f.updated_by_email||'—')}</small></div>
+      <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade??'—'} ano(s) · cadastro ${ProtegeApp.formatDate(c.created_at)}</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
+  }
+  function fillFamilyEdit(f){
+    const form=document.getElementById('familyEditForm'); if(!form)return;
+    ['responsavel1','responsavel2','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','status','observacoes'].forEach(k=>{
+      const el=form.elements[k]; if(el) el.value=f[k]??'';
+    });
+    const box=document.getElementById('familyChildrenEdit');
+    box.innerHTML=childrenOf(f).length?childrenOf(f).map(c=>`<div class="child-edit-row" data-child-id="${ProtegeApp.esc(c.id)}"><input class="child-edit-name" value="${ProtegeApp.esc(c.nome||'')}" placeholder="Nome"><input class="child-edit-age" type="number" min="0" max="99" value="${ProtegeApp.esc(c.idade??'')}" placeholder="Idade"><small>Cadastrado em ${ProtegeApp.formatDate(c.created_at)}</small></div>`).join(''):'<div class="empty-state">Nenhum filho cadastrado.</div>';
+  }
+  function setFamilyEditMode(editing){
+    document.getElementById('familyDetails').hidden=editing;
+    document.getElementById('familyEditSection').hidden=!editing;
+    document.getElementById('editFamilyBtn').hidden=editing;
   }
   async function renderHistory(f){
     const box=document.getElementById('familyHistory');
@@ -576,6 +617,28 @@ async function initFamiliesPage() {
       const idx=families.findIndex(x=>x.id===activeFamily.id);if(idx>=0)families[idx]=updated;
       activeFamily=updated;renderDetails(updated);render();m.textContent='ONG vinculada atualizada.';
     }catch(err){console.error(err);m.textContent='Não foi possível atualizar: '+(err?.message||'erro inesperado');}
+    finally{b.disabled=false;}
+  });
+
+  document.getElementById('editFamilyBtn')?.addEventListener('click',()=>{if(activeFamily){fillFamilyEdit(activeFamily);setFamilyEditMode(true);}});
+  document.getElementById('cancelFamilyEdit')?.addEventListener('click',()=>setFamilyEditMode(false));
+  document.getElementById('familyEditForm')?.addEventListener('submit',async e=>{
+    e.preventDefault(); if(!activeFamily)return;
+    const m=document.getElementById('familyEditMessage'),b=document.getElementById('saveFamilyEdit'),fd=new FormData(e.currentTarget);
+    b.disabled=true;m.textContent='Salvando alterações...';
+    try{
+      const patch={};
+      ['responsavel1','responsavel2','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','status','observacoes'].forEach(k=>patch[k]=String(fd.get(k)||'').trim()||null);
+      if(!patch.responsavel1||!patch.telefone) throw new Error('Responsável principal e telefone são obrigatórios.');
+      patch.estado=patch.estado?patch.estado.toUpperCase():null;
+      await ProtegeApp.updateFamily(activeFamily.id,patch);
+      for(const row of document.querySelectorAll('#familyChildrenEdit .child-edit-row')){
+        const nome=row.querySelector('.child-edit-name').value.trim(), age=row.querySelector('.child-edit-age').value;
+        if(nome) await ProtegeApp.updateChild(row.dataset.childId,{nome,idade:age===''?null:Number(age)});
+      }
+      families=await ProtegeApp.loadFamilies(); activeFamily=families.find(x=>x.id===activeFamily.id);
+      render();renderDetails(activeFamily);fillFamilyEdit(activeFamily);setFamilyEditMode(false);m.textContent='Dados atualizados com sucesso.';
+    }catch(err){m.textContent='Não foi possível salvar: '+(err?.message||'erro inesperado');}
     finally{b.disabled=false;}
   });
 
@@ -629,9 +692,9 @@ async function initOngsPage(){
     tbody.innerHTML=rows.length?rows.map(o=>`<tr>
       <td><b>${ProtegeApp.esc(o.nome)}</b></td><td>${ProtegeApp.esc(o.cnpj||'—')}</td>
       <td>${ProtegeApp.esc(o.responsavel||'—')}</td><td>${ProtegeApp.esc(o.telefone||'—')}</td>
-      <td>${ProtegeApp.esc(o.email||'—')}</td><td><span class="status-pill ${o.status==='ativa'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(o.status)}</span></td>
+      <td>${ProtegeApp.esc(o.email||'—')}</td><td>${ProtegeApp.formatDate(o.created_at)}</td><td><span class="status-pill ${o.status==='ativa'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(o.status)}</span></td>
       <td><button class="small-btn view-ong" data-id="${ProtegeApp.esc(o.id)}">Abrir</button></td>
-    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhuma ONG encontrada.</td></tr>';
+    </tr>`).join(''):'<tr><td colspan="8" class="empty-state">Nenhuma ONG encontrada.</td></tr>';
   }
   async function refresh(){items=await ProtegeApp.loadOngs();render();}
   function open(id){
@@ -643,8 +706,13 @@ async function initOngsPage(){
       <div class="detail-card"><span>Telefone</span><b>${ProtegeApp.esc(o.telefone||'—')}</b></div>
       <div class="detail-card"><span>E-mail</span><b>${ProtegeApp.esc(o.email||'—')}</b></div>
       <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc([o.logradouro,o.numero].filter(Boolean).join(', ')||'—')}</b><small>${ProtegeApp.esc([o.bairro,o.cidade&&o.estado?o.cidade+'/'+o.estado:o.cidade||o.estado,o.cep].filter(Boolean).join(' · '))}</small></div>
-      <div class="detail-card detail-wide"><span>Observações</span><b>${ProtegeApp.esc(o.observacoes||'—')}</b></div>`;
+      <div class="detail-card detail-wide"><span>Observações</span><b>${ProtegeApp.esc(o.observacoes||'—')}</b></div>
+      <div class="detail-card"><span>Data de cadastro</span><b>${ProtegeApp.formatDate(o.created_at)}</b></div>
+      <div class="detail-card"><span>Última alteração</span><b>${ProtegeApp.formatDate(o.updated_at)}</b><small>${ProtegeApp.esc(o.updated_by_email||'—')}</small></div>`;
     document.getElementById('ongDetailStatus').value=o.status||'ativa';
+    const ef=document.getElementById('ongEditForm');
+    if(ef){['nome','cnpj','responsavel','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','observacoes','status'].forEach(k=>{if(ef.elements[k])ef.elements[k].value=o[k]??'';});}
+    document.getElementById('ongEditSection').hidden=true; document.getElementById('ongDetailGrid').hidden=false; document.getElementById('editOngBtn').hidden=false;
     document.getElementById('ongDetailMessage').textContent='';
     dialog.showModal();
   }
@@ -676,7 +744,19 @@ async function initOngsPage(){
     catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}
     finally{b.disabled=false;}
   });
-  try{await refresh();}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as ONGs. Execute o SQL da V13.6.</td></tr>';}
+
+  document.getElementById('editOngBtn')?.addEventListener('click',()=>{document.getElementById('ongDetailGrid').hidden=true;document.getElementById('ongEditSection').hidden=false;document.getElementById('editOngBtn').hidden=true;});
+  document.getElementById('cancelOngEdit')?.addEventListener('click',()=>{document.getElementById('ongDetailGrid').hidden=false;document.getElementById('ongEditSection').hidden=true;document.getElementById('editOngBtn').hidden=false;});
+  document.getElementById('ongEditForm')?.addEventListener('submit',async e=>{
+    e.preventDefault();if(!active)return;const fd=new FormData(e.currentTarget),m=document.getElementById('ongDetailMessage'),b=document.getElementById('saveOngEdit');
+    const patch={};['nome','cnpj','responsavel','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','observacoes','status'].forEach(k=>patch[k]=String(fd.get(k)||'').trim()||null);
+    if(!patch.nome){m.textContent='Informe o nome da ONG.';return;} patch.estado=patch.estado?patch.estado.toUpperCase():null;
+    b.disabled=true;m.textContent='Salvando alterações...';
+    try{await ProtegeApp.updateOng(active.id,patch);await refresh();active=items.find(x=>x.id===active.id);m.textContent='ONG atualizada com sucesso.';setTimeout(()=>dialog.close(),450);}
+    catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}finally{b.disabled=false;}
+  });
+
+  try{await refresh();}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="8" class="empty-state">Não foi possível carregar as ONGs. Execute o SQL da V13.6.</td></tr>';}
 }
 
 async function initProfessionalsPage(){
@@ -717,10 +797,11 @@ async function initProfessionalsPage(){
       <td>${ProtegeApp.esc(p.telefone||'—')}</td>
       <td>${ProtegeApp.esc(p.especialidade||'—')}</td>
       <td>${ProtegeApp.esc(p.ongs?.nome||'—')}</td>
+      <td>${ProtegeApp.formatDate(p.created_at)}</td>
       <td><span class="access-pill ${p.perfil==='admin'?'access-admin':'access-professional'}">${p.perfil==='admin'?'Administrador':'Profissional'}</span></td>
       <td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td>
       <td><button type="button" class="small-btn view-professional" data-id="${ProtegeApp.esc(p.id)}">Abrir</button></td>
-    </tr>`).join(''):'<tr><td colspan="8" class="empty-state">Nenhum profissional encontrado.</td></tr>';
+    </tr>`).join(''):'<tr><td colspan="9" class="empty-state">Nenhum profissional encontrado.</td></tr>';
   }
 
   async function refresh(){
@@ -744,7 +825,11 @@ async function initProfessionalsPage(){
       <div class="detail-card"><span>Especialidade / função</span><b>${ProtegeApp.esc(p.especialidade||'—')}</b></div>
       <div class="detail-card"><span>ONG vinculada</span><b>${ProtegeApp.esc(p.ongs?.nome||'Nenhuma')}</b></div>
       <div class="detail-card"><span>Perfil atual</span><b>${p.perfil==='admin'?'Administrador':'Profissional'}</b></div>
-      <div class="detail-card"><span>Status atual</span><b>${ProtegeApp.esc(p.status||'—')}</b></div>`;
+      <div class="detail-card"><span>Status atual</span><b>${ProtegeApp.esc(p.status||'—')}</b></div>
+      <div class="detail-card"><span>Data de cadastro</span><b>${ProtegeApp.formatDate(p.created_at)}</b></div>
+      <div class="detail-card"><span>Última alteração</span><b>${ProtegeApp.formatDate(p.updated_at)}</b><small>${ProtegeApp.esc(p.updated_by_email||'—')}</small></div>`;
+    const df=document.getElementById('professionalEditForm');if(df){df.elements.nome.value=p.nome||'';df.elements.email.value=p.email||'';df.elements.telefone.value=p.telefone||'';df.elements.especialidade.value=p.especialidade||'';df.elements.ong_id.value=p.ong_id||'';}
+    document.getElementById('professionalEditSection').hidden=true;document.getElementById('professionalDetailCards').hidden=false;document.getElementById('editProfessionalBtn').hidden=false;
     document.getElementById('detailProfessionalProfile').value=p.perfil==='admin'?'admin':'profissional';
     document.getElementById('detailProfessionalStatus').value=p.status==='inativo'?'inativo':'ativo';
     document.getElementById('detailProfessionalOng').value=p.ong_id||'';
@@ -804,6 +889,17 @@ async function initProfessionalsPage(){
   document.getElementById('closeProfessionalDetail')?.addEventListener('click',()=>dialog.close());
   dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 
+
+  document.getElementById('editProfessionalBtn')?.addEventListener('click',()=>{document.getElementById('professionalDetailCards').hidden=true;document.getElementById('professionalEditSection').hidden=false;document.getElementById('editProfessionalBtn').hidden=true;});
+  document.getElementById('cancelProfessionalEdit')?.addEventListener('click',()=>{document.getElementById('professionalDetailCards').hidden=false;document.getElementById('professionalEditSection').hidden=true;document.getElementById('editProfessionalBtn').hidden=false;});
+  document.getElementById('professionalEditForm')?.addEventListener('submit',async e=>{
+    e.preventDefault();if(!activeProfessional)return;const fd=new FormData(e.currentTarget),m=document.getElementById('professionalEditMessage'),b=document.getElementById('saveProfessionalEdit');
+    const patch={nome:String(fd.get('nome')||'').trim(),email:String(fd.get('email')||'').trim().toLowerCase(),telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,ong_id:String(fd.get('ong_id')||'')||null};
+    if(!patch.nome||!patch.email){m.textContent='Nome e e-mail são obrigatórios.';return;}b.disabled=true;m.textContent='Salvando alterações...';
+    try{await ProtegeApp.updateProfessionalDetails(activeProfessional.id,patch);m.textContent='Dados atualizados com sucesso.';await refresh();setTimeout(()=>dialog.close(),450);}
+    catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}finally{b.disabled=false;}
+  });
+
   document.getElementById('saveProfessionalAccess')?.addEventListener('click',async()=>{
     if(!activeProfessional)return;
     const button=document.getElementById('saveProfessionalAccess');
@@ -845,7 +941,7 @@ async function initProfessionalsPage(){
     ongs=await ProtegeApp.loadOngs();
     const options='<option value="">Nenhuma ONG</option>'+ongs.filter(o=>o.status==='ativa').map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
     document.getElementById('professionalOng').innerHTML=options;
-    document.getElementById('detailProfessionalOng').innerHTML=options;
+    document.getElementById('detailProfessionalOng').innerHTML=options; document.getElementById('editProfessionalOng').innerHTML=options;
     document.getElementById('professionalOngFilter').innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
   }catch(err){console.warn('ONGs indisponíveis',err);}
   document.getElementById('saveProfessionalOng')?.addEventListener('click',async()=>{

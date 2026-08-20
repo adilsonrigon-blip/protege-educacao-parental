@@ -1,0 +1,20 @@
+PROTEGE V13.7 - EDIÇÃO DE CADASTROS
+
+NOVO:
+- Família: botão Editar dados na ficha.
+- Filhos: nome e idade editáveis dentro da ficha da família.
+- Profissionais: botão Editar dados cadastrais.
+- ONGs: botão Editar dados.
+- Data de cadastro exibida em Famílias, Profissionais e ONGs.
+- Última alteração e usuário/e-mail responsável exibidos nas fichas.
+- Perfil/status/senha do profissional continuam em controles separados.
+
+ORDEM DE ATUALIZAÇÃO:
+1) Supabase SQL Editor: execute supabase-v13-7-edicao-cadastros.sql
+2) Supabase Edge Functions > administrar-profissional > Code:
+   substitua index.ts pelo conteúdo de administrar-profissional-index-v137.ts e clique Deploy updates.
+3) GitHub: substitua os HTMLs, script-v126.js e style-v126.css deste pacote.
+4) Aguarde GitHub Pages e pressione Ctrl+F5.
+
+OBSERVAÇÃO:
+A V13.7 evolui a V13.6.1 e mantém as funcionalidades anteriores.

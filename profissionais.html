@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=1361">
+  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=137">
 </head>
 <body class="app-page" data-requires-auth="true">
   <aside class="sidebar"><div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div><nav>
@@ -45,8 +45,8 @@
       <div class="professionals-result-bar"><span id="professionalResultCount">0 profissionais</span></div>
       <div class="table-responsive">
         <table class="data-table" id="professionalsTable">
-          <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>ONG</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody><tr><td colspan="8" class="empty-state">Carregando...</td></tr></tbody>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>ONG</th><th>Cadastro</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="9" class="empty-state">Carregando...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -59,6 +59,13 @@
         <button type="button" id="closeProfessionalDetail" class="modal-close" aria-label="Fechar">×</button>
       </div>
       <div id="professionalDetailCards" class="detail-grid"></div>
+<section id="professionalEditSection" class="record-edit-section" hidden><form id="professionalEditForm" class="form-grid record-edit-form">
+<label>Nome completo<input name="nome" required></label><label>E-mail<input name="email" type="email" required></label>
+<label>Telefone<input name="telefone"></label><label>Especialidade / função<input name="especialidade"></label>
+<label>ONG vinculada<select name="ong_id" id="editProfessionalOng"><option value="">Nenhuma ONG</option></select></label>
+<div class="edit-actions full-field"><button id="cancelProfessionalEdit" class="btn btn-secondary" type="button">Cancelar</button><button id="saveProfessionalEdit" class="btn btn-primary" type="submit">Salvar alterações</button></div>
+<p id="professionalEditMessage" class="form-message full-field"></p></form></section>
+<div class="dialog-actions"><button id="editProfessionalBtn" class="btn btn-secondary" type="button">Editar dados cadastrais</button></div>
       <div class="professional-admin-tools">
         <div>
           <span class="section-label">ACESSO</span>
@@ -90,5 +97,5 @@
       </div>
     </div>
   </dialog>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=1361"></script><script src="script-v126.js?v=1361"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=137"></script><script src="script-v126.js?v=137"></script>
 </body></html>
