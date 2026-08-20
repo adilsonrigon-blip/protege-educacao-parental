@@ -1,0 +1,25 @@
+PROTEGE V13.3 - RELATÓRIOS GERENCIAIS
+
+Novidades:
+- Menu Relatórios funcional.
+- Filtros por período, profissional, família e status.
+- Indicadores: famílias, profissionais, realizados, agendados, faltas e cancelados.
+- Gráfico por status.
+- Gráfico de atendimentos realizados por profissional.
+- Tabela consolidada de atendimentos + agenda.
+- Exportação CSV.
+- Impressão / salvar como PDF pelo navegador.
+
+NO GITHUB:
+Substitua todos os arquivos HTML incluídos neste pacote e também:
+- script-v126.js
+- style-v126.css
+
+Adicione o novo arquivo:
+- relatorios.html
+
+Não precisa executar SQL novo.
+Não altere a Edge Function.
+
+Depois do Commit, aguarde a publicação e pressione Ctrl+F5.
+Teste: Dashboard > Relatórios.

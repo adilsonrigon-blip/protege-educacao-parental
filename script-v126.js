@@ -1,4 +1,4 @@
-console.info("Protege build V13.2 - consulta de profissionais");
+console.info("Protege build V13.3 - relatórios gerenciais");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -249,6 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('dashboardAttendances')) await initDashboardCore();
   if (document.getElementById('attendancesTable')) await initAttendancesPage();
   if (document.getElementById('agendaDayList')) await initAgendaPage();
+  if (document.getElementById('reportsTable')) await initReportsPage();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -679,6 +680,144 @@ async function initAttendancesPage(){
     finally{saveBtn.disabled=false;saveBtn.textContent='+ Adicionar evolução';}
   });
   search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+}
+
+
+async function initReportsPage(){
+  const startInput=document.getElementById('reportStartDate');
+  const endInput=document.getElementById('reportEndDate');
+  const professionalFilter=document.getElementById('reportProfessional');
+  const familyFilter=document.getElementById('reportFamily');
+  const statusFilter=document.getElementById('reportStatus');
+  const tableBody=document.querySelector('#reportsTable tbody');
+  const countEl=document.getElementById('reportResultCount');
+  let families=[],professionals=[],attendances=[],schedules=[],currentRows=[];
+
+  const familyNameFrom = r => {
+    const f=r.familias||{};
+    return [f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';
+  };
+  const attendanceTarget = a => a?.dados?.membro_atendido||a?.filhos?.nome||(a.tipo_alvo==='familia'?'Família completa':a.tipo_alvo==='responsaveis'?'Responsável(is)':'—');
+  const statusText = s => ({realizado:'Realizado',agendado:'Agendado',confirmado:'Confirmado',rascunho:'Rascunho',falta:'Falta',cancelado:'Cancelado'})[s]||s||'—';
+  const statusClass = s => s==='realizado'?'status-aprovado':(['agendado','confirmado'].includes(s)?'status-em_contato':(['falta','cancelado'].includes(s)?'status-nao_aprovado':'status-novo'));
+  const localDateKey = v => {
+    if(!v)return '';
+    const d=new Date(v), y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  };
+  const labelFamily = f => [f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';
+
+  function buildRows(){
+    const attendanceRows=attendances.map(a=>({
+      id:a.id,source:'atendimento',date:a.data_hora,family_id:a.familia_id,professional_id:a.profissional_id,
+      family:familyNameFrom(a),target:attendanceTarget(a),professional:a.profissionais?.nome||'—',status:a.status||'realizado',
+      type:'Atendimento',href:`atendimentos.html?id=${encodeURIComponent(a.id)}`
+    }));
+    const scheduleRows=schedules.filter(a=>!(a.status==='realizado'&&a.atendimento_id)).map(a=>({
+      id:a.id,source:'agenda',date:a.data_inicio,family_id:a.familia_id,professional_id:a.profissional_id,
+      family:familyNameFrom(a),target:a.atendimento_para||'—',professional:a.profissionais?.nome||'—',status:a.status||'agendado',
+      type:a.tipo||'Agenda',href:'agenda.html'
+    }));
+    return [...attendanceRows,...scheduleRows].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  }
+
+  function baseFilteredRows(ignoreStatus=false){
+    const start=startInput.value,end=endInput.value,pid=professionalFilter.value,fid=familyFilter.value,st=statusFilter.value;
+    return buildRows().filter(r=>{
+      const key=localDateKey(r.date);
+      if(start&&key<start)return false;
+      if(end&&key>end)return false;
+      if(pid&&r.professional_id!==pid)return false;
+      if(fid&&r.family_id!==fid)return false;
+      if(!ignoreStatus&&st){
+        if(st==='agendado'&&!['agendado','confirmado'].includes(r.status))return false;
+        else if(st!=='agendado'&&r.status!==st)return false;
+      }
+      return true;
+    });
+  }
+
+  function setMetrics(){
+    const rows=baseFilteredRows(true);
+    const selectedFamily=familyFilter.value;
+    const selectedProfessional=professionalFilter.value;
+    const familyIds=new Set(rows.map(r=>r.family_id).filter(Boolean));
+    const professionalIds=new Set(rows.map(r=>r.professional_id).filter(Boolean));
+    document.getElementById('reportMetricFamilies').textContent=selectedFamily?'1':(familyIds.size||families.length);
+    document.getElementById('reportMetricProfessionals').textContent=selectedProfessional?'1':(professionalIds.size||professionals.filter(p=>p.status==='ativo').length);
+    document.getElementById('reportMetricDone').textContent=rows.filter(r=>r.status==='realizado').length;
+    document.getElementById('reportMetricScheduled').textContent=rows.filter(r=>['agendado','confirmado'].includes(r.status)).length;
+    document.getElementById('reportMetricMissed').textContent=rows.filter(r=>r.status==='falta').length;
+    document.getElementById('reportMetricCanceled').textContent=rows.filter(r=>r.status==='cancelado').length;
+  }
+
+  function renderStatusChart(rows){
+    const groups=[['Realizados','realizado'],['Agendados','agendado'],['Faltas','falta'],['Cancelados','cancelado']];
+    const values=groups.map(([label,key])=>[label,key==='agendado'?rows.filter(r=>['agendado','confirmado'].includes(r.status)).length:rows.filter(r=>r.status===key).length]);
+    const max=Math.max(1,...values.map(x=>x[1]));
+    document.getElementById('reportStatusChart').innerHTML=values.map(([label,val])=>`<div class="report-bar-row"><span>${ProtegeApp.esc(label)}</span><div class="report-bar-track"><i style="width:${Math.round(val/max*100)}%"></i></div><b>${val}</b></div>`).join('');
+  }
+
+  function renderProfessionalChart(rows){
+    const map=new Map();
+    rows.filter(r=>r.status==='realizado').forEach(r=>map.set(r.professional,(map.get(r.professional)||0)+1));
+    const values=[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const max=Math.max(1,...values.map(x=>x[1]));
+    document.getElementById('reportProfessionalChart').innerHTML=values.length?values.map(([label,val])=>`<div class="report-bar-row"><span title="${ProtegeApp.esc(label)}">${ProtegeApp.esc(label)}</span><div class="report-bar-track"><i style="width:${Math.round(val/max*100)}%"></i></div><b>${val}</b></div>`).join(''):'<div class="empty-state report-chart-empty">Nenhum atendimento realizado no período.</div>';
+  }
+
+  function render(){
+    setMetrics();
+    currentRows=baseFilteredRows(false);
+    if(countEl)countEl.textContent=`${currentRows.length} ${currentRows.length===1?'registro':'registros'}`;
+    tableBody.innerHTML=currentRows.length?currentRows.map(r=>`<tr>
+      <td>${ProtegeApp.formatDate(r.date)}</td>
+      <td><b>${ProtegeApp.esc(r.family)}</b></td>
+      <td>${ProtegeApp.esc(r.target)}</td>
+      <td>${ProtegeApp.esc(r.professional)}</td>
+      <td>${ProtegeApp.esc(r.type)}</td>
+      <td><span class="status-pill ${statusClass(r.status)}">${ProtegeApp.esc(statusText(r.status))}</span></td>
+      <td><a class="small-btn" href="${ProtegeApp.esc(r.href)}">Abrir</a></td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum registro encontrado para os filtros selecionados.</td></tr>';
+    renderStatusChart(currentRows);
+    renderProfessionalChart(currentRows);
+  }
+
+  function defaultDates(){
+    const now=new Date();
+    const first=new Date(now.getFullYear(),now.getMonth(),1);
+    const last=new Date(now.getFullYear(),now.getMonth()+1,0);
+    const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    startInput.value=key(first); endInput.value=key(last);
+  }
+
+  function exportCsv(){
+    const header=['Data','Família','Atendimento para','Profissional','Tipo','Status'];
+    const rows=currentRows.map(r=>[ProtegeApp.formatDate(r.date),r.family,r.target,r.professional,r.type,statusText(r.status)]);
+    const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+    const csv='\ufeff'+[header,...rows].map(row=>row.map(q).join(';')).join('\r\n');
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=`relatorio-protege-${startInput.value||'inicio'}-${endInput.value||'fim'}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }
+
+  try{
+    defaultDates();
+    [families,professionals,attendances,schedules]=await Promise.all([
+      ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals(),ProtegeApp.loadAttendances(null,2000),ProtegeApp.loadSchedules()
+    ]);
+    professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+professionals.map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
+    familyFilter.innerHTML='<option value="">Todas as famílias</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(labelFamily(f))}</option>`).join('');
+    render();
+  }catch(err){
+    console.error(err);
+    tableBody.innerHTML=`<tr><td colspan="7" class="empty-state">Não foi possível carregar os relatórios: ${ProtegeApp.esc(err?.message||'erro inesperado')}</td></tr>`;
+  }
+
+  [startInput,endInput,professionalFilter,familyFilter,statusFilter].forEach(el=>el?.addEventListener('change',render));
+  document.getElementById('reportApplyFilters')?.addEventListener('click',render);
+  document.getElementById('reportClearFilters')?.addEventListener('click',()=>{defaultDates();professionalFilter.value='';familyFilter.value='';statusFilter.value='';render();});
+  document.getElementById('reportExportCsv')?.addEventListener('click',exportCsv);
+  document.getElementById('reportPrint')?.addEventListener('click',()=>window.print());
 }
 
 function formDataToObject(form){
