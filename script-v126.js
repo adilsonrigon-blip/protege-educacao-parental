@@ -1,4 +1,4 @@
-console.info("Protege build V13.5 - layout profissional de impressão/PDF");
+console.info("Protege build V13.6 - ONGs vinculadas");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -45,11 +45,42 @@ const ProtegeApp = (() => {
     if (error) throw error;
   }
 
-  async function loadFamilies() {
+  async function loadOngs(activeOnly=false) {
     if (!configured) return [];
-    const { data, error } = await db.from('familias').select('*, filhos(*)').order('created_at',{ascending:false});
+    let q = db.from('ongs').select('*').order('nome',{ascending:true});
+    if (activeOnly) q = q.eq('status','ativa');
+    const { data, error } = await q;
     if (error) throw error;
     return data || [];
+  }
+
+  async function saveOng(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const body = {...payload, updated_at:new Date().toISOString()};
+    const { data, error } = await db.from('ongs').insert(body).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function updateOng(id, patch) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const { data, error } = await db.from('ongs').update({...patch,updated_at:new Date().toISOString()}).eq('id',id).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function loadFamilies() {
+    if (!configured) return [];
+    const { data, error } = await db.from('familias').select('*, filhos(*), ongs(id,nome,status)').order('created_at',{ascending:false});
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function updateFamilyOng(id, ong_id) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const { data, error } = await db.from('familias').update({ong_id:ong_id||null,updated_at:new Date().toISOString()}).eq('id',id).select('*, filhos(*), ongs(id,nome,status)').single();
+    if (error) throw error;
+    return data;
   }
 
   async function convertLead(id) {
@@ -61,7 +92,7 @@ const ProtegeApp = (() => {
 
   async function loadProfessionals() {
     if (!configured) return [];
-    const { data, error } = await db.from('profissionais').select('*').order('nome',{ascending:true});
+    const { data, error } = await db.from('profissionais').select('*, ongs(id,nome,status)').order('nome',{ascending:true});
     if (error) throw error;
     return data || [];
   }
@@ -112,9 +143,13 @@ const ProtegeApp = (() => {
     return manageProfessionalAccess({action:'reset-password', profissional_id, password});
   }
 
+  async function updateProfessionalOng(profissional_id, ong_id) {
+    return manageProfessionalAccess({action:'set-ong', profissional_id, ong_id:ong_id||null});
+  }
+
   async function loadAttendances(familyId=null, limit=100) {
     if (!configured) return [];
-    let q = db.from('atendimentos').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').order('data_hora',{ascending:false}).limit(limit);
+    let q = db.from('atendimentos').select('*, profissionais(nome,ong_id,ongs(id,nome)), filhos(nome), familias(responsavel1,responsavel2,ong_id,ongs(id,nome))').order('data_hora',{ascending:false}).limit(limit);
     if (familyId) q = q.eq('familia_id',familyId);
     const { data, error } = await q;
     if (error) throw error;
@@ -148,7 +183,7 @@ const ProtegeApp = (() => {
 
   async function loadSchedules(start=null,end=null) {
     if (!configured) return [];
-    let q=db.from('agenda').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').order('data_inicio',{ascending:true});
+    let q=db.from('agenda').select('*, profissionais(nome,ong_id,ongs(id,nome)), filhos(nome), familias(responsavel1,responsavel2,ong_id,ongs(id,nome))').order('data_inicio',{ascending:true});
     if(start) q=q.gte('data_inicio',start);
     if(end) q=q.lt('data_inicio',end);
     const {data,error}=await q; if(error) throw error; return data||[];
@@ -156,7 +191,7 @@ const ProtegeApp = (() => {
 
   async function getSchedule(id) {
     if (!configured) return null;
-    const {data,error}=await db.from('agenda').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').eq('id',id).single();
+    const {data,error}=await db.from('agenda').select('*, profissionais(nome,ong_id,ongs(id,nome)), filhos(nome), familias(responsavel1,responsavel2,ong_id,ongs(id,nome))').eq('id',id).single();
     if(error) throw error; return data;
   }
 
@@ -185,7 +220,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -245,6 +280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('recentLeads')) await initDashboardLeads();
   if (document.getElementById('leadsTable')) await initLeadsPage();
   if (document.getElementById('familiesTable')) await initFamiliesPage();
+  if (document.getElementById('ongsTable')) await initOngsPage();
   if (document.getElementById('professionalsTable')) await initProfessionalsPage();
   if (document.getElementById('dashboardAttendances')) await initDashboardCore();
   if (document.getElementById('attendancesTable')) await initAttendancesPage();
@@ -463,51 +499,92 @@ function writeProtegePrintWindow(w,content){
 async function initFamiliesPage() {
   const tbody=document.querySelector('#familiesTable tbody');
   const search=document.getElementById('familySearch');
+  const ongFilter=document.getElementById('familyOngFilter');
   const dialog=document.getElementById('familyDialog');
-  let families=[],activeFamily=null;
+  let families=[],ongs=[],activeFamily=null;
 
-  function childrenOf(x){ return x.filhos || []; }
+  function childrenOf(x){return x.filhos||[];}
+  function familyName(f){return [f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';}
+  function filtered(){
+    const q=(search?.value||'').trim().toLowerCase(),oid=ongFilter?.value||'';
+    return families.filter(f=>{
+      if(oid&&f.ong_id!==oid)return false;
+      if(!q)return true;
+      return [f.responsavel1,f.responsavel2,f.telefone,f.email,f.cidade,f.estado,f.ongs?.nome,...childrenOf(f).map(c=>c.nome)]
+        .filter(Boolean).join(' ').toLowerCase().includes(q);
+    });
+  }
   function render(){
-    const q=(search?.value||'').toLowerCase().trim();
-    const items=families.filter(x=>!q||[x.responsavel1,x.responsavel2,x.telefone,x.email,x.cidade,...childrenOf(x).map(c=>c.nome)].filter(Boolean).join(' ').toLowerCase().includes(q));
-    tbody.innerHTML=items.length?items.map(x=>`<tr>
-      <td>${ProtegeApp.formatDate(x.created_at)}</td><td><b>${ProtegeApp.esc(x.responsavel1)}</b>${x.responsavel2?`<small>${ProtegeApp.esc(x.responsavel2)}</small>`:''}</td>
-      <td>${ProtegeApp.esc(x.telefone)}${x.email?`<small>${ProtegeApp.esc(x.email)}</small>`:''}</td><td>${childrenOf(x).length}</td>
-      <td>${ProtegeApp.esc(x.cidade||'')}/${ProtegeApp.esc(x.estado||'')}</td><td><span class="status-pill status-aprovado">${ProtegeApp.esc(x.status||'ativa')}</span></td>
-      <td><button class="small-btn view-family" data-id="${ProtegeApp.esc(x.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhuma família convertida ainda.</td></tr>';
+    const rows=filtered();
+    tbody.innerHTML=rows.length?rows.map(f=>`<tr>
+      <td>${ProtegeApp.formatDate(f.created_at)}</td>
+      <td><b>${ProtegeApp.esc(f.responsavel1)}</b>${f.responsavel2?`<small>${ProtegeApp.esc(f.responsavel2)}</small>`:''}</td>
+      <td>${ProtegeApp.esc(f.telefone||'—')}${f.email?`<small>${ProtegeApp.esc(f.email)}</small>`:''}</td>
+      <td>${childrenOf(f).length}</td>
+      <td>${ProtegeApp.esc(f.cidade||'—')}${f.estado?'/'+ProtegeApp.esc(f.estado):''}</td>
+      <td>${ProtegeApp.esc(f.ongs?.nome||'—')}</td>
+      <td><span class="status-pill status-aprovado">${ProtegeApp.esc(f.status||'ativa')}</span></td>
+      <td><button class="small-btn view-family" data-id="${ProtegeApp.esc(f.id)}">Abrir</button></td>
+    </tr>`).join(''):'<tr><td colspan="8" class="empty-state">Nenhuma família encontrada.</td></tr>';
+  }
+  function renderDetails(f){
+    const ch=childrenOf(f);
+    document.getElementById('familyDetails').innerHTML=`
+      <div class="detail-card"><span>Responsáveis</span><b>${ProtegeApp.esc(f.responsavel1)}</b>${f.responsavel2?`<small>${ProtegeApp.esc(f.responsavel2)}</small>`:''}</div>
+      <div class="detail-card"><span>Contato</span><b>${ProtegeApp.esc(f.telefone||'—')}</b><small>${ProtegeApp.esc(f.email||'Sem e-mail')}</small></div>
+      <div class="detail-card"><span>ONG vinculada</span><b>${ProtegeApp.esc(f.ongs?.nome||'Nenhuma')}</b></div>
+      <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc(f.logradouro||'')}${f.numero?', '+ProtegeApp.esc(f.numero):''}${f.complemento?' · '+ProtegeApp.esc(f.complemento):''}</b><small>${ProtegeApp.esc(f.bairro||'')} · ${ProtegeApp.esc(f.cidade||'')}${f.estado?'/'+ProtegeApp.esc(f.estado):''} · CEP ${ProtegeApp.esc(f.cep||'')}</small></div>
+      <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade??'—'} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
   }
   async function renderHistory(f){
     const box=document.getElementById('familyHistory');
     box.innerHTML='<div class="empty-state">Carregando histórico...</div>';
     try{
       const items=await ProtegeApp.loadAttendances(f.id,30);
-      box.innerHTML=items.length?items.map(a=>`<div class="history-item"><div><b>${ProtegeApp.formatDate(a.data_hora)}</b><small>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')} · ${ProtegeApp.esc(a.tipo_alvo||'família')}${a.filhos?.nome?` · ${ProtegeApp.esc(a.filhos.nome)}`:''}</small></div><span class="status-pill">${ProtegeApp.esc(a.status)}</span></div>`).join(''):'<div class="empty-state">Nenhum atendimento registrado para esta família.</div>';
-    }catch(err){console.error(err);box.innerHTML='<div class="empty-state">Histórico indisponível. Execute a migração V9 no Supabase.</div>';}
+      box.innerHTML=items.length?items.map(a=>`<div class="history-item"><div><b>${ProtegeApp.formatDate(a.data_hora)}</b><small>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')} · ${ProtegeApp.esc(a?.dados?.membro_atendido||a.filhos?.nome||a.tipo_alvo||'família')}</small></div><span class="status-pill">${ProtegeApp.esc(a.status)}</span></div>`).join(''):'<div class="empty-state">Nenhum atendimento registrado para esta família.</div>';
+    }catch(err){console.error(err);box.innerHTML='<div class="empty-state">Histórico indisponível.</div>';}
   }
   async function openFamily(id){
-    const f=families.find(x=>x.id===id); if(!f)return; activeFamily=f;
-    document.getElementById('familyDialogName').textContent=f.responsavel1;
-    const ch=childrenOf(f);
-    document.getElementById('familyDetails').innerHTML=`
-      <div class="detail-card"><span>Responsáveis</span><b>${ProtegeApp.esc(f.responsavel1)}</b>${f.responsavel2?`<small>${ProtegeApp.esc(f.responsavel2)}</small>`:''}</div>
-      <div class="detail-card"><span>Contato</span><b>${ProtegeApp.esc(f.telefone)}</b><small>${ProtegeApp.esc(f.email||'Sem e-mail')}</small></div>
-      <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc(f.logradouro||'')}, ${ProtegeApp.esc(f.numero||'')}${f.complemento?' · '+ProtegeApp.esc(f.complemento):''}</b><small>${ProtegeApp.esc(f.bairro||'')} · ${ProtegeApp.esc(f.cidade||'')}/${ProtegeApp.esc(f.estado||'')} · CEP ${ProtegeApp.esc(f.cep||'')}</small></div>
-      <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade ?? '—'} ano(s)</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
-    document.getElementById('familyWhatsapp').href=`https://wa.me/55${ProtegeApp.onlyDigits(f.telefone)}`;
+    const f=families.find(x=>x.id===id);if(!f)return;activeFamily=f;
+    document.getElementById('familyDialogName').textContent=familyName(f);
+    renderDetails(f);
+    document.getElementById('familyOngSelect').value=f.ong_id||'';
+    document.getElementById('familyOngMessage').textContent='';
+    document.getElementById('familyWhatsapp').href=`https://wa.me/55${ProtegeApp.onlyDigits(f.telefone||'')}`;
     document.getElementById('newAttendanceForFamily').href=`atendimento.html?familia=${encodeURIComponent(f.id)}`;
-    dialog.showModal(); await renderHistory(f);
+    dialog.showModal();await renderHistory(f);
   }
+
   try{
-    families=await ProtegeApp.loadFamilies(); document.getElementById('metricFamilies').textContent=families.length; document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0); render();
-    const id=new URLSearchParams(location.search).get('id'); if(id && families.some(f=>f.id===id)){ await openFamily(id); history.replaceState({},'',location.pathname); }
-  }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as famílias.</td></tr>';}
+    [families,ongs]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadOngs()]);
+    document.getElementById('metricFamilies').textContent=families.length;
+    document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0);
+    const activeOptions=ongs.filter(o=>o.status==='ativa').map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
+    document.getElementById('familyOngSelect').innerHTML='<option value="">Nenhuma ONG</option>'+activeOptions;
+    ongFilter.innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
+    render();
+    const id=new URLSearchParams(location.search).get('id');
+    if(id&&families.some(f=>f.id===id)){await openFamily(id);history.replaceState({},'',location.pathname);}
+  }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="8" class="empty-state">Não foi possível carregar as famílias. Execute o SQL da V13.6.</td></tr>';}
+
+  document.getElementById('saveFamilyOng')?.addEventListener('click',async()=>{
+    if(!activeFamily)return;
+    const b=document.getElementById('saveFamilyOng'),m=document.getElementById('familyOngMessage');
+    b.disabled=true;m.textContent='Salvando...';
+    try{
+      const updated=await ProtegeApp.updateFamilyOng(activeFamily.id,document.getElementById('familyOngSelect').value||null);
+      const idx=families.findIndex(x=>x.id===activeFamily.id);if(idx>=0)families[idx]=updated;
+      activeFamily=updated;renderDetails(updated);render();m.textContent='ONG vinculada atualizada.';
+    }catch(err){console.error(err);m.textContent='Não foi possível atualizar: '+(err?.message||'erro inesperado');}
+    finally{b.disabled=false;}
+  });
 
   document.getElementById('printFamilyPdf')?.addEventListener('click',async()=>{
     if(!activeFamily)return;
     const printWindow=openProtegePrintWindow('Cadastro da Família');if(!printWindow)return;
     try{
       const f=activeFamily,ch=childrenOf(f),historyItems=await ProtegeApp.loadAttendances(f.id,100);
-      const familyTitle=[f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';
+      const familyTitle=familyName(f);
       const address=[`${f.logradouro||''}${f.numero?', '+f.numero:''}${f.complemento?' · '+f.complemento:''}`,[f.bairro,f.cidade&&f.estado?`${f.cidade}/${f.estado}`:f.cidade||f.estado].filter(Boolean).join(' · '),f.cep?`CEP ${f.cep}`:''].filter(Boolean);
       const childrenHtml=ch.length?ch.map(c=>`<span class="print-chip"><b>${ProtegeApp.esc(c.nome)}</b> · ${ProtegeApp.esc(c.idade??'—')} ano(s)</span>`).join(''):'<span class="print-empty">Nenhum filho cadastrado.</span>';
       const historyHtml=historyItems.length?`<table class="print-table"><thead><tr><th>Data</th><th>Atendimento para</th><th>Profissional</th><th>Status</th></tr></thead><tbody>${historyItems.map(a=>`<tr><td>${ProtegeApp.esc(ProtegeApp.formatDate(a.data_hora))}</td><td>${ProtegeApp.esc(a?.dados?.membro_atendido||a?.filhos?.nome||(a.tipo_alvo==='familia'?'Família completa':a.tipo_alvo==='responsaveis'?'Responsável(is)':'—'))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(a.status||'—')}</td></tr>`).join('')}</tbody></table>`:'<p class="print-empty">Nenhum atendimento registrado para esta família.</p>';
@@ -516,6 +593,7 @@ async function initFamiliesPage() {
           <div class="print-card"><span>Responsáveis</span><b>${ProtegeApp.esc(f.responsavel1||'—')}</b>${f.responsavel2?`<small>${ProtegeApp.esc(f.responsavel2)}</small>`:''}</div>
           <div class="print-card"><span>Contato</span><b>${ProtegeApp.esc(f.telefone||'—')}</b><small>${ProtegeApp.esc(f.email||'Sem e-mail')}</small></div>
           <div class="print-card"><span>Status</span><b>${ProtegeApp.esc(f.status||'ativa')}</b><small>Cadastrada em ${ProtegeApp.esc(ProtegeApp.formatDate(f.created_at))}</small></div>
+          <div class="print-card"><span>ONG vinculada</span><b>${ProtegeApp.esc(f.ongs?.nome||'Nenhuma')}</b></div>
           <div class="print-card wide"><span>Endereço</span><b>${ProtegeApp.esc(address[0]||'—')}</b><small>${ProtegeApp.esc(address.slice(1).join(' · ')||'')}</small></div>
           <div class="print-card wide"><span>Filhos</span>${childrenHtml}</div>
         </div></section>
@@ -524,7 +602,81 @@ async function initFamiliesPage() {
       writeProtegePrintWindow(printWindow,ProtegePrintDocument({title:'Cadastro da Família',subtitle:familyTitle,sections}));
     }catch(err){console.error(err);printWindow.document.body.innerHTML='<p>Não foi possível preparar o documento para impressão.</p>';}
   });
-  search?.addEventListener('input',render); tbody.addEventListener('click',async e=>{const b=e.target.closest('.view-family');if(b)await openFamily(b.dataset.id);});
+
+  search?.addEventListener('input',render);
+  ongFilter?.addEventListener('change',render);
+  tbody.addEventListener('click',async e=>{const b=e.target.closest('.view-family');if(b)await openFamily(b.dataset.id);});
+}
+
+async function initOngsPage(){
+  const tbody=document.querySelector('#ongsTable tbody'), form=document.getElementById('ongForm');
+  const search=document.getElementById('ongSearch'), statusFilter=document.getElementById('ongStatusFilter');
+  const msg=document.getElementById('ongMessage'), dialog=document.getElementById('ongDetailDialog');
+  let items=[],active=null;
+
+  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  function filtered(){
+    const q=norm(search?.value).trim(),st=statusFilter?.value||'';
+    return items.filter(o=>{
+      if(st&&o.status!==st)return false;
+      if(!q)return true;
+      return norm([o.nome,o.cnpj,o.responsavel,o.telefone,o.email,o.cidade].join(' ')).includes(q);
+    });
+  }
+  function render(){
+    const rows=filtered();
+    document.getElementById('ongResultCount').textContent=`${rows.length} ${rows.length===1?'ONG':'ONGs'}`;
+    tbody.innerHTML=rows.length?rows.map(o=>`<tr>
+      <td><b>${ProtegeApp.esc(o.nome)}</b></td><td>${ProtegeApp.esc(o.cnpj||'—')}</td>
+      <td>${ProtegeApp.esc(o.responsavel||'—')}</td><td>${ProtegeApp.esc(o.telefone||'—')}</td>
+      <td>${ProtegeApp.esc(o.email||'—')}</td><td><span class="status-pill ${o.status==='ativa'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(o.status)}</span></td>
+      <td><button class="small-btn view-ong" data-id="${ProtegeApp.esc(o.id)}">Abrir</button></td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhuma ONG encontrada.</td></tr>';
+  }
+  async function refresh(){items=await ProtegeApp.loadOngs();render();}
+  function open(id){
+    const o=items.find(x=>x.id===id);if(!o)return;active=o;
+    document.getElementById('ongDetailName').textContent=o.nome;
+    document.getElementById('ongDetailGrid').innerHTML=`
+      <div class="detail-card"><span>CNPJ</span><b>${ProtegeApp.esc(o.cnpj||'—')}</b></div>
+      <div class="detail-card"><span>Responsável</span><b>${ProtegeApp.esc(o.responsavel||'—')}</b></div>
+      <div class="detail-card"><span>Telefone</span><b>${ProtegeApp.esc(o.telefone||'—')}</b></div>
+      <div class="detail-card"><span>E-mail</span><b>${ProtegeApp.esc(o.email||'—')}</b></div>
+      <div class="detail-card detail-wide"><span>Endereço</span><b>${ProtegeApp.esc([o.logradouro,o.numero].filter(Boolean).join(', ')||'—')}</b><small>${ProtegeApp.esc([o.bairro,o.cidade&&o.estado?o.cidade+'/'+o.estado:o.cidade||o.estado,o.cep].filter(Boolean).join(' · '))}</small></div>
+      <div class="detail-card detail-wide"><span>Observações</span><b>${ProtegeApp.esc(o.observacoes||'—')}</b></div>`;
+    document.getElementById('ongDetailStatus').value=o.status||'ativa';
+    document.getElementById('ongDetailMessage').textContent='';
+    dialog.showModal();
+  }
+  form?.addEventListener('submit',async e=>{
+    e.preventDefault();const fd=new FormData(form),btn=document.getElementById('saveOngButton');
+    const nome=String(fd.get('nome')||'').trim();if(!nome){msg.textContent='Informe o nome da ONG.';return;}
+    btn.disabled=true;msg.textContent='Salvando...';
+    try{
+      await ProtegeApp.saveOng({
+        nome,cnpj:String(fd.get('cnpj')||'').trim()||null,responsavel:String(fd.get('responsavel')||'').trim()||null,
+        telefone:String(fd.get('telefone')||'').trim()||null,email:String(fd.get('email')||'').trim().toLowerCase()||null,
+        cep:String(fd.get('cep')||'').trim()||null,logradouro:String(fd.get('logradouro')||'').trim()||null,
+        numero:String(fd.get('numero')||'').trim()||null,complemento:String(fd.get('complemento')||'').trim()||null,
+        bairro:String(fd.get('bairro')||'').trim()||null,cidade:String(fd.get('cidade')||'').trim()||null,
+        estado:String(fd.get('estado')||'').trim().toUpperCase()||null,observacoes:String(fd.get('observacoes')||'').trim()||null,
+        status:String(fd.get('status')||'ativa')
+      });
+      form.reset();msg.textContent='ONG cadastrada com sucesso.';await refresh();
+    }catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro inesperado');}
+    finally{btn.disabled=false;}
+  });
+  [search,statusFilter].forEach(el=>el?.addEventListener(el===search?'input':'change',render));
+  tbody?.addEventListener('click',e=>{const b=e.target.closest('.view-ong');if(b)open(b.dataset.id);});
+  document.getElementById('closeOngDetail')?.addEventListener('click',()=>dialog.close());
+  document.getElementById('saveOngStatus')?.addEventListener('click',async()=>{
+    if(!active)return;const b=document.getElementById('saveOngStatus'),m=document.getElementById('ongDetailMessage');
+    b.disabled=true;m.textContent='Salvando...';
+    try{await ProtegeApp.updateOng(active.id,{status:document.getElementById('ongDetailStatus').value});m.textContent='Status atualizado.';await refresh();setTimeout(()=>dialog.close(),350);}
+    catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}
+    finally{b.disabled=false;}
+  });
+  try{await refresh();}catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as ONGs. Execute o SQL da V13.6.</td></tr>';}
 }
 
 async function initProfessionalsPage(){
@@ -536,7 +688,7 @@ async function initProfessionalsPage(){
   const statusFilter=document.getElementById('professionalStatusFilter');
   const resultCount=document.getElementById('professionalResultCount');
   const dialog=document.getElementById('professionalDetailDialog');
-  let items=[],activeProfessional=null;
+  let items=[],ongs=[],activeProfessional=null;
 
   function normalized(v=''){
     return String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -546,9 +698,11 @@ async function initProfessionalsPage(){
     const q=normalized(search?.value||'').trim();
     const perfil=profileFilter?.value||'';
     const status=statusFilter?.value||'';
+    const ong=document.getElementById('professionalOngFilter')?.value||'';
     return items.filter(p=>{
       if(perfil && p.perfil!==perfil) return false;
       if(status && p.status!==status) return false;
+      if(ong && p.ong_id!==ong) return false;
       if(!q) return true;
       return normalized([p.nome,p.email,p.telefone,p.especialidade].filter(Boolean).join(' ')).includes(q);
     });
@@ -562,10 +716,11 @@ async function initProfessionalsPage(){
       <td>${ProtegeApp.esc(p.email||'—')}</td>
       <td>${ProtegeApp.esc(p.telefone||'—')}</td>
       <td>${ProtegeApp.esc(p.especialidade||'—')}</td>
+      <td>${ProtegeApp.esc(p.ongs?.nome||'—')}</td>
       <td><span class="access-pill ${p.perfil==='admin'?'access-admin':'access-professional'}">${p.perfil==='admin'?'Administrador':'Profissional'}</span></td>
       <td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td>
       <td><button type="button" class="small-btn view-professional" data-id="${ProtegeApp.esc(p.id)}">Abrir</button></td>
-    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum profissional encontrado.</td></tr>';
+    </tr>`).join(''):'<tr><td colspan="8" class="empty-state">Nenhum profissional encontrado.</td></tr>';
   }
 
   async function refresh(){
@@ -574,7 +729,7 @@ async function initProfessionalsPage(){
       render();
     }catch(err){
       console.error(err);
-      tbody.innerHTML=`<tr><td colspan="7" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;
+      tbody.innerHTML=`<tr><td colspan="8" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;
     }
   }
 
@@ -587,10 +742,12 @@ async function initProfessionalsPage(){
     document.getElementById('professionalDetailCards').innerHTML=`
       <div class="detail-card"><span>Telefone</span><b>${ProtegeApp.esc(p.telefone||'—')}</b></div>
       <div class="detail-card"><span>Especialidade / função</span><b>${ProtegeApp.esc(p.especialidade||'—')}</b></div>
+      <div class="detail-card"><span>ONG vinculada</span><b>${ProtegeApp.esc(p.ongs?.nome||'Nenhuma')}</b></div>
       <div class="detail-card"><span>Perfil atual</span><b>${p.perfil==='admin'?'Administrador':'Profissional'}</b></div>
       <div class="detail-card"><span>Status atual</span><b>${ProtegeApp.esc(p.status||'—')}</b></div>`;
     document.getElementById('detailProfessionalProfile').value=p.perfil==='admin'?'admin':'profissional';
     document.getElementById('detailProfessionalStatus').value=p.status==='inativo'?'inativo':'ativo';
+    document.getElementById('detailProfessionalOng').value=p.ong_id||'';
     document.getElementById('detailProfessionalPassword').value='';
     document.getElementById('professionalAccessMessage').textContent='';
     document.getElementById('professionalPasswordMessage').textContent='';
@@ -622,7 +779,8 @@ async function initProfessionalsPage(){
         telefone:String(fd.get('telefone')||'').trim()||null,
         especialidade:String(fd.get('especialidade')||'').trim()||null,
         perfil:String(fd.get('perfil')||'profissional'),
-        status:String(fd.get('status')||'ativo')
+        status:String(fd.get('status')||'ativo'),
+        ong_id:String(fd.get('ong_id')||'')||null
       });
       msg.textContent='Profissional e usuário de acesso criados com sucesso.';
       form.reset();
@@ -634,7 +792,7 @@ async function initProfessionalsPage(){
     }finally{saveBtn.disabled=false;}
   });
 
-  [search,profileFilter,statusFilter].forEach(el=>{
+  [search,profileFilter,statusFilter,document.getElementById('professionalOngFilter')].forEach(el=>{
     el?.addEventListener(el===search?'input':'change',render);
   });
 
@@ -683,6 +841,21 @@ async function initProfessionalsPage(){
     }finally{button.disabled=false;}
   });
 
+  try{
+    ongs=await ProtegeApp.loadOngs();
+    const options='<option value="">Nenhuma ONG</option>'+ongs.filter(o=>o.status==='ativa').map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
+    document.getElementById('professionalOng').innerHTML=options;
+    document.getElementById('detailProfessionalOng').innerHTML=options;
+    document.getElementById('professionalOngFilter').innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
+  }catch(err){console.warn('ONGs indisponíveis',err);}
+  document.getElementById('saveProfessionalOng')?.addEventListener('click',async()=>{
+    if(!activeProfessional)return;
+    const b=document.getElementById('saveProfessionalOng'),m=document.getElementById('professionalOngMessage');
+    b.disabled=true;m.textContent='Salvando...';
+    try{await ProtegeApp.updateProfessionalOng(activeProfessional.id,document.getElementById('detailProfessionalOng').value||null);m.textContent='ONG atualizada.';await refresh();setTimeout(()=>dialog.close(),350);}
+    catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}
+    finally{b.disabled=false;}
+  });
   await refresh();
 }
 
@@ -705,6 +878,7 @@ async function initAttendancesPage(){
   const tbody=document.querySelector('#attendancesTable tbody');
   const search=document.getElementById('attendanceSearch');
   const statusFilter=document.getElementById('attendanceStatusFilter');
+  const ongFilter=document.getElementById('attendanceOngFilter');
   const dialog=document.getElementById('attendanceDetailDialog');
   const close1=document.getElementById('closeAttendanceDetail');
   const close2=document.getElementById('closeAttendanceDetailBottom');
@@ -712,7 +886,7 @@ async function initAttendancesPage(){
   const evolutionList=document.getElementById('attendanceEvolutionList');
   const evolutionProfessional=document.getElementById('evolutionProfessional');
   const evolutionMessage=document.getElementById('evolutionMessage');
-  let items=[],professionals=[],activeAttendance=null;
+  let items=[],professionals=[],ongs=[],activeAttendance=null;
   const labels={demanda:'Demanda / motivo',objetivo:'Objetivo do encontro',participantes:'Participantes',contexto:'Contexto atual',sessao_relato:'Relato da sessão',sessao_conclusao:'Conclusões / combinados',dinamica_parental:'Perfil e dinâmica parental',estrategia:'Estratégia',orientacao:'Orientação',tecnica:'Técnica',observacoes:'Observações',encaminhamentos:'Encaminhamentos',proximo_passo:'Próximo passo',data_revisao:'Data da revisão',pontos_revisao:'Pontos para revisão',data_falta:'Data da ocorrência',falta_observacoes:'Falta / remarcação / contato',duvidas:'Dúvidas para supervisão',evolucao:'Evolução observada'};
   const stepGroups=[
     ['1 · Demanda',['demanda','objetivo']],['2 · Contexto',['participantes','contexto']],['3 · Sessão',['sessao_relato','sessao_conclusao']],['4 · Dinâmica',['dinamica_parental']],['5 · Ferramenta',['estrategia','orientacao','tecnica']],['6 · Observações',['observacoes']],['7 · Registro',['encaminhamentos','proximo_passo']],['8 · Revisão',['data_revisao','pontos_revisao']],['9 · Faltas',['data_falta','falta_observacoes']],['10 · Supervisão',['duvidas','evolucao']]
@@ -728,8 +902,8 @@ async function initAttendancesPage(){
     document.getElementById('attendanceMetricScheduled').textContent=items.filter(x=>x.status==='agendado').length;
     document.getElementById('attendanceMetricDraft').textContent=items.filter(x=>x.status==='rascunho').length;
   }
-  function filtered(){const q=(search?.value||'').trim().toLowerCase(),st=statusFilter?.value||'';return items.filter(a=>{if(st&&a.status!==st)return false;if(!q)return true;return [familyName(a),memberName(a),a.profissionais?.nome||'',a.status||''].join(' ').toLowerCase().includes(q);});}
-  function render(){const rows=filtered();tbody.innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_hora)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(memberName(a))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><div class="attendance-row-actions"><button class="small-btn view-attendance" data-id="${ProtegeApp.esc(a.id)}">Abrir</button><button class="small-btn add-evolution" data-id="${ProtegeApp.esc(a.id)}">+ Evolução</button></div></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum atendimento encontrado.</td></tr>';}
+  function filtered(){const q=(search?.value||'').trim().toLowerCase(),st=statusFilter?.value||'',ong=ongFilter?.value||'';return items.filter(a=>{if(st&&a.status!==st)return false;if(ong&&a.familias?.ong_id!==ong)return false;if(!q)return true;return [familyName(a),memberName(a),a.profissionais?.nome||'',a.familias?.ongs?.nome||'',a.status||''].join(' ').toLowerCase().includes(q);});}
+  function render(){const rows=filtered();tbody.innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_hora)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(memberName(a))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(a.familias?.ongs?.nome||'—')}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><div class="attendance-row-actions"><button class="small-btn view-attendance" data-id="${ProtegeApp.esc(a.id)}">Abrir</button><button class="small-btn add-evolution" data-id="${ProtegeApp.esc(a.id)}">+ Evolução</button></div></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum atendimento encontrado.</td></tr>';}
   function renderEvolutions(evolutions){
     evolutionList.innerHTML=evolutions.length?evolutions.map(ev=>`<article class="evolution-item"><div class="evolution-marker"><span>${Number(ev.etapa)}</span></div><div class="evolution-body"><div class="evolution-meta"><span class="evolution-step-badge">Etapa ${Number(ev.etapa)} · ${ProtegeApp.esc(stepNames[ev.etapa]||'')}</span><time>${ProtegeApp.formatDate(ev.created_at)}</time></div>${ev.titulo?`<h4>${ProtegeApp.esc(ev.titulo)}</h4>`:''}<p>${ProtegeApp.esc(ev.conteudo).replace(/\n/g,'<br>')}</p><small>Registrado por <b>${ProtegeApp.esc(ev.profissionais?.nome||'Profissional não informado')}</b></small></div></article>`).join(''):'<div class="empty-state evolution-empty">Nenhuma evolução acrescentada ainda. O registro inicial permanece preservado acima.</div>';
   }
@@ -743,7 +917,7 @@ async function initAttendancesPage(){
     const a=items.find(x=>x.id===id);if(!a)return;activeAttendance=a;
     document.getElementById('attendanceDetailTitle').textContent=memberName(a);
     document.getElementById('attendanceDetailMeta').textContent=`${ProtegeApp.formatDate(a.data_hora)} · ${a.profissionais?.nome||'Profissional não informado'}`;
-    document.getElementById('attendanceDetailSummary').innerHTML=`<div class="detail-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div><div class="detail-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div><div class="detail-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div><div class="detail-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>`;
+    document.getElementById('attendanceDetailSummary').innerHTML=`<div class="detail-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div><div class="detail-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div><div class="detail-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div><div class="detail-card"><span>ONG da família</span><b>${ProtegeApp.esc(a.familias?.ongs?.nome||'Nenhuma')}</b></div><div class="detail-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>`;
     const dados=a.dados||{};
     document.getElementById('attendanceDetailSteps').innerHTML=stepGroups.map(([title,keys])=>{const content=keys.map(k=>{const v=String(dados[k]||'').trim();return v?`<div class="attendance-detail-field"><span>${ProtegeApp.esc(labels[k]||k)}</span><p>${ProtegeApp.esc(v).replace(/\n/g,'<br>')}</p></div>`:''}).join('');return `<section class="attendance-detail-step"><h4>${ProtegeApp.esc(title)}</h4>${content||'<p class="attendance-empty-value">Sem registro nesta etapa.</p>'}</section>`;}).join('');
     document.getElementById('attendanceFamilyLink').href=`familias.html?id=${encodeURIComponent(a.familia_id)}`;
@@ -755,11 +929,12 @@ async function initAttendancesPage(){
     if(focusEvolution){setTimeout(()=>{evolutionForm?.scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('evolutionContent')?.focus();},80);}
   }
   try{
-    [items,professionals]=await Promise.all([ProtegeApp.loadAttendances(null,500),ProtegeApp.loadProfessionals()]);
+    [items,professionals,ongs]=await Promise.all([ProtegeApp.loadAttendances(null,500),ProtegeApp.loadProfessionals(),ProtegeApp.loadOngs()]);
+    ongFilter.innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
     evolutionProfessional.innerHTML='<option value="">Selecione</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
     updateMetrics();render();
     const openId=new URLSearchParams(location.search).get('id'); if(openId&&items.some(a=>a.id===openId)){await openDetail(openId,new URLSearchParams(location.search).get('evolucao')==='1'); history.replaceState({},'',location.pathname);}
-  }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="6" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
+  }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
 
   document.getElementById('printAttendancePdf')?.addEventListener('click',async()=>{
     if(!activeAttendance)return;
@@ -773,6 +948,7 @@ async function initAttendancesPage(){
           <div class="print-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div>
           <div class="print-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div>
           <div class="print-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div>
+          <div class="print-card"><span>ONG da família</span><b>${ProtegeApp.esc(a.familias?.ongs?.nome||'Nenhuma')}</b></div>
           <div class="print-card"><span>Data / horário</span><b>${ProtegeApp.esc(ProtegeApp.formatDate(a.data_hora))}</b></div>
           <div class="print-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>
         </div></section>
@@ -795,7 +971,7 @@ async function initAttendancesPage(){
     }catch(err){console.error(err);evolutionMessage.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}
     finally{saveBtn.disabled=false;saveBtn.textContent='+ Adicionar evolução';}
   });
-  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);ongFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 
 
@@ -805,9 +981,10 @@ async function initReportsPage(){
   const professionalFilter=document.getElementById('reportProfessional');
   const familyFilter=document.getElementById('reportFamily');
   const statusFilter=document.getElementById('reportStatus');
+  const ongFilter=document.getElementById('reportOng');
   const tableBody=document.querySelector('#reportsTable tbody');
   const countEl=document.getElementById('reportResultCount');
-  let families=[],professionals=[],attendances=[],schedules=[],currentRows=[];
+  let families=[],professionals=[],ongs=[],attendances=[],schedules=[],currentRows=[];
 
   const familyNameFrom = r => {
     const f=r.familias||{};
@@ -826,25 +1003,26 @@ async function initReportsPage(){
   function buildRows(){
     const attendanceRows=attendances.map(a=>({
       id:a.id,source:'atendimento',date:a.data_hora,family_id:a.familia_id,professional_id:a.profissional_id,
-      family:familyNameFrom(a),target:attendanceTarget(a),professional:a.profissionais?.nome||'—',status:a.status||'realizado',
+      family:familyNameFrom(a),target:attendanceTarget(a),professional:a.profissionais?.nome||'—',ong_id:a.familias?.ong_id||null,ong:a.familias?.ongs?.nome||'—',status:a.status||'realizado',
       type:'Atendimento',href:`atendimentos.html?id=${encodeURIComponent(a.id)}`
     }));
     const scheduleRows=schedules.filter(a=>!(a.status==='realizado'&&a.atendimento_id)).map(a=>({
       id:a.id,source:'agenda',date:a.data_inicio,family_id:a.familia_id,professional_id:a.profissional_id,
-      family:familyNameFrom(a),target:a.atendimento_para||'—',professional:a.profissionais?.nome||'—',status:a.status||'agendado',
+      family:familyNameFrom(a),target:a.atendimento_para||'—',professional:a.profissionais?.nome||'—',ong_id:a.familias?.ong_id||null,ong:a.familias?.ongs?.nome||'—',status:a.status||'agendado',
       type:a.tipo||'Agenda',href:'agenda.html'
     }));
     return [...attendanceRows,...scheduleRows].sort((a,b)=>new Date(b.date)-new Date(a.date));
   }
 
   function baseFilteredRows(ignoreStatus=false){
-    const start=startInput.value,end=endInput.value,pid=professionalFilter.value,fid=familyFilter.value,st=statusFilter.value;
+    const start=startInput.value,end=endInput.value,pid=professionalFilter.value,fid=familyFilter.value,st=statusFilter.value,oid=ongFilter.value;
     return buildRows().filter(r=>{
       const key=localDateKey(r.date);
       if(start&&key<start)return false;
       if(end&&key>end)return false;
       if(pid&&r.professional_id!==pid)return false;
       if(fid&&r.family_id!==fid)return false;
+      if(oid&&r.ong_id!==oid)return false;
       if(!ignoreStatus&&st){
         if(st==='agendado'&&!['agendado','confirmado'].includes(r.status))return false;
         else if(st!=='agendado'&&r.status!==st)return false;
@@ -891,10 +1069,11 @@ async function initReportsPage(){
       <td><b>${ProtegeApp.esc(r.family)}</b></td>
       <td>${ProtegeApp.esc(r.target)}</td>
       <td>${ProtegeApp.esc(r.professional)}</td>
+      <td>${ProtegeApp.esc(r.ong)}</td>
       <td>${ProtegeApp.esc(r.type)}</td>
       <td><span class="status-pill ${statusClass(r.status)}">${ProtegeApp.esc(statusText(r.status))}</span></td>
       <td><a class="small-btn" href="${ProtegeApp.esc(r.href)}">Abrir</a></td>
-    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum registro encontrado para os filtros selecionados.</td></tr>';
+    </tr>`).join(''):'<tr><td colspan="8" class="empty-state">Nenhum registro encontrado para os filtros selecionados.</td></tr>';
     renderStatusChart(currentRows);
     renderProfessionalChart(currentRows);
   }
@@ -908,8 +1087,8 @@ async function initReportsPage(){
   }
 
   function exportCsv(){
-    const header=['Data','Família','Atendimento para','Profissional','Tipo','Status'];
-    const rows=currentRows.map(r=>[ProtegeApp.formatDate(r.date),r.family,r.target,r.professional,r.type,statusText(r.status)]);
+    const header=['Data','Família','Atendimento para','Profissional','ONG','Tipo','Status'];
+    const rows=currentRows.map(r=>[ProtegeApp.formatDate(r.date),r.family,r.target,r.professional,r.ong,r.type,statusText(r.status)]);
     const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
     const csv='\ufeff'+[header,...rows].map(row=>row.map(q).join(';')).join('\r\n');
     const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -918,20 +1097,21 @@ async function initReportsPage(){
 
   try{
     defaultDates();
-    [families,professionals,attendances,schedules]=await Promise.all([
-      ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals(),ProtegeApp.loadAttendances(null,2000),ProtegeApp.loadSchedules()
+    [families,professionals,ongs,attendances,schedules]=await Promise.all([
+      ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals(),ProtegeApp.loadOngs(),ProtegeApp.loadAttendances(null,2000),ProtegeApp.loadSchedules()
     ]);
     professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+professionals.map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
+    ongFilter.innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
     familyFilter.innerHTML='<option value="">Todas as famílias</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(labelFamily(f))}</option>`).join('');
     render();
   }catch(err){
     console.error(err);
-    tableBody.innerHTML=`<tr><td colspan="7" class="empty-state">Não foi possível carregar os relatórios: ${ProtegeApp.esc(err?.message||'erro inesperado')}</td></tr>`;
+    tableBody.innerHTML=`<tr><td colspan="8" class="empty-state">Não foi possível carregar os relatórios: ${ProtegeApp.esc(err?.message||'erro inesperado')}</td></tr>`;
   }
 
-  [startInput,endInput,professionalFilter,familyFilter,statusFilter].forEach(el=>el?.addEventListener('change',render));
+  [startInput,endInput,professionalFilter,familyFilter,statusFilter,ongFilter].forEach(el=>el?.addEventListener('change',render));
   document.getElementById('reportApplyFilters')?.addEventListener('click',render);
-  document.getElementById('reportClearFilters')?.addEventListener('click',()=>{defaultDates();professionalFilter.value='';familyFilter.value='';statusFilter.value='';render();});
+  document.getElementById('reportClearFilters')?.addEventListener('click',()=>{defaultDates();professionalFilter.value='';familyFilter.value='';statusFilter.value='';ongFilter.value='';render();});
   document.getElementById('reportExportCsv')?.addEventListener('click',exportCsv);
   document.getElementById('reportPrint')?.addEventListener('click',()=>window.print());
 }
@@ -955,6 +1135,7 @@ async function initAttendanceWizard() {
     if(!f){
       targetSel.innerHTML='<option value="">Selecione primeiro uma família</option>';
       document.getElementById('attendanceFamilySummary').innerHTML='Selecione uma família acima.';
+      document.getElementById('attendanceOngInfo').textContent='Nenhuma família selecionada';
       return;
     }
     const members=[];
@@ -963,6 +1144,7 @@ async function initAttendanceWizard() {
     if(f.responsavel2) members.push(`<option value="responsavel2:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel2)} · Responsável</option>`);
     ch.forEach(c=>members.push(`<option value="filho:${ProtegeApp.esc(c.id)}">${ProtegeApp.esc(c.nome)} · Filho(a)${c.idade!=null?' · '+c.idade+' ano(s)':''}</option>`));
     targetSel.innerHTML='<option value="">Selecione quem será atendido</option>'+members.join('');
+    document.getElementById('attendanceOngInfo').textContent=f.ongs?.nome||'Nenhuma ONG vinculada';
     document.getElementById('attendanceFamilySummary').innerHTML=`<span>Família selecionada</span><b>${ProtegeApp.esc(f.responsavel1)}${f.responsavel2?' e '+ProtegeApp.esc(f.responsavel2):''}</b><small>${ch.length?ch.map(c=>ProtegeApp.esc(c.nome)).join(', '):'Sem filhos cadastrados'} · ${ProtegeApp.esc(f.cidade||'')}/${ProtegeApp.esc(f.estado||'')}</small>`;
   }
   function selectedTarget(){
@@ -1000,7 +1182,7 @@ async function initAgendaPage(){
   const showScheduleModal=()=>{if(backdrop){backdrop.hidden=false;document.body.classList.add('schedule-modal-open');}else if(dialog?.showModal){dialog.showModal();}};
   const closeScheduleModal=()=>{if(backdrop){backdrop.hidden=true;document.body.classList.remove('schedule-modal-open');}else if(dialog?.close){dialog.close();}};
   const familySel=document.getElementById('scheduleFamily'),targetSel=document.getElementById('scheduleTarget'),professionalSel=document.getElementById('scheduleProfessional');
-  let items=[],families=[],professionals=[],editingId=null;
+  let items=[],families=[],professionals=[],ongs=[],editingId=null;
   const localKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;};
   const toInputDate=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10);};
   const toLocalDT=v=>{const x=new Date(v);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,16);};
@@ -1020,16 +1202,16 @@ async function initAgendaPage(){
   function selectedFamily(){return families.find(f=>f.id===familySel.value);}
   function targetOptions(f){if(!f)return '<option value="">Selecione a família</option>';const out=[`<option value="familia:${ProtegeApp.esc(f.id)}">Família completa</option>`];if(f.responsavel1)out.push(`<option value="responsavel1:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel1)} · Responsável</option>`);if(f.responsavel2)out.push(`<option value="responsavel2:${ProtegeApp.esc(f.id)}">${ProtegeApp.esc(f.responsavel2)} · Responsável</option>`);(f.filhos||[]).forEach(c=>out.push(`<option value="filho:${ProtegeApp.esc(c.id)}">${ProtegeApp.esc(c.nome)} · Filho(a)${c.idade!=null?' · '+c.idade+' ano(s)':''}</option>`));return '<option value="">Selecione quem será atendido</option>'+out.join('');}
   function selectedTarget(){const f=selectedFamily(),[kind,id]=(targetSel.value||'').split(':');if(!f||!kind)return null;if(kind==='familia')return {tipo_alvo:'familia',filho_id:null,nome:'Família completa'};if(kind==='responsavel1')return {tipo_alvo:'responsavel',filho_id:null,nome:f.responsavel1};if(kind==='responsavel2')return {tipo_alvo:'responsavel',filho_id:null,nome:f.responsavel2};if(kind==='filho'){const c=(f.filhos||[]).find(x=>x.id===id);return {tipo_alvo:'filho',filho_id:id,nome:c?.nome||'Filho(a)'};}return null;}
-  function refreshTarget(){targetSel.innerHTML=targetOptions(selectedFamily());}
-  function selected(){return items.filter(a=>localKey(a.data_inicio)===dateInput.value&&(!professionalFilter.value||a.profissional_id===professionalFilter.value)).sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));}
-  function render(){const rows=selected(),dayDate=new Date(dateInput.value+'T12:00:00');document.getElementById('agendaDayTitle').textContent=dayDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});document.getElementById('agendaMetricDay').textContent=rows.length;document.getElementById('agendaMetricScheduled').textContent=rows.filter(x=>['agendado','confirmado'].includes(x.status)).length;document.getElementById('agendaMetricDone').textContent=rows.filter(x=>x.status==='realizado').length;document.getElementById('agendaMetricMissed').textContent=rows.filter(x=>x.status==='falta').length;list.innerHTML=rows.length?rows.map(a=>{const d=new Date(a.data_inicio),time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});let actions=`<a class="small-btn" href="familias.html?id=${encodeURIComponent(a.familia_id)}">Família</a>`;if(a.atendimento_id)actions+=`<a class="small-btn" href="atendimentos.html?id=${encodeURIComponent(a.atendimento_id)}">Abrir atendimento</a>`;else if(!['cancelado','falta','realizado'].includes(a.status))actions+=`<a class="small-btn agenda-action-success" href="atendimento.html?agenda=${encodeURIComponent(a.id)}">Iniciar atendimento</a>`;actions+=`<button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Remarcar / editar</button>`;if(a.status==='agendado')actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="confirmado">Confirmar</button>`;if(!['realizado','cancelado'].includes(a.status))actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="falta">Falta</button><button class="small-btn agenda-action-danger schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="cancelado">Cancelar</button>`;return `<article class="agenda-card" data-status="${ProtegeApp.esc(a.status)}"><div class="agenda-time"><strong>${time}</strong><span>${ProtegeApp.esc(typeText(a.tipo))}</span></div><div class="agenda-card-main"><div><span class="section-label">${ProtegeApp.esc(a.atendimento_para)}</span><h3>${ProtegeApp.esc(familyName(a))}</h3><p>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')}</p>${a.observacoes?`<p class="agenda-notes">${ProtegeApp.esc(a.observacoes)}</p>`:''}</div><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></div><div class="agenda-card-actions">${actions}</div></article>`;}).join(''):'<div class="empty-state agenda-empty">Nenhum compromisso nesta data.</div>';}
+  function refreshTarget(){const f=selectedFamily();targetSel.innerHTML=targetOptions(f);document.getElementById('scheduleOngInfo').textContent=f?.ongs?.nome||'Nenhuma ONG vinculada';}
+  function selected(){return items.filter(a=>localKey(a.data_inicio)===dateInput.value&&(!professionalFilter.value||a.profissional_id===professionalFilter.value)&&(!ongFilter.value||a.familias?.ong_id===ongFilter.value)).sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));}
+  function render(){const rows=selected(),dayDate=new Date(dateInput.value+'T12:00:00');document.getElementById('agendaDayTitle').textContent=dayDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});document.getElementById('agendaMetricDay').textContent=rows.length;document.getElementById('agendaMetricScheduled').textContent=rows.filter(x=>['agendado','confirmado'].includes(x.status)).length;document.getElementById('agendaMetricDone').textContent=rows.filter(x=>x.status==='realizado').length;document.getElementById('agendaMetricMissed').textContent=rows.filter(x=>x.status==='falta').length;list.innerHTML=rows.length?rows.map(a=>{const d=new Date(a.data_inicio),time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});let actions=`<a class="small-btn" href="familias.html?id=${encodeURIComponent(a.familia_id)}">Família</a>`;if(a.atendimento_id)actions+=`<a class="small-btn" href="atendimentos.html?id=${encodeURIComponent(a.atendimento_id)}">Abrir atendimento</a>`;else if(!['cancelado','falta','realizado'].includes(a.status))actions+=`<a class="small-btn agenda-action-success" href="atendimento.html?agenda=${encodeURIComponent(a.id)}">Iniciar atendimento</a>`;actions+=`<button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Remarcar / editar</button>`;if(a.status==='agendado')actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="confirmado">Confirmar</button>`;if(!['realizado','cancelado'].includes(a.status))actions+=`<button class="small-btn schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="falta">Falta</button><button class="small-btn agenda-action-danger schedule-status" data-id="${ProtegeApp.esc(a.id)}" data-status="cancelado">Cancelar</button>`;return `<article class="agenda-card" data-status="${ProtegeApp.esc(a.status)}"><div class="agenda-time"><strong>${time}</strong><span>${ProtegeApp.esc(typeText(a.tipo))}</span></div><div class="agenda-card-main"><div><span class="section-label">${ProtegeApp.esc(a.atendimento_para)}</span><h3>${ProtegeApp.esc(familyName(a))}</h3><p>${ProtegeApp.esc(a.profissionais?.nome||'Profissional não informado')}</p><p class="agenda-ong-line">ONG: ${ProtegeApp.esc(a.familias?.ongs?.nome||'Nenhuma')}</p>${a.observacoes?`<p class="agenda-notes">${ProtegeApp.esc(a.observacoes)}</p>`:''}</div><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></div><div class="agenda-card-actions">${actions}</div></article>`;}).join(''):'<div class="empty-state agenda-empty">Nenhum compromisso nesta data.</div>';}
   function shift(days){const d=new Date(dateInput.value+'T12:00:00');d.setDate(d.getDate()+days);dateInput.value=toInputDate(d);render();}
   async function reload(){items=await ProtegeApp.loadSchedules();render();}
   function openNew(){editingId=null;form.reset();document.getElementById('scheduleId').value='';document.getElementById('scheduleDialogTitle').textContent='Novo agendamento';familySel.value='';refreshTarget();professionalSel.value='';const d=new Date(dateInput.value+'T09:00:00');setDateTimeParts('scheduleStart',d);const e=new Date(d.getTime()+60*60*1000);setDateTimeParts('scheduleEnd',e);syncHiddenDateTimes();document.getElementById('scheduleStatus').value='agendado';document.getElementById('scheduleMessage').textContent='';showScheduleModal();}
   async function openEdit(id){const a=items.find(x=>x.id===id)||await ProtegeApp.getSchedule(id);editingId=id;document.getElementById('scheduleId').value=id;document.getElementById('scheduleDialogTitle').textContent='Editar / remarcar';familySel.value=a.familia_id;refreshTarget();let val=a.tipo_alvo==='familia'?`familia:${a.familia_id}`:a.tipo_alvo==='filho'&&a.filho_id?`filho:${a.filho_id}`:'';if(a.tipo_alvo==='responsavel'){const f=selectedFamily();if(a.atendimento_para===f?.responsavel2)val=`responsavel2:${a.familia_id}`;else val=`responsavel1:${a.familia_id}`;}targetSel.value=val;professionalSel.value=a.profissional_id||'';document.getElementById('scheduleType').value=a.tipo;setDateTimeParts('scheduleStart',a.data_inicio);if(a.data_fim){setDateTimeParts('scheduleEnd',a.data_fim);}else{document.getElementById('scheduleEndDate').value='';}syncHiddenDateTimes();document.getElementById('scheduleStatus').value=a.status;document.getElementById('scheduleNotes').value=a.observacoes||'';document.getElementById('scheduleMessage').textContent='';showScheduleModal();}
-  async function runQuery(){const s=document.getElementById('agendaQueryStart').value,e=document.getElementById('agendaQueryEnd').value,st=document.getElementById('agendaQueryStatus').value,q=document.getElementById('agendaQuerySearch').value.trim().toLowerCase();let rows=items.filter(a=>(!s||localKey(a.data_inicio)>=s)&&(!e||localKey(a.data_inicio)<=e)&&(!st||a.status===st));if(q)rows=rows.filter(a=>[familyName(a),a.atendimento_para,a.profissionais?.nome||'',a.tipo].join(' ').toLowerCase().includes(q));rows.sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));document.getElementById('agendaQueryRows').innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_inicio)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(a.atendimento_para)}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(typeText(a.tipo))}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum compromisso encontrado.</td></tr>';}
-  try{[items,families,professionals]=await Promise.all([ProtegeApp.loadSchedules(),ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals()]);professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc([f.responsavel1,f.responsavel2].filter(Boolean).join(' / '))}</option>`).join('');const today=toInputDate(new Date());document.getElementById('agendaQueryStart').value=today;const future=new Date();future.setDate(future.getDate()+30);document.getElementById('agendaQueryEnd').value=toInputDate(future);render();}catch(err){console.error(err);list.innerHTML='<div class="empty-state">Não foi possível carregar a agenda. Execute o SQL da V12 no Supabase.</div>';}
-  familySel.addEventListener('change',refreshTarget);dateInput.addEventListener('change',render);professionalFilter.addEventListener('change',render);document.getElementById('agendaPrevDay')?.addEventListener('click',()=>shift(-1));document.getElementById('agendaNextDay')?.addEventListener('click',()=>shift(1));document.getElementById('agendaToday')?.addEventListener('click',()=>{dateInput.value=toInputDate(new Date());render();});document.getElementById('openScheduleDialog')?.addEventListener('click',openNew);document.getElementById('closeScheduleDialog')?.addEventListener('click',()=>closeScheduleModal());document.getElementById('cancelScheduleDialog')?.addEventListener('click',()=>closeScheduleModal());document.getElementById('agendaQueryButton')?.addEventListener('click',runQuery);backdrop?.addEventListener('click',e=>{if(e.target===backdrop)closeScheduleModal();});
+  async function runQuery(){const s=document.getElementById('agendaQueryStart').value,e=document.getElementById('agendaQueryEnd').value,st=document.getElementById('agendaQueryStatus').value,oid=document.getElementById('agendaQueryOng').value,q=document.getElementById('agendaQuerySearch').value.trim().toLowerCase();let rows=items.filter(a=>(!s||localKey(a.data_inicio)>=s)&&(!e||localKey(a.data_inicio)<=e)&&(!st||a.status===st)&&(!oid||a.familias?.ong_id===oid));if(q)rows=rows.filter(a=>[familyName(a),a.atendimento_para,a.profissionais?.nome||'',a.familias?.ongs?.nome||'',a.tipo].join(' ').toLowerCase().includes(q));rows.sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));document.getElementById('agendaQueryRows').innerHTML=rows.length?rows.map(a=>`<tr><td>${ProtegeApp.formatDate(a.data_inicio)}</td><td><b>${ProtegeApp.esc(familyName(a))}</b></td><td>${ProtegeApp.esc(a.atendimento_para)}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(a.familias?.ongs?.nome||'—')}</td><td>${ProtegeApp.esc(typeText(a.tipo))}</td><td><span class="status-pill ${statusClass(a.status)}">${ProtegeApp.esc(statusText(a.status))}</span></td><td><button class="small-btn edit-schedule" data-id="${ProtegeApp.esc(a.id)}">Abrir</button></td></tr>`).join(''):'<tr><td colspan="8" class="empty-state">Nenhum compromisso encontrado.</td></tr>';}
+  try{[items,families,professionals,ongs]=await Promise.all([ProtegeApp.loadSchedules(),ProtegeApp.loadFamilies(),ProtegeApp.loadProfessionals(),ProtegeApp.loadOngs()]);ongFilter.innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');document.getElementById('agendaQueryOng').innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');professionalFilter.innerHTML='<option value="">Todos os profissionais</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');professionalSel.innerHTML='<option value="">Selecione o profissional</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');familySel.innerHTML='<option value="">Selecione a família</option>'+families.map(f=>`<option value="${ProtegeApp.esc(f.id)}">${ProtegeApp.esc([f.responsavel1,f.responsavel2].filter(Boolean).join(' / '))}</option>`).join('');const today=toInputDate(new Date());document.getElementById('agendaQueryStart').value=today;const future=new Date();future.setDate(future.getDate()+30);document.getElementById('agendaQueryEnd').value=toInputDate(future);render();}catch(err){console.error(err);list.innerHTML='<div class="empty-state">Não foi possível carregar a agenda. Execute o SQL da V12 no Supabase.</div>';}
+  familySel.addEventListener('change',refreshTarget);dateInput.addEventListener('change',render);professionalFilter.addEventListener('change',render);ongFilter.addEventListener('change',render);document.getElementById('agendaPrevDay')?.addEventListener('click',()=>shift(-1));document.getElementById('agendaNextDay')?.addEventListener('click',()=>shift(1));document.getElementById('agendaToday')?.addEventListener('click',()=>{dateInput.value=toInputDate(new Date());render();});document.getElementById('openScheduleDialog')?.addEventListener('click',openNew);document.getElementById('closeScheduleDialog')?.addEventListener('click',()=>closeScheduleModal());document.getElementById('cancelScheduleDialog')?.addEventListener('click',()=>closeScheduleModal());document.getElementById('agendaQueryButton')?.addEventListener('click',runQuery);backdrop?.addEventListener('click',e=>{if(e.target===backdrop)closeScheduleModal();});
   document.addEventListener('click',async e=>{const edit=e.target.closest('.edit-schedule');if(edit){await openEdit(edit.dataset.id);return;}const st=e.target.closest('.schedule-status');if(st){try{await ProtegeApp.updateSchedule(st.dataset.id,{status:st.dataset.status});await reload();}catch(err){alert('Não foi possível atualizar: '+(err?.message||'erro'));}}});
   ['scheduleStartDate','scheduleStartHour','scheduleStartMinute'].forEach(id=>document.getElementById(id)?.addEventListener('change',autoFillScheduleEnd));
   form.addEventListener('submit',async e=>{e.preventDefault();const t=selectedTarget(),msg=document.getElementById('scheduleMessage');if(!familySel.value||!professionalSel.value||!t){msg.textContent='Preencha família, pessoa atendida e profissional.';return;}syncHiddenDateTimes();const start=document.getElementById('scheduleStart').value,end=document.getElementById('scheduleEnd').value;if(!start){msg.textContent='Informe data e hora de início.';return;}if(end&&new Date(end)<=new Date(start)){msg.textContent='O horário de término deve ser posterior ao início.';return;}const body={familia_id:familySel.value,filho_id:t.filho_id,profissional_id:professionalSel.value,atendimento_para:t.nome,tipo_alvo:t.tipo_alvo,tipo:document.getElementById('scheduleType').value,data_inicio:new Date(start).toISOString(),data_fim:end?new Date(end).toISOString():null,status:document.getElementById('scheduleStatus').value,observacoes:document.getElementById('scheduleNotes').value.trim()||null};try{document.getElementById('saveScheduleButton').disabled=true;if(editingId)await ProtegeApp.updateSchedule(editingId,body);else await ProtegeApp.saveSchedule(body);msg.textContent='Agendamento salvo com sucesso.';await reload();setTimeout(()=>closeScheduleModal(),350);}catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}finally{document.getElementById('saveScheduleButton').disabled=false;}});

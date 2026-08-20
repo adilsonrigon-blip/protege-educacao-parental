@@ -162,3 +162,16 @@
 /* V13.4 - Impressão / PDF de famílias e atendimentos */
 .dialog-actions #printFamilyPdf,.dialog-actions #printAttendancePdf{white-space:nowrap}
 @media(max-width:700px){.dialog-actions{flex-wrap:wrap}.dialog-actions #printFamilyPdf,.dialog-actions #printAttendancePdf{width:100%}}
+
+
+/* V13.6 - ONGs */
+.readonly-info{min-height:48px;border:1px solid #e0d7e5;border-radius:12px;background:#f8f4fa;padding:13px 14px;color:#5b4961;font-weight:800;display:flex;align-items:center}
+.ong-info-field{display:flex;flex-direction:column;gap:7px}
+.panel-inline{margin:18px 0;padding:18px;border:1px solid #eadfec;border-radius:16px;background:#fbf8fc}
+.panel-inline h3{margin:4px 0 12px}
+.family-ong-controls,.professional-ong-edit{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.family-ong-controls select,.professional-ong-edit select{min-width:260px;min-height:46px;border:1px solid #ded5e3;border-radius:12px;background:#fff;padding:0 12px;font:inherit}
+.professional-ong-edit label{display:flex;flex-direction:column;gap:7px;font-size:.86rem;font-weight:800;flex:1}
+.agenda-ong-line{font-size:.78rem!important;color:#7d6687!important;margin-top:4px!important}
+.ong-form .full-field{grid-column:1/-1}
+@media(max-width:700px){.family-ong-controls,.professional-ong-edit{display:grid;grid-template-columns:1fr}.family-ong-controls select,.professional-ong-edit select{min-width:0;width:100%}}

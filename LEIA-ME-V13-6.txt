@@ -1,0 +1,34 @@
+PROTEGE V13.6 — ONGs
+
+ARQUITETURA
+- Tabela ongs.
+- familias.ong_id -> ongs.id (Foreign Key).
+- profissionais.ong_id -> ongs.id (Foreign Key).
+- Agenda e Atendimentos NÃO gravam ong_id.
+  A ONG exibida/filtrada é sempre a ONG da família.
+
+NOVAS FUNÇÕES
+- Novo menu ONGs: cadastro, consulta e status.
+- Famílias: filtro por ONG + vincular/alterar ONG na ficha.
+- Profissionais: ONG no cadastro, consulta e ficha.
+- Agenda: ONG informativa + filtro por ONG.
+- Novo atendimento: ONG da família informativa.
+- Atendimentos: filtro e coluna ONG.
+- Relatórios: filtro e coluna ONG + exportação CSV com ONG.
+- PDFs de Família e Atendimento passam a mostrar a ONG.
+
+ORDEM SEGURA DE ATUALIZAÇÃO
+1) Supabase > SQL Editor:
+   execute supabase-v13-6-ongs.sql
+2) Supabase > Edge Functions > administrar-profissional > Code:
+   substitua index.ts pelo conteúdo de administrar-profissional-index-v136.ts
+   e clique em Deploy updates.
+3) GitHub:
+   envie/substitua TODOS os HTMLs deste pacote,
+   mais script-v126.js e style-v126.css.
+4) Aguarde o GitHub Pages e pressione Ctrl+F5.
+
+OBSERVAÇÃO
+- Não apague tabelas.
+- Não altere config-v126.js.
+- A ONG principal de Agenda/Atendimento é a ONG vinculada à família.

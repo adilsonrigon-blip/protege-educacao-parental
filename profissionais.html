@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=133">
+  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=136">
 </head>
 <body class="app-page" data-requires-auth="true">
   <aside class="sidebar"><div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div><nav>
     <a href="dashboard.html">Dashboard</a><a href="familias-interessadas.html">Famílias interessadas <span id="sidebarLeadCount" class="nav-badge">0</span></a>
-    <a class="active" href="profissionais.html">Profissionais</a><a href="agenda.html">Agenda</a><a href="familias.html">Famílias</a><a href="#">Filhos</a><a href="atendimentos.html">Atendimentos</a><a href="relatorios.html">Relatórios</a>
+    <a class="active" href="profissionais.html">Profissionais</a><a href="ongs.html">ONGs</a><a href="agenda.html">Agenda</a><a href="familias.html">Famílias</a><a href="#">Filhos</a><a href="atendimentos.html">Atendimentos</a><a href="relatorios.html">Relatórios</a>
   </nav><button id="logoutBtn" class="sidebar-logout">Sair</button></aside>
   <main class="app-main">
     <header class="app-topbar"><div><span class="section-label">EQUIPE</span><h1>Profissionais</h1><p class="app-subtitle">Cadastre quem realiza os acompanhamentos da Protege.</p></div></header>
@@ -18,7 +18,7 @@
         <label>E-mail de acesso<input id="professionalEmail" name="email" type="email" required autocomplete="email"></label>
         <label>Senha inicial<div class="password-field-wrap"><input id="professionalPassword" name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo de 8 caracteres"><button type="button" id="toggleProfessionalPassword" class="password-toggle">Mostrar</button></div></label>
         <label>Telefone<input name="telefone" inputmode="tel"></label>
-        <label>Especialidade / função<input name="especialidade" placeholder="Ex.: Educadora parental"></label>
+        <label>Especialidade / função<input name="especialidade" placeholder="Ex.: Educadora parental"></label><label>ONG vinculada<select id="professionalOng" name="ong_id"><option value="">Nenhuma ONG</option></select></label>
         <label>Perfil de acesso<select id="professionalProfile" name="perfil" required><option value="profissional">Profissional</option><option value="admin">Administrador</option></select></label>
         <label>Status<select name="status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></label>
         <div class="access-help"><strong>Profissional:</strong> acesso individual. <strong>Administrador:</strong> poderá gerenciar todos os dados e usuários.</div>
@@ -35,7 +35,7 @@
             <option value="admin">Administrador</option>
             <option value="profissional">Profissional</option>
           </select>
-          <select id="professionalStatusFilter" class="table-filter" aria-label="Filtrar por status">
+          <select id="professionalOngFilter" class="table-filter" aria-label="Filtrar por ONG"><option value="">Todas as ONGs</option></select><select id="professionalStatusFilter" class="table-filter" aria-label="Filtrar por status">
             <option value="">Todos os status</option>
             <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
@@ -45,8 +45,8 @@
       <div class="professionals-result-bar"><span id="professionalResultCount">0 profissionais</span></div>
       <div class="table-responsive">
         <table class="data-table" id="professionalsTable">
-          <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
-          <tbody><tr><td colspan="7" class="empty-state">Carregando...</td></tr></tbody>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>ONG</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="8" class="empty-state">Carregando...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -64,7 +64,7 @@
           <span class="section-label">ACESSO</span>
           <h3>Perfil e status</h3>
         </div>
-        <div class="professional-admin-grid">
+        <div class="professional-ong-edit"><label>ONG vinculada<select id="detailProfessionalOng"><option value="">Nenhuma ONG</option></select></label><button type="button" id="saveProfessionalOng" class="btn btn-secondary">Salvar ONG</button></div><p id="professionalOngMessage" class="form-message"></p><div class="professional-admin-grid">
           <label>Perfil de acesso
             <select id="detailProfessionalProfile">
               <option value="profissional">Profissional</option>
@@ -90,5 +90,5 @@
       </div>
     </div>
   </dialog>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=133"></script><script src="script-v126.js?v=133"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=136"></script><script src="script-v126.js?v=136"></script>
 </body></html>

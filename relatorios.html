@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relatórios | Protege</title><link rel="stylesheet" href="style-v126.css?v=133">
+  <title>Relatórios | Protege</title><link rel="stylesheet" href="style-v126.css?v=136">
 </head>
 <body class="app-page reports-page" data-requires-auth="true">
   <aside class="sidebar"><div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div><nav>
     <a href="dashboard.html">Dashboard</a><a href="familias-interessadas.html">Famílias interessadas <span id="sidebarLeadCount" class="nav-badge">0</span></a>
-    <a href="profissionais.html">Profissionais</a><a href="agenda.html">Agenda</a><a href="familias.html">Famílias</a><a href="#">Filhos</a><a href="atendimentos.html">Atendimentos</a><a class="active" href="relatorios.html">Relatórios</a>
+    <a href="profissionais.html">Profissionais</a><a href="ongs.html">ONGs</a><a href="agenda.html">Agenda</a><a href="familias.html">Famílias</a><a href="#">Filhos</a><a href="atendimentos.html">Atendimentos</a><a class="active" href="relatorios.html">Relatórios</a>
   </nav><button id="logoutBtn" class="sidebar-logout">Sair</button></aside>
   <main class="app-main">
     <header class="app-topbar reports-topbar"><div><span class="section-label">GESTÃO</span><h1>Relatórios</h1><p class="app-subtitle">Acompanhe famílias, profissionais, atendimentos e agenda em um único painel.</p></div><div class="report-export-actions"><button id="reportExportCsv" class="btn btn-secondary" type="button">Exportar CSV</button><button id="reportPrint" class="btn btn-primary" type="button">Imprimir / PDF</button></div></header>
@@ -17,7 +17,7 @@
         <label>De<input id="reportStartDate" type="date"></label>
         <label>Até<input id="reportEndDate" type="date"></label>
         <label>Profissional<select id="reportProfessional"><option value="">Todos os profissionais</option></select></label>
-        <label>Família<select id="reportFamily"><option value="">Todas as famílias</option></select></label>
+        <label>Família<select id="reportFamily"><option value="">Todas as famílias</option></select></label><label>ONG<select id="reportOng"><option value="">Todas as ONGs</option></select></label>
         <label>Status<select id="reportStatus"><option value="">Todos os status</option><option value="realizado">Realizado</option><option value="agendado">Agendado / Confirmado</option><option value="falta">Falta</option><option value="cancelado">Cancelado</option><option value="rascunho">Rascunho</option></select></label>
         <div class="report-filter-actions"><button id="reportClearFilters" class="btn btn-secondary" type="button">Limpar</button><button id="reportApplyFilters" class="btn btn-primary" type="button">Aplicar filtros</button></div>
       </div>
@@ -38,8 +38,8 @@
     </section>
 
     <section class="panel report-table-panel"><div class="panel-head reports-table-head"><div><span class="section-label">REGISTROS</span><h2>Atendimentos e compromissos</h2></div><span id="reportResultCount" class="report-result-count">0 registros</span></div>
-      <div class="table-responsive"><table id="reportsTable" class="data-table"><thead><tr><th>Data</th><th>Família</th><th>Atendimento para</th><th>Profissional</th><th>Tipo</th><th>Status</th><th>Ações</th></tr></thead><tbody><tr><td colspan="7" class="empty-state">Carregando relatório...</td></tr></tbody></table></div>
+      <div class="table-responsive"><table id="reportsTable" class="data-table"><thead><tr><th>Data</th><th>Família</th><th>Atendimento para</th><th>Profissional</th><th>ONG</th><th>Tipo</th><th>Status</th><th>Ações</th></tr></thead><tbody><tr><td colspan="8" class="empty-state">Carregando relatório...</td></tr></tbody></table></div>
     </section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=133"></script><script src="script-v126.js?v=133"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=136"></script><script src="script-v126.js?v=136"></script>
 </body></html>
