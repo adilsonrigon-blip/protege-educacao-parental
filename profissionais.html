@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=1381">
+  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=139">
 </head>
 <body class="app-page cadastro-workspace-page" data-requires-auth="true">
   <aside class="sidebar"><div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div><nav>
@@ -44,7 +44,7 @@
         <label>Nome completo<input id="professionalName" name="nome" required autocomplete="name"></label>
         <label>E-mail de acesso<input id="professionalEmail" name="email" type="email" required autocomplete="email"></label>
         <label>Senha inicial<div class="password-field-wrap"><input id="professionalPassword" name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo de 8 caracteres"><button type="button" id="toggleProfessionalPassword" class="password-toggle">Mostrar</button></div></label>
-        <label>Telefone<input name="telefone" inputmode="tel"></label>
+        <label>Telefone<input name="telefone" inputmode="tel" autocomplete="tel"></label>
         <label>Especialidade / função<input name="especialidade" placeholder="Ex.: Educadora parental"></label><label>ONG vinculada<select id="professionalOng" name="ong_id"><option value="">Nenhuma ONG</option></select></label>
         <label>Perfil de acesso<select id="professionalProfile" name="perfil" required><option value="profissional">Profissional</option><option value="admin">Administrador</option></select></label>
         <label>Status<select name="status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></label>
@@ -61,7 +61,7 @@
       <div id="professionalDetailCards" class="detail-grid"></div>
 <section id="professionalEditSection" class="record-edit-section" hidden><form id="professionalEditForm" class="form-grid record-edit-form">
 <label>Nome completo<input name="nome" required></label><label>E-mail<input name="email" type="email" required></label>
-<label>Telefone<input name="telefone"></label><label>Especialidade / função<input name="especialidade"></label>
+<label>Telefone<input name="telefone" inputmode="tel" autocomplete="tel"></label><label>Especialidade / função<input name="especialidade"></label>
 <label>ONG vinculada<select name="ong_id" id="editProfessionalOng"><option value="">Nenhuma ONG</option></select></label>
 <div class="edit-actions full-field"><button id="cancelProfessionalEdit" class="btn btn-secondary" type="button">Cancelar</button><button id="saveProfessionalEdit" class="btn btn-primary" type="submit">Salvar alterações</button></div>
 <p id="professionalEditMessage" class="form-message full-field"></p></form></section>
@@ -97,5 +97,5 @@
       </div>
     </div>
   </dialog>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=1381"></script><script src="script-v126.js?v=1381"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=139"></script><script src="script-v126.js?v=139"></script>
 </body></html>

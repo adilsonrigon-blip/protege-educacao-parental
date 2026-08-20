@@ -1,0 +1,19 @@
+PROTEGE V13.9 — MÁSCARAS E VALIDAÇÕES BRASILEIRAS
+
+NOVO:
+- Telefone: máscara automática (11) 3333-4444 ou (11) 99999-9999 e validação de 10/11 dígitos com DDD.
+- Celular: máscara (11) 99999-9999 e validação de 11 dígitos, exigindo 9 após o DDD.
+- CPF: máscara 000.000.000-00 + validação matemática dos dígitos verificadores.
+- CNPJ: máscara 00.000.000/0000-00 + validação matemática dos dígitos verificadores.
+- Sequências repetidas inválidas (ex.: 000.000.000-00) são recusadas em CPF/CNPJ.
+- Campos opcionais podem ficar vazios; quando preenchidos, precisam ser válidos.
+- Um campo inválido fica destacado em vermelho e impede o envio ao Supabase.
+- A regra é centralizada: campos atuais ou futuros cujo name/id contenha telefone, celular, WhatsApp, CPF ou CNPJ recebem máscara/validação automaticamente.
+
+GITHUB:
+Substitua todos os HTMLs do pacote, além de script-v126.js e style-v126.css.
+
+Não precisa executar SQL novo.
+Não precisa alterar a Edge Function.
+
+Após o Commit, aguarde o GitHub Pages e pressione Ctrl+F5.

@@ -1,4 +1,4 @@
-console.info("Protege build V13.8.1 - revisão e hardening");
+console.info("Protege build V13.9 - máscaras e validações BR");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -249,7 +249,94 @@ const ProtegeApp = (() => {
   return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,updateFamily,updateChild,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,updateProfessionalDetails,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
+// =========================================================
+// V13.9 — Máscaras e validações brasileiras
+// Telefone/Celular, CPF e CNPJ
+// =========================================================
+function protegeDigits(value=''){return String(value).replace(/\D/g,'');}
+function protegeMaskPhone(value=''){
+  const d=protegeDigits(value).slice(0,11);
+  if(!d)return '';
+  if(d.length<=2)return `(${d}`;
+  if(d.length<=6)return `(${d.slice(0,2)}) ${d.slice(2)}`;
+  if(d.length<=10)return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+}
+function protegeMaskCpf(value=''){
+  const d=protegeDigits(value).slice(0,11);
+  return d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1-$2');
+}
+function protegeMaskCnpj(value=''){
+  const d=protegeDigits(value).slice(0,14);
+  return d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\/\d{4})(\d)/,'$1-$2');
+}
+function protegeValidCpf(value=''){
+  const cpf=protegeDigits(value);
+  if(cpf.length!==11||/^(\d)\1{10}$/.test(cpf))return false;
+  let sum=0;for(let i=0;i<9;i++)sum+=Number(cpf[i])*(10-i);
+  let d1=(sum*10)%11;if(d1===10)d1=0;if(d1!==Number(cpf[9]))return false;
+  sum=0;for(let i=0;i<10;i++)sum+=Number(cpf[i])*(11-i);
+  let d2=(sum*10)%11;if(d2===10)d2=0;return d2===Number(cpf[10]);
+}
+function protegeValidCnpj(value=''){
+  const cnpj=protegeDigits(value);
+  if(cnpj.length!==14||/^(\d)\1{13}$/.test(cnpj))return false;
+  const calc=(weights)=>{let sum=0;for(let i=0;i<weights.length;i++)sum+=Number(cnpj[i])*weights[i];const r=sum%11;return r<2?0:11-r;};
+  if(calc([5,4,3,2,9,8,7,6,5,4,3,2])!==Number(cnpj[12]))return false;
+  return calc([6,5,4,3,2,9,8,7,6,5,4,3,2])===Number(cnpj[13]);
+}
+function protegeFieldKind(input){
+  const key=`${input.name||''} ${input.id||''} ${input.dataset.mask||''}`.toLowerCase();
+  if(/cnpj/.test(key))return 'cnpj';
+  if(/cpf/.test(key))return 'cpf';
+  if(/celular|whatsapp|whats/.test(key))return 'celular';
+  if(/telefone|phone|fone/.test(key))return 'telefone';
+  return '';
+}
+function protegeValidateBrField(input,showMessage=true){
+  const kind=protegeFieldKind(input);if(!kind)return true;
+  const value=input.value.trim(),d=protegeDigits(value);
+  let valid=true,message='';
+  if(!value){valid=!input.required;message=input.required?'Este campo é obrigatório.':'';}
+  else if(kind==='cpf'){valid=protegeValidCpf(value);message='Informe um CPF válido.';}
+  else if(kind==='cnpj'){valid=protegeValidCnpj(value);message='Informe um CNPJ válido.';}
+  else if(kind==='celular'){valid=d.length===11&&d[2]==='9';message='Informe um celular válido com DDD, por exemplo (11) 99999-9999.';}
+  else if(kind==='telefone'){valid=(d.length===10||d.length===11);message='Informe um telefone válido com DDD.';}
+  input.setCustomValidity(valid?'':message);
+  input.classList.toggle('field-invalid',!valid);
+  input.classList.toggle('field-valid',valid&&!!value);
+  let feedback=input.parentElement?.querySelector(':scope > .field-validation-message');
+  if(!valid&&showMessage){if(!feedback){feedback=document.createElement('small');feedback.className='field-validation-message';input.insertAdjacentElement('afterend',feedback);}feedback.textContent=message;}
+  else if(feedback)feedback.remove();
+  return valid;
+}
+function protegeApplyBrMask(input){
+  const kind=protegeFieldKind(input);if(!kind)return;
+  if(kind==='cpf'){input.value=protegeMaskCpf(input.value);input.maxLength=14;input.inputMode='numeric';if(!input.placeholder)input.placeholder='000.000.000-00';}
+  else if(kind==='cnpj'){input.value=protegeMaskCnpj(input.value);input.maxLength=18;input.inputMode='numeric';if(!input.placeholder)input.placeholder='00.000.000/0000-00';}
+  else {input.value=protegeMaskPhone(input.value);input.maxLength=15;input.inputMode='tel';if(!input.placeholder)input.placeholder='(11) 99999-9999';}
+}
+function initBrazilianFieldValidation(){
+  const bind=()=>document.querySelectorAll('input[name],input[id]').forEach(input=>{
+    if(!protegeFieldKind(input)||input.dataset.brValidationBound==='1')return;
+    input.dataset.brValidationBound='1';protegeApplyBrMask(input);
+    input.addEventListener('input',()=>{protegeApplyBrMask(input);input.setCustomValidity('');input.classList.remove('field-invalid','field-valid');const m=input.parentElement?.querySelector(':scope > .field-validation-message');if(m)m.remove();});
+    input.addEventListener('blur',()=>protegeValidateBrField(input,true));
+  });
+  bind();
+  // cobre campos que sejam adicionados dinamicamente no futuro
+  const observer=new MutationObserver(bind);observer.observe(document.body,{childList:true,subtree:true});
+  // captura o submit antes dos handlers das telas: inválido não chega ao Supabase
+  document.addEventListener('submit',e=>{
+    const fields=[...e.target.querySelectorAll('input[name],input[id]')].filter(i=>protegeFieldKind(i));
+    let firstInvalid=null;
+    fields.forEach(i=>{if(!protegeValidateBrField(i,true)&&!firstInvalid)firstInvalid=i;});
+    if(firstInvalid){e.preventDefault();e.stopImmediatePropagation();firstInvalid.focus();firstInvalid.reportValidity();}
+  },true);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  initBrazilianFieldValidation();
   await ProtegeApp.requireAuth();
 
   const year = document.getElementById('year');
