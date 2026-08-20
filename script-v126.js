@@ -1,4 +1,4 @@
-console.info("Protege build V13.9 - máscaras e validações BR");
+console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -300,7 +300,7 @@ function protegeValidateBrField(input,showMessage=true){
   if(!value){valid=!input.required;message=input.required?'Este campo é obrigatório.':'';}
   else if(kind==='cpf'){valid=protegeValidCpf(value);message='Informe um CPF válido.';}
   else if(kind==='cnpj'){valid=protegeValidCnpj(value);message='Informe um CNPJ válido.';}
-  else if(kind==='celular'){valid=d.length===11&&d[2]==='9';message='Informe um celular válido com DDD, por exemplo (11) 99999-9999.';}
+  else if(kind==='celular'){valid=d.length===11&&d[2]==='9';message='Informe um celular válido com DDD. Use 11 dígitos e o número deve começar com 9 após o DDD, por exemplo (11) 99999-9999.';}
   else if(kind==='telefone'){valid=(d.length===10||d.length===11);message='Informe um telefone válido com DDD.';}
   input.setCustomValidity(valid?'':message);
   input.classList.toggle('field-invalid',!valid);

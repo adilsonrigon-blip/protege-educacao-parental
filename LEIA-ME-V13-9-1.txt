@@ -1,0 +1,33 @@
+PROTEGE V13.9.1 — HOTFIX CELULAR / QUERO PARTICIPAR
+
+Problema corrigido:
+Na tela "Quero Participar", o campo "Telefone / WhatsApp" estava identificado
+internamente como "telefone". Por isso a validação aceitava telefone fixo
+com 10 dígitos.
+
+Correção:
+O mesmo campo continua sendo salvo como "telefone" no banco, mas agora recebe
+data-mask="celular". Assim ele passa a exigir:
+- DDD + celular;
+- exatamente 11 dígitos;
+- primeiro dígito do celular igual a 9;
+- máscara automática (11) 99999-9999.
+
+Exemplo válido:
+(11) 99999-9999
+
+Exemplos recusados:
+(11) 3333-4444
+(11) 89999-9999
+(11) 9999-9999
+
+NO GITHUB:
+Substitua somente:
+1. cadastro.html
+2. script-v126.js
+3. style-v126.css
+
+Não precisa executar SQL.
+Não precisa alterar a Edge Function.
+
+Depois do Commit, aguarde o GitHub Pages e pressione Ctrl+F5 na página Quero Participar.
