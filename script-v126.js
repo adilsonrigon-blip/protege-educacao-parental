@@ -1,4 +1,4 @@
-console.info("Protege build V13.6 - ONGs vinculadas");
+console.info("Protege build V13.6.1 - hotfix ONGs");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);

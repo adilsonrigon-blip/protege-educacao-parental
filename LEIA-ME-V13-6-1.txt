@@ -1,0 +1,34 @@
+PROTEGE V13.6.1 - HOTFIX ONGs
+
+Correções:
+- Corrigido o layout da tela ONGs.
+- Inputs, selects e textarea agora seguem o padrão visual da plataforma.
+- Campo ONG da família ficou mais evidente na ficha da Família.
+- Campo ONG da família ficou mais evidente no Novo Atendimento.
+- Mantidos filtros por ONG em Famílias, Agenda, Atendimentos, Profissionais e Relatórios.
+- Cache dos arquivos atualizado para evitar o navegador carregar HTML/CSS antigo.
+
+IMPORTANTE:
+Este hotfix NÃO exige novo SQL.
+Este hotfix NÃO exige nova alteração na Edge Function.
+
+NO GITHUB, substitua:
+- ongs.html
+- familias.html
+- atendimento.html
+- agenda.html
+- atendimentos.html
+- profissionais.html
+- relatorios.html
+- dashboard.html
+- familias-interessadas.html
+- script-v126.js
+- style-v126.css
+
+Depois do Commit:
+1. Aguarde o GitHub Pages atualizar.
+2. Abra ONGs e pressione Ctrl+F5.
+3. Depois teste Família > Abrir: deve aparecer "ONG vinculada à família".
+4. Teste Novo atendimento: ao selecionar uma família, aparece "ONG da família".
+
+Se o campo não aparecer mesmo após este pacote, significa que um HTML antigo permaneceu no repositório.

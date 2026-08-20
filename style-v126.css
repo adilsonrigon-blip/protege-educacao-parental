@@ -175,3 +175,83 @@
 .agenda-ong-line{font-size:.78rem!important;color:#7d6687!important;margin-top:4px!important}
 .ong-form .full-field{grid-column:1/-1}
 @media(max-width:700px){.family-ong-controls,.professional-ong-edit{display:grid;grid-template-columns:1fr}.family-ong-controls select,.professional-ong-edit select{min-width:0;width:100%}}
+
+
+/* V13.6.1 - Hotfix visual ONGs e campos ONG */
+.ong-form{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  margin-top:18px;
+}
+.ong-form label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-size:13px;
+  font-weight:750;
+  color:#4d4553;
+}
+.ong-form input,
+.ong-form select,
+.ong-form textarea{
+  width:100%;
+  min-height:48px;
+  border:1px solid #ded5e3;
+  border-radius:12px;
+  padding:11px 13px;
+  font:inherit;
+  background:#fff;
+  color:var(--ink);
+  outline:none;
+}
+.ong-form textarea{min-height:96px;resize:vertical}
+.ong-form .full-field{grid-column:1/-1}
+.ong-form .form-submit-cell{grid-column:1/-1;display:flex;justify-content:flex-end}
+.ong-form .form-submit-cell .btn{min-width:240px}
+.family-ong-link{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px 18px;
+  align-items:end;
+}
+.family-ong-link .form-message{grid-column:1/-1}
+.family-ong-controls{display:flex;gap:10px;align-items:end}
+.family-ong-controls select{
+  min-width:300px;
+  min-height:46px;
+  border:1px solid #ded5e3;
+  border-radius:12px;
+  padding:0 12px;
+  background:#fff;
+  font:inherit;
+}
+.ong-info-field .readonly-info{
+  min-height:48px;
+  border:1px solid #d9cde1;
+  border-radius:12px;
+  background:#f8f2fb;
+  padding:12px 14px;
+  font-weight:800;
+  color:#5c2f78;
+}
+.professional-ong-edit{
+  margin:16px 0;
+  padding:14px;
+  border:1px solid #eadfec;
+  border-radius:14px;
+  background:#fbf8fc;
+}
+#familyOngFilter,#attendanceOngFilter,#agendaOngFilter,#agendaQueryOng,#reportOng,#professionalOngFilter{
+  min-width:170px;
+}
+@media(max-width:1050px){
+  .ong-form{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){
+  .ong-form{grid-template-columns:1fr}
+  .ong-form .full-field,.ong-form .form-submit-cell{grid-column:1}
+  .family-ong-link{grid-template-columns:1fr}
+  .family-ong-controls{display:grid;grid-template-columns:1fr}
+  .family-ong-controls select{min-width:0;width:100%}
+}
