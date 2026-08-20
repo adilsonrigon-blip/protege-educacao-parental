@@ -1,4 +1,4 @@
-console.info("Protege build V13.4 - PDF famílias e atendimentos");
+console.info("Protege build V13.5 - layout profissional de impressão/PDF");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -394,8 +394,58 @@ function ProtegePrintDocument({title, subtitle='', sections='', footer='Protege 
   const emittedAt=new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date());
   const doc=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>${ProtegeApp.esc(title)}</title>
   <style>
-    @page{size:A4;margin:16mm 14mm 18mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#2d2431;font-size:11px;line-height:1.45;background:#fff}.print-head{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7e3ba5;padding-bottom:12px;margin-bottom:18px}.print-brand{display:flex;align-items:center;gap:14px}.print-brand img{width:82px;height:auto}.print-title h1{margin:0;font-size:22px}.print-title p{margin:3px 0 0;color:#776a7b}.print-meta{text-align:right;color:#776a7b;font-size:9px}.print-section{margin:0 0 18px;break-inside:avoid}.print-section h2{font-size:14px;color:#7e3ba5;border-bottom:1px solid #e8ddeb;padding-bottom:6px;margin:0 0 10px}.print-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.print-card{border:1px solid #e8e0eb;border-radius:8px;padding:9px 10px;break-inside:avoid}.print-card.wide{grid-column:1/-1}.print-card span,.print-field span{display:block;text-transform:uppercase;letter-spacing:.05em;color:#8a7a90;font-size:8px;margin-bottom:3px}.print-card b{font-size:11px}.print-card small{display:block;color:#6f6372;margin-top:3px}.print-chip{display:inline-block;border:1px solid #e6dce9;border-radius:999px;padding:4px 8px;margin:3px 5px 2px 0}.print-step{border:1px solid #e8e0eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;break-inside:avoid}.print-step h3{margin:0 0 8px;font-size:12px;color:#7e3ba5}.print-field{margin-top:8px}.print-field p{margin:3px 0 0;white-space:pre-wrap}.print-timeline{border-left:2px solid #dbc5e6;padding-left:14px;margin-left:5px}.print-evolution{position:relative;margin:0 0 14px;break-inside:avoid}.print-evolution:before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:#7e3ba5;left:-19px;top:5px}.print-evolution h3{font-size:11px;margin:0 0 3px}.print-evolution p{white-space:pre-wrap;margin:5px 0}.print-evolution small{color:#726676}.print-table{width:100%;border-collapse:collapse}.print-table th,.print-table td{padding:7px 6px;border-bottom:1px solid #e9e2eb;text-align:left;vertical-align:top}.print-table th{text-transform:uppercase;font-size:8px;color:#837488}.print-empty{color:#817484;font-style:italic}.print-footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #e8e0eb;padding-top:5px;text-align:center;color:#8a7d8d;font-size:8px}.print-confidential{font-weight:700;color:#7e3ba5}@media print{.no-print{display:none!important}} 
-  </style></head><body><header class="print-head"><div class="print-brand"><img src="${logoUrl}" alt="Protege"><div class="print-title"><h1>${ProtegeApp.esc(title)}</h1><p>${ProtegeApp.esc(subtitle)}</p></div></div><div class="print-meta"><div>Emitido em ${ProtegeApp.esc(emittedAt)}</div><div class="print-confidential">Documento de uso interno</div></div></header>${sections}<footer class="print-footer">${ProtegeApp.esc(footer)}</footer><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),350));<\/script></body></html>`;
+    @page{size:A4 portrait;margin:11mm 11mm 14mm}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#241c2a;font-size:9.5px;line-height:1.32;background:#fff}
+    .print-head{display:grid;grid-template-columns:82px 1fr 185px;gap:14px;align-items:center;border-bottom:2px solid #6f2c91;padding:0 0 10px;margin:0 0 10px}
+    .print-brand img{width:74px;height:auto;display:block}
+    .print-title h1{margin:0;color:#4f2476;font-size:20px;line-height:1.05;text-transform:uppercase;letter-spacing:-.3px}
+    .print-title p{margin:5px 0 0;color:#746a79;font-size:9px}
+    .print-meta{text-align:right;border-left:1px solid #ded3e5;padding-left:12px;color:#6f6474;font-size:8px;line-height:1.55}
+    .print-meta b{display:block;color:#2b2230;font-size:9px}
+    .print-confidential{margin-top:3px;font-weight:700;color:#6f2c91}
+    .print-section{border:1px solid #e5dce9;border-radius:10px;padding:10px 11px;margin:0 0 9px;break-inside:auto}
+    .print-section>h2{display:flex;align-items:center;gap:6px;margin:0 0 8px;padding:0 0 6px;border-bottom:1px solid #d9c8e2;color:#5d2684;font-size:11px;text-transform:uppercase;letter-spacing:.15px}
+    .print-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .print-card{border:1px solid #e8e1eb;border-radius:8px;padding:7px 9px;background:#fff;min-height:42px;break-inside:avoid}
+    .print-card.wide{grid-column:1/-1}
+    .print-card span,.print-field span{display:block;color:#735589;text-transform:uppercase;letter-spacing:.04em;font-size:6.8px;margin-bottom:2px}
+    .print-card b{font-size:10px;color:#1f1824}
+    .print-card small{display:block;color:#746a79;margin-top:2px;font-size:8px}
+    .print-chip{display:inline-block;background:#f5eff8;border-radius:999px;padding:3px 7px;margin:2px 4px 1px 0}
+    .print-step{display:grid;grid-template-columns:25px 118px 1fr;column-gap:8px;align-items:start;border:0;border-bottom:1px solid #eee8f1;border-radius:0;padding:6px 2px;margin:0;break-inside:avoid}
+    .print-step:last-child{border-bottom:0}
+    .print-step h3{grid-column:1/3;margin:0;color:#52217a;font-size:9.5px}
+    .print-step h3:before{content:'›';display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#f0e8f5;margin-right:7px;color:#632b88;font-weight:700}
+    .print-step .print-field{grid-column:3;margin:0 0 4px;display:grid;grid-template-columns:145px 1fr;gap:8px}
+    .print-step .print-field span{margin:0}
+    .print-field p{margin:0;white-space:pre-wrap;color:#251e29}
+    .print-timeline{border-left:2px solid #d9c2e5;padding-left:13px;margin:2px 0 0 5px}
+    .print-evolution{position:relative;margin:0 0 10px;break-inside:avoid}
+    .print-evolution:before{content:'';position:absolute;width:7px;height:7px;border-radius:50%;background:#6f2c91;left:-18px;top:3px}
+    .print-evolution h3{font-size:9px;color:#52217a;margin:0 0 2px}
+    .print-evolution p{white-space:pre-wrap;margin:3px 0}
+    .print-evolution small{color:#756a79;font-size:7.5px}
+    .print-table{width:100%;border-collapse:collapse}
+    .print-table th,.print-table td{padding:5px;border-bottom:1px solid #ece6ee;text-align:left;vertical-align:top}
+    .print-table th{font-size:7px;text-transform:uppercase;color:#735589;background:#faf7fb}
+    .print-empty{color:#817484;font-style:italic}
+    .print-footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #e4dbe8;padding-top:4px;text-align:center;color:#837789;font-size:7px;background:#fff}
+    .print-footer:after{content:"  •  Documento de uso interno"}
+    @media print{
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .print-section{box-shadow:none}
+      .no-print{display:none!important}
+    }
+  </style></head><body>
+  <header class="print-head">
+    <div class="print-brand"><img src="${logoUrl}" alt="Protege"></div>
+    <div class="print-title"><h1>${ProtegeApp.esc(title)}</h1><p>${ProtegeApp.esc(subtitle)}</p></div>
+    <div class="print-meta"><span>EMITIDO EM</span><b>${ProtegeApp.esc(emittedAt)}</b><div class="print-confidential">DOCUMENTO DE USO INTERNO</div></div>
+  </header>
+  ${sections}
+  <footer class="print-footer">${ProtegeApp.esc(footer)}</footer>
+  <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),350));<\/script></body></html>`;
   return doc;
 }
 

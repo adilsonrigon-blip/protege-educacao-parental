@@ -1,0 +1,21 @@
+PROTEGE V13.5 — NOVO LAYOUT DE IMPRESSÃO / PDF
+
+Melhorias:
+- Cabeçalho mais compacto e profissional.
+- Melhor aproveitamento de folha A4.
+- Identificação em cards.
+- 10 etapas em formato compacto, reduzindo espaços vazios.
+- Evoluções em linha do tempo.
+- Rodapé discreto de uso interno.
+- Mantidos todos os dados e funcionalidades da V13.4.
+
+ARQUIVOS PARA SUBIR NO GITHUB:
+1. familias.html
+2. atendimentos.html
+3. script-v126.js
+4. style-v126.css
+
+Não precisa executar SQL.
+Não precisa alterar Edge Function.
+
+Após o Commit, aguarde o GitHub Pages e pressione Ctrl+F5.
