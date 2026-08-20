@@ -1,4 +1,4 @@
-console.info("Protege build V13.0.1 - profissionais com acesso");
+console.info("Protege build V13.2 - consulta de profissionais");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -99,6 +99,19 @@ const ProtegeApp = (() => {
     return manageProfessionalAccess({action:'create', ...payload});
   }
 
+  async function updateProfessionalAccess(profissional_id, perfil, status) {
+    return manageProfessionalAccess({
+      action:'set-profile',
+      profissional_id,
+      perfil,
+      ativo: status !== 'inativo'
+    });
+  }
+
+  async function resetProfessionalPassword(profissional_id, password) {
+    return manageProfessionalAccess({action:'reset-password', profissional_id, password});
+  }
+
   async function loadAttendances(familyId=null, limit=100) {
     if (!configured) return [];
     let q = db.from('atendimentos').select('*, profissionais(nome), filhos(nome), familias(responsavel1,responsavel2)').order('data_hora',{ascending:false}).limit(limit);
@@ -172,7 +185,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadFamilies,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -419,25 +432,161 @@ async function initFamiliesPage() {
 }
 
 async function initProfessionalsPage(){
-  const tbody=document.querySelector('#professionalsTable tbody'); const form=document.getElementById('professionalForm'); const msg=document.getElementById('professionalMessage');
+  const tbody=document.querySelector('#professionalsTable tbody');
+  const form=document.getElementById('professionalForm');
+  const msg=document.getElementById('professionalMessage');
+  const search=document.getElementById('professionalSearch');
+  const profileFilter=document.getElementById('professionalProfileFilter');
+  const statusFilter=document.getElementById('professionalStatusFilter');
+  const resultCount=document.getElementById('professionalResultCount');
+  const dialog=document.getElementById('professionalDetailDialog');
+  let items=[],activeProfessional=null;
+
+  function normalized(v=''){
+    return String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  }
+
+  function filteredItems(){
+    const q=normalized(search?.value||'').trim();
+    const perfil=profileFilter?.value||'';
+    const status=statusFilter?.value||'';
+    return items.filter(p=>{
+      if(perfil && p.perfil!==perfil) return false;
+      if(status && p.status!==status) return false;
+      if(!q) return true;
+      return normalized([p.nome,p.email,p.telefone,p.especialidade].filter(Boolean).join(' ')).includes(q);
+    });
+  }
+
+  function render(){
+    const rows=filteredItems();
+    if(resultCount) resultCount.textContent=`${rows.length} ${rows.length===1?'profissional':'profissionais'}`;
+    tbody.innerHTML=rows.length?rows.map(p=>`<tr>
+      <td><b>${ProtegeApp.esc(p.nome)}</b></td>
+      <td>${ProtegeApp.esc(p.email||'—')}</td>
+      <td>${ProtegeApp.esc(p.telefone||'—')}</td>
+      <td>${ProtegeApp.esc(p.especialidade||'—')}</td>
+      <td><span class="access-pill ${p.perfil==='admin'?'access-admin':'access-professional'}">${p.perfil==='admin'?'Administrador':'Profissional'}</span></td>
+      <td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td>
+      <td><button type="button" class="small-btn view-professional" data-id="${ProtegeApp.esc(p.id)}">Abrir</button></td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">Nenhum profissional encontrado.</td></tr>';
+  }
+
   async function refresh(){
     try{
-      const items=await ProtegeApp.loadProfessionalsWithAccess();
-      tbody.innerHTML=items.length?items.map(p=>`<tr><td><b>${ProtegeApp.esc(p.nome)}</b></td><td>${ProtegeApp.esc(p.email||'—')}</td><td>${ProtegeApp.esc(p.telefone||'—')}</td><td>${ProtegeApp.esc(p.especialidade||'—')}</td><td><span class="access-pill ${p.perfil==='admin'?'access-admin':'access-professional'}">${p.perfil==='admin'?'Administrador':'Profissional'}</span></td><td><span class="status-pill ${p.status==='ativo'?'status-aprovado':'status-nao_aprovado'}">${ProtegeApp.esc(p.status)}</span></td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum profissional cadastrado.</td></tr>';
-    }catch(err){console.error(err);tbody.innerHTML=`<tr><td colspan="6" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;}
+      items=await ProtegeApp.loadProfessionalsWithAccess();
+      render();
+    }catch(err){
+      console.error(err);
+      tbody.innerHTML=`<tr><td colspan="7" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;
+    }
   }
-  const passwordInput=document.getElementById('professionalPassword'); const togglePassword=document.getElementById('toggleProfessionalPassword');
-  togglePassword?.addEventListener('click',()=>{const showing=passwordInput.type==='text';passwordInput.type=showing?'password':'text';togglePassword.textContent=showing?'Mostrar':'Ocultar';});
-  form?.addEventListener('submit',async e=>{
-    e.preventDefault(); const fd=new FormData(form); const saveBtn=document.getElementById('saveProfessionalButton');
-    const nome=String(fd.get('nome')||'').trim(), email=String(fd.get('email')||'').trim().toLowerCase(), password=String(fd.get('password')||'');
-    if(!nome||!email){msg.textContent='Informe nome e e-mail.';return;} if(password.length<8){msg.textContent='A senha deve ter pelo menos 8 caracteres.';return;}
-    msg.textContent='Criando profissional e acesso...'; saveBtn.disabled=true;
-    try{
-      await ProtegeApp.createProfessionalWithAccess({nome,email,password,telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,perfil:String(fd.get('perfil')||'profissional'),status:String(fd.get('status')||'ativo')});
-      msg.textContent='Profissional e usuário de acesso criados com sucesso.'; form.reset(); document.getElementById('professionalProfile').value='profissional'; await refresh();
-    }catch(err){console.error(err);msg.textContent=`Não foi possível criar: ${err?.message||'erro inesperado'}`;}finally{saveBtn.disabled=false;}
+
+  function openProfessional(id){
+    const p=items.find(x=>x.id===id);
+    if(!p)return;
+    activeProfessional=p;
+    document.getElementById('professionalDetailName').textContent=p.nome||'Profissional';
+    document.getElementById('professionalDetailEmail').textContent=p.email||'Sem e-mail';
+    document.getElementById('professionalDetailCards').innerHTML=`
+      <div class="detail-card"><span>Telefone</span><b>${ProtegeApp.esc(p.telefone||'—')}</b></div>
+      <div class="detail-card"><span>Especialidade / função</span><b>${ProtegeApp.esc(p.especialidade||'—')}</b></div>
+      <div class="detail-card"><span>Perfil atual</span><b>${p.perfil==='admin'?'Administrador':'Profissional'}</b></div>
+      <div class="detail-card"><span>Status atual</span><b>${ProtegeApp.esc(p.status||'—')}</b></div>`;
+    document.getElementById('detailProfessionalProfile').value=p.perfil==='admin'?'admin':'profissional';
+    document.getElementById('detailProfessionalStatus').value=p.status==='inativo'?'inativo':'ativo';
+    document.getElementById('detailProfessionalPassword').value='';
+    document.getElementById('professionalAccessMessage').textContent='';
+    document.getElementById('professionalPasswordMessage').textContent='';
+    if(typeof dialog.showModal==='function')dialog.showModal(); else dialog.setAttribute('open','');
+  }
+
+  const passwordInput=document.getElementById('professionalPassword');
+  const togglePassword=document.getElementById('toggleProfessionalPassword');
+  togglePassword?.addEventListener('click',()=>{
+    const showing=passwordInput.type==='text';
+    passwordInput.type=showing?'password':'text';
+    togglePassword.textContent=showing?'Mostrar':'Ocultar';
   });
+
+  form?.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const fd=new FormData(form);
+    const saveBtn=document.getElementById('saveProfessionalButton');
+    const nome=String(fd.get('nome')||'').trim();
+    const email=String(fd.get('email')||'').trim().toLowerCase();
+    const password=String(fd.get('password')||'');
+    if(!nome||!email){msg.textContent='Informe nome e e-mail.';return;}
+    if(password.length<8){msg.textContent='A senha deve ter pelo menos 8 caracteres.';return;}
+    msg.textContent='Criando profissional e acesso...';
+    saveBtn.disabled=true;
+    try{
+      await ProtegeApp.createProfessionalWithAccess({
+        nome,email,password,
+        telefone:String(fd.get('telefone')||'').trim()||null,
+        especialidade:String(fd.get('especialidade')||'').trim()||null,
+        perfil:String(fd.get('perfil')||'profissional'),
+        status:String(fd.get('status')||'ativo')
+      });
+      msg.textContent='Profissional e usuário de acesso criados com sucesso.';
+      form.reset();
+      document.getElementById('professionalProfile').value='profissional';
+      await refresh();
+    }catch(err){
+      console.error(err);
+      msg.textContent=`Não foi possível criar: ${err?.message||'erro inesperado'}`;
+    }finally{saveBtn.disabled=false;}
+  });
+
+  [search,profileFilter,statusFilter].forEach(el=>{
+    el?.addEventListener(el===search?'input':'change',render);
+  });
+
+  tbody?.addEventListener('click',e=>{
+    const b=e.target.closest('.view-professional');
+    if(b)openProfessional(b.dataset.id);
+  });
+
+  document.getElementById('closeProfessionalDetail')?.addEventListener('click',()=>dialog.close());
+  dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+
+  document.getElementById('saveProfessionalAccess')?.addEventListener('click',async()=>{
+    if(!activeProfessional)return;
+    const button=document.getElementById('saveProfessionalAccess');
+    const accessMsg=document.getElementById('professionalAccessMessage');
+    const perfil=document.getElementById('detailProfessionalProfile').value;
+    const status=document.getElementById('detailProfessionalStatus').value;
+    button.disabled=true; accessMsg.textContent='Salvando...';
+    try{
+      await ProtegeApp.updateProfessionalAccess(activeProfessional.id,perfil,status);
+      accessMsg.textContent='Perfil e status atualizados com sucesso.';
+      await refresh();
+      activeProfessional=items.find(x=>x.id===activeProfessional.id)||activeProfessional;
+      setTimeout(()=>{if(dialog.open)dialog.close();},450);
+    }catch(err){
+      console.error(err);
+      accessMsg.textContent='Não foi possível salvar: '+(err?.message||'erro inesperado');
+    }finally{button.disabled=false;}
+  });
+
+  document.getElementById('resetProfessionalPassword')?.addEventListener('click',async()=>{
+    if(!activeProfessional)return;
+    const field=document.getElementById('detailProfessionalPassword');
+    const passMsg=document.getElementById('professionalPasswordMessage');
+    const password=field.value;
+    if(password.length<8){passMsg.textContent='A nova senha deve ter pelo menos 8 caracteres.';return;}
+    const button=document.getElementById('resetProfessionalPassword');
+    button.disabled=true; passMsg.textContent='Redefinindo senha...';
+    try{
+      await ProtegeApp.resetProfessionalPassword(activeProfessional.id,password);
+      passMsg.textContent='Senha redefinida com sucesso.';
+      field.value='';
+    }catch(err){
+      console.error(err);
+      passMsg.textContent='Não foi possível redefinir: '+(err?.message||'erro inesperado');
+    }finally{button.disabled=false;}
+  });
+
   await refresh();
 }
 

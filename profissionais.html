@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=126">
+  <title>Profissionais | Protege</title><link rel="stylesheet" href="style-v126.css?v=132">
 </head>
 <body class="app-page" data-requires-auth="true">
   <aside class="sidebar"><div class="sidebar-brand"><img src="logo-protege.jpeg" alt="Protege"></div><nav>
@@ -25,9 +25,70 @@
         <div class="form-submit-cell"><button id="saveProfessionalButton" class="btn btn-primary" type="submit">Criar profissional e acesso</button></div>
       </form><p id="professionalMessage" class="form-message" role="status"></p>
     </section>
-    <section class="panel leads-panel"><div class="panel-head"><div><span class="section-label">EQUIPE</span><h2>Profissionais cadastrados</h2></div></div>
-      <div class="table-responsive"><table class="data-table" id="professionalsTable"><thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>Perfil</th><th>Status</th></tr></thead><tbody><tr><td colspan="6" class="empty-state">Carregando...</td></tr></tbody></table></div>
+    <section class="panel leads-panel">
+      <div class="panel-head professionals-list-head">
+        <div><span class="section-label">EQUIPE</span><h2>Profissionais cadastrados</h2></div>
+        <div class="professionals-filters">
+          <input id="professionalSearch" class="table-search" type="search" placeholder="Buscar por nome, telefone ou e-mail" autocomplete="off">
+          <select id="professionalProfileFilter" class="table-filter" aria-label="Filtrar por perfil">
+            <option value="">Todos os perfis</option>
+            <option value="admin">Administrador</option>
+            <option value="profissional">Profissional</option>
+          </select>
+          <select id="professionalStatusFilter" class="table-filter" aria-label="Filtrar por status">
+            <option value="">Todos os status</option>
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
+      </div>
+      <div class="professionals-result-bar"><span id="professionalResultCount">0 profissionais</span></div>
+      <div class="table-responsive">
+        <table class="data-table" id="professionalsTable">
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Especialidade</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody><tr><td colspan="7" class="empty-state">Carregando...</td></tr></tbody>
+        </table>
+      </div>
     </section>
   </main>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=126"></script><script src="script-v126.js?v=126"></script>
+
+  <dialog id="professionalDetailDialog" class="modal-dialog professional-detail-dialog">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <div><span class="section-label">PROFISSIONAL</span><h2 id="professionalDetailName">Profissional</h2><p id="professionalDetailEmail" class="app-subtitle"></p></div>
+        <button type="button" id="closeProfessionalDetail" class="modal-close" aria-label="Fechar">×</button>
+      </div>
+      <div id="professionalDetailCards" class="detail-grid"></div>
+      <div class="professional-admin-tools">
+        <div>
+          <span class="section-label">ACESSO</span>
+          <h3>Perfil e status</h3>
+        </div>
+        <div class="professional-admin-grid">
+          <label>Perfil de acesso
+            <select id="detailProfessionalProfile">
+              <option value="profissional">Profissional</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </label>
+          <label>Status
+            <select id="detailProfessionalStatus">
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </label>
+          <button type="button" id="saveProfessionalAccess" class="btn btn-primary">Salvar acesso</button>
+        </div>
+        <p id="professionalAccessMessage" class="form-message"></p>
+        <div class="professional-password-reset">
+          <label>Nova senha
+            <input id="detailProfessionalPassword" type="password" minlength="8" placeholder="Mínimo de 8 caracteres">
+          </label>
+          <button type="button" id="resetProfessionalPassword" class="btn btn-secondary">Redefinir senha</button>
+        </div>
+        <p id="professionalPasswordMessage" class="form-message"></p>
+      </div>
+    </div>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config-v126.js?v=132"></script><script src="script-v126.js?v=132"></script>
 </body></html>

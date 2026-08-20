@@ -1,0 +1,22 @@
+PROTEGE V13.2 - Consulta de profissionais
+
+ALTERAÇÃO:
+- Busca instantânea por nome, telefone, e-mail ou especialidade.
+- Filtro por perfil: Administrador / Profissional.
+- Filtro por status: Ativo / Inativo.
+- Contador de resultados.
+- Coluna Ações com botão Abrir.
+- Ficha do profissional em modal.
+- Admin pode alterar Perfil/Status e redefinir senha pela Edge Function já existente.
+
+NO GITHUB:
+Substitua somente:
+1. profissionais.html
+2. script-v126.js
+3. style-v126.css
+
+Não precisa executar SQL novo.
+Não precisa alterar a Edge Function se a administrar-profissional já está publicada com as ações:
+list, create, set-profile e reset-password.
+
+Depois do commit, aguarde a publicação e pressione Ctrl+F5.
