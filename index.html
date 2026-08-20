@@ -5,7 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Protege - Educação Parental. Cuidado, orientação e fortalecimento dos vínculos familiares.">
   <title>Protege | Educação Parental</title>
-  <link rel="stylesheet" href="style-v126.css?v=126">
+  <link rel="stylesheet" href="style.css?v=1392">
+
+  <style>
+    .benefits-marketing .benefits-heading{
+      max-width: 860px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+    .benefits-marketing .benefits-heading h2{
+      margin-bottom: 16px;
+    }
+    .benefits-intro{
+      max-width: 760px;
+      margin: 0 auto;
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: #74697a;
+    }
+    .benefit-grid-marketing{
+      margin-top: 42px;
+    }
+    .benefit-marketing{
+      align-items: flex-start;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .benefit-marketing:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 16px 38px rgba(69, 44, 78, .08);
+      border-color: #dfcee7;
+    }
+    .benefit-marketing b{
+      flex: 0 0 auto;
+    }
+    .benefit-marketing h3{
+      margin-bottom: 8px;
+    }
+    .benefit-marketing p{
+      line-height: 1.65;
+    }
+    .benefits-cta{
+      margin-top: 46px;
+      padding: 30px 34px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #f7effb 0%, #fdf9ff 100%);
+      border: 1px solid #eadcf0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+    }
+    .benefits-cta h3{
+      margin: 8px 0 8px;
+      font-size: clamp(1.35rem, 2vw, 1.8rem);
+      color: #302737;
+    }
+    .benefits-cta p{
+      margin: 0;
+      max-width: 720px;
+      color: #74697a;
+      line-height: 1.6;
+    }
+    .benefits-cta-button{
+      white-space: nowrap;
+      min-width: 220px;
+      text-align: center;
+    }
+    @media (max-width: 760px){
+      .benefits-cta{
+        flex-direction: column;
+        align-items: stretch;
+        padding: 24px;
+      }
+      .benefits-cta-button{
+        width: 100%;
+      }
+    }
+  </style>
+
 </head>
 <body>
   <header class="site-header">
@@ -115,17 +193,58 @@
       </div>
     </section>
 
-    <section id="beneficios" class="section">
+    <section id="beneficios" class="section benefits-marketing">
       <div class="container">
-        <div class="section-heading">
+        <div class="section-heading benefits-heading">
           <span class="section-label">BENEFÍCIOS</span>
-          <h2>Mais consciência para relações mais fortes.</h2>
+          <h2>Transforme desafios do dia a dia em relações mais fortes.</h2>
+          <p class="benefits-intro">
+            Orientação prática para ajudar sua família a enfrentar os desafios da parentalidade
+            com mais segurança, diálogo e conexão.
+          </p>
         </div>
-        <div class="benefit-grid">
-          <div class="benefit"><b>01</b><div><h3>Mais segurança</h3><p>Conhecimento para lidar com situações desafiadoras.</p></div></div>
-          <div class="benefit"><b>02</b><div><h3>Comunicação</h3><p>Construção de diálogos mais claros e respeitosos.</p></div></div>
-          <div class="benefit"><b>03</b><div><h3>Vínculos</h3><p>Fortalecimento das relações entre pais, filhos e cuidadores.</p></div></div>
-          <div class="benefit"><b>04</b><div><h3>Desenvolvimento</h3><p>Estratégias práticas para acompanhar cada etapa da família.</p></div></div>
+
+        <div class="benefit-grid benefit-grid-marketing">
+          <div class="benefit benefit-marketing">
+            <b>01</b>
+            <div>
+              <h3>Mais segurança para educar</h3>
+              <p>Tome decisões com mais confiança e aprenda estratégias práticas para lidar com limites, conflitos e situações desafiadoras do dia a dia.</p>
+            </div>
+          </div>
+
+          <div class="benefit benefit-marketing">
+            <b>02</b>
+            <div>
+              <h3>Comunicação que aproxima</h3>
+              <p>Construa diálogos mais claros e respeitosos, reduzindo conflitos e criando um ambiente em que pais e filhos se sintam ouvidos e compreendidos.</p>
+            </div>
+          </div>
+
+          <div class="benefit benefit-marketing">
+            <b>03</b>
+            <div>
+              <h3>Vínculos familiares mais fortes</h3>
+              <p>Fortaleça a conexão entre pais, filhos e cuidadores, criando relações baseadas em confiança, respeito, acolhimento e presença.</p>
+            </div>
+          </div>
+
+          <div class="benefit benefit-marketing">
+            <b>04</b>
+            <div>
+              <h3>Estratégias para cada fase</h3>
+              <p>Entenda melhor as necessidades dos seus filhos e tenha ferramentas para enfrentar os desafios de cada etapa do desenvolvimento.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="benefits-cta">
+          <div>
+            <span class="section-label">VOCÊ NÃO PRECISA FAZER TUDO SOZINHO</span>
+            <h3>Sua família pode viver relações mais leves, conscientes e conectadas.</h3>
+            <p>Encontre orientação, acolhimento e estratégias práticas para construir relações familiares mais saudáveis.</p>
+          </div>
+          <a class="btn btn-primary benefits-cta-button" href="cadastro.html">Quero conhecer a Protege</a>
         </div>
       </div>
     </section>
@@ -158,6 +277,6 @@
     </div>
   </footer>
 
-  <script src="script-v126.js?v=126"></script>
+  <script src="script.js?v=1392"></script>
 </body>
 </html>

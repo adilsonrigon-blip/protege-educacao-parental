@@ -1,0 +1,21 @@
+PROTEGE V13.9.2 — BENEFÍCIOS MAIS PERSUASIVOS
+
+Alteração:
+- Novo título da seção Benefícios.
+- Texto introdutório mais comercial.
+- Benefícios reescritos com foco no resultado para pais e famílias.
+- Novo bloco de chamada para ação.
+- Botão "Quero conhecer a Protege" direcionando para cadastro.html.
+- Ajustes visuais incluídos dentro do próprio index.html.
+
+PARA SUBIR NO GITHUB:
+Substitua somente:
+- index.html
+
+Não precisa alterar:
+- Supabase
+- SQL
+- Edge Function
+- demais arquivos da plataforma
+
+Depois do Commit, aguarde a publicação e pressione Ctrl+F5.
