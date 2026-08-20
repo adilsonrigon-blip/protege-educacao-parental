@@ -157,3 +157,8 @@
 @media(max-width:850px){.report-chart-grid{grid-template-columns:1fr}.report-filter-grid{grid-template-columns:1fr 1fr}.reports-topbar{gap:18px}.report-export-actions{width:100%}.report-export-actions .btn{flex:1;text-align:center}}
 @media(max-width:600px){.report-metric-grid{grid-template-columns:1fr 1fr}.report-filter-grid{grid-template-columns:1fr}.report-filter-actions{flex-direction:column-reverse}.report-filter-actions .btn{width:100%}.report-bar-row{grid-template-columns:90px 1fr 28px}}
 @media print{.sidebar,.report-filter-panel,.report-export-actions,.sidebar-logout,#reportsTable th:last-child,#reportsTable td:last-child{display:none!important}.app-main{margin-left:0!important;padding:15px!important}.report-chart-grid{grid-template-columns:1fr 1fr}.panel,.metric{box-shadow:none!important;break-inside:avoid}.reports-page{background:#fff!important}.report-metric-grid{grid-template-columns:repeat(3,1fr)}}
+
+
+/* V13.4 - Impressão / PDF de famílias e atendimentos */
+.dialog-actions #printFamilyPdf,.dialog-actions #printAttendancePdf{white-space:nowrap}
+@media(max-width:700px){.dialog-actions{flex-wrap:wrap}.dialog-actions #printFamilyPdf,.dialog-actions #printAttendancePdf{width:100%}}

@@ -1,0 +1,21 @@
+PROTEGE V13.4 - IMPRESSÃO / PDF
+
+Novidades:
+- Famílias > Abrir > botão "Imprimir / PDF".
+- Atendimentos > Abrir > botão "Imprimir / PDF".
+- Cadastro da família: responsáveis, contato, endereço, filhos, status e histórico de atendimentos.
+- Atendimento: identificação, 10 etapas do registro inicial e histórico completo de evoluções.
+- O navegador abre a janela de impressão; escolha "Salvar como PDF" para gerar o arquivo.
+
+NO GITHUB:
+Substitua somente:
+1. familias.html
+2. atendimentos.html
+3. script-v126.js
+4. style-v126.css
+
+Não precisa executar SQL novo.
+Não precisa alterar a Edge Function.
+
+Depois do Commit, aguarde a publicação e pressione Ctrl+F5.
+Se o navegador bloquear a janela de impressão, permita pop-ups para o endereço do GitHub Pages.

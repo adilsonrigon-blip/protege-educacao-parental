@@ -1,4 +1,4 @@
-console.info("Protege build V13.3 - relatórios gerenciais");
+console.info("Protege build V13.4 - PDF famílias e atendimentos");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -388,11 +388,33 @@ async function initLeadsPage() {
 }
 
 
+
+function ProtegePrintDocument({title, subtitle='', sections='', footer='Protege · Educação Parental'}){
+  const logoUrl=new URL('logo-protege.jpeg',location.href).href;
+  const emittedAt=new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date());
+  const doc=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>${ProtegeApp.esc(title)}</title>
+  <style>
+    @page{size:A4;margin:16mm 14mm 18mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#2d2431;font-size:11px;line-height:1.45;background:#fff}.print-head{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #7e3ba5;padding-bottom:12px;margin-bottom:18px}.print-brand{display:flex;align-items:center;gap:14px}.print-brand img{width:82px;height:auto}.print-title h1{margin:0;font-size:22px}.print-title p{margin:3px 0 0;color:#776a7b}.print-meta{text-align:right;color:#776a7b;font-size:9px}.print-section{margin:0 0 18px;break-inside:avoid}.print-section h2{font-size:14px;color:#7e3ba5;border-bottom:1px solid #e8ddeb;padding-bottom:6px;margin:0 0 10px}.print-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.print-card{border:1px solid #e8e0eb;border-radius:8px;padding:9px 10px;break-inside:avoid}.print-card.wide{grid-column:1/-1}.print-card span,.print-field span{display:block;text-transform:uppercase;letter-spacing:.05em;color:#8a7a90;font-size:8px;margin-bottom:3px}.print-card b{font-size:11px}.print-card small{display:block;color:#6f6372;margin-top:3px}.print-chip{display:inline-block;border:1px solid #e6dce9;border-radius:999px;padding:4px 8px;margin:3px 5px 2px 0}.print-step{border:1px solid #e8e0eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;break-inside:avoid}.print-step h3{margin:0 0 8px;font-size:12px;color:#7e3ba5}.print-field{margin-top:8px}.print-field p{margin:3px 0 0;white-space:pre-wrap}.print-timeline{border-left:2px solid #dbc5e6;padding-left:14px;margin-left:5px}.print-evolution{position:relative;margin:0 0 14px;break-inside:avoid}.print-evolution:before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:#7e3ba5;left:-19px;top:5px}.print-evolution h3{font-size:11px;margin:0 0 3px}.print-evolution p{white-space:pre-wrap;margin:5px 0}.print-evolution small{color:#726676}.print-table{width:100%;border-collapse:collapse}.print-table th,.print-table td{padding:7px 6px;border-bottom:1px solid #e9e2eb;text-align:left;vertical-align:top}.print-table th{text-transform:uppercase;font-size:8px;color:#837488}.print-empty{color:#817484;font-style:italic}.print-footer{position:fixed;bottom:0;left:0;right:0;border-top:1px solid #e8e0eb;padding-top:5px;text-align:center;color:#8a7d8d;font-size:8px}.print-confidential{font-weight:700;color:#7e3ba5}@media print{.no-print{display:none!important}} 
+  </style></head><body><header class="print-head"><div class="print-brand"><img src="${logoUrl}" alt="Protege"><div class="print-title"><h1>${ProtegeApp.esc(title)}</h1><p>${ProtegeApp.esc(subtitle)}</p></div></div><div class="print-meta"><div>Emitido em ${ProtegeApp.esc(emittedAt)}</div><div class="print-confidential">Documento de uso interno</div></div></header>${sections}<footer class="print-footer">${ProtegeApp.esc(footer)}</footer><script>window.addEventListener('load',()=>setTimeout(()=>window.print(),350));<\/script></body></html>`;
+  return doc;
+}
+
+function openProtegePrintWindow(initialTitle='Preparando documento...'){
+  const w=window.open('','_blank');
+  if(!w){alert('O navegador bloqueou a janela de impressão. Permita pop-ups para este site e tente novamente.');return null;}
+  w.document.open();w.document.write(`<!DOCTYPE html><html><head><title>${initialTitle}</title></head><body style="font-family:Arial;padding:30px">Preparando documento...</body></html>`);w.document.close();
+  return w;
+}
+
+function writeProtegePrintWindow(w,content){
+  if(!w)return;w.document.open();w.document.write(content);w.document.close();
+}
+
 async function initFamiliesPage() {
   const tbody=document.querySelector('#familiesTable tbody');
   const search=document.getElementById('familySearch');
   const dialog=document.getElementById('familyDialog');
-  let families=[];
+  let families=[],activeFamily=null;
 
   function childrenOf(x){ return x.filhos || []; }
   function render(){
@@ -413,7 +435,7 @@ async function initFamiliesPage() {
     }catch(err){console.error(err);box.innerHTML='<div class="empty-state">Histórico indisponível. Execute a migração V9 no Supabase.</div>';}
   }
   async function openFamily(id){
-    const f=families.find(x=>x.id===id); if(!f)return;
+    const f=families.find(x=>x.id===id); if(!f)return; activeFamily=f;
     document.getElementById('familyDialogName').textContent=f.responsavel1;
     const ch=childrenOf(f);
     document.getElementById('familyDetails').innerHTML=`
@@ -429,6 +451,29 @@ async function initFamiliesPage() {
     families=await ProtegeApp.loadFamilies(); document.getElementById('metricFamilies').textContent=families.length; document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0); render();
     const id=new URLSearchParams(location.search).get('id'); if(id && families.some(f=>f.id===id)){ await openFamily(id); history.replaceState({},'',location.pathname); }
   }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar as famílias.</td></tr>';}
+
+  document.getElementById('printFamilyPdf')?.addEventListener('click',async()=>{
+    if(!activeFamily)return;
+    const printWindow=openProtegePrintWindow('Cadastro da Família');if(!printWindow)return;
+    try{
+      const f=activeFamily,ch=childrenOf(f),historyItems=await ProtegeApp.loadAttendances(f.id,100);
+      const familyTitle=[f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';
+      const address=[`${f.logradouro||''}${f.numero?', '+f.numero:''}${f.complemento?' · '+f.complemento:''}`,[f.bairro,f.cidade&&f.estado?`${f.cidade}/${f.estado}`:f.cidade||f.estado].filter(Boolean).join(' · '),f.cep?`CEP ${f.cep}`:''].filter(Boolean);
+      const childrenHtml=ch.length?ch.map(c=>`<span class="print-chip"><b>${ProtegeApp.esc(c.nome)}</b> · ${ProtegeApp.esc(c.idade??'—')} ano(s)</span>`).join(''):'<span class="print-empty">Nenhum filho cadastrado.</span>';
+      const historyHtml=historyItems.length?`<table class="print-table"><thead><tr><th>Data</th><th>Atendimento para</th><th>Profissional</th><th>Status</th></tr></thead><tbody>${historyItems.map(a=>`<tr><td>${ProtegeApp.esc(ProtegeApp.formatDate(a.data_hora))}</td><td>${ProtegeApp.esc(a?.dados?.membro_atendido||a?.filhos?.nome||(a.tipo_alvo==='familia'?'Família completa':a.tipo_alvo==='responsaveis'?'Responsável(is)':'—'))}</td><td>${ProtegeApp.esc(a.profissionais?.nome||'—')}</td><td>${ProtegeApp.esc(a.status||'—')}</td></tr>`).join('')}</tbody></table>`:'<p class="print-empty">Nenhum atendimento registrado para esta família.</p>';
+      const sections=`
+        <section class="print-section"><h2>Dados da família</h2><div class="print-grid">
+          <div class="print-card"><span>Responsáveis</span><b>${ProtegeApp.esc(f.responsavel1||'—')}</b>${f.responsavel2?`<small>${ProtegeApp.esc(f.responsavel2)}</small>`:''}</div>
+          <div class="print-card"><span>Contato</span><b>${ProtegeApp.esc(f.telefone||'—')}</b><small>${ProtegeApp.esc(f.email||'Sem e-mail')}</small></div>
+          <div class="print-card"><span>Status</span><b>${ProtegeApp.esc(f.status||'ativa')}</b><small>Cadastrada em ${ProtegeApp.esc(ProtegeApp.formatDate(f.created_at))}</small></div>
+          <div class="print-card wide"><span>Endereço</span><b>${ProtegeApp.esc(address[0]||'—')}</b><small>${ProtegeApp.esc(address.slice(1).join(' · ')||'')}</small></div>
+          <div class="print-card wide"><span>Filhos</span>${childrenHtml}</div>
+        </div></section>
+        <section class="print-section"><h2>Resumo de acompanhamento</h2><div class="print-grid"><div class="print-card"><span>Filhos vinculados</span><b>${ch.length}</b></div><div class="print-card"><span>Atendimentos registrados</span><b>${historyItems.length}</b></div></div></section>
+        <section class="print-section"><h2>Histórico de atendimentos</h2>${historyHtml}</section>`;
+      writeProtegePrintWindow(printWindow,ProtegePrintDocument({title:'Cadastro da Família',subtitle:familyTitle,sections}));
+    }catch(err){console.error(err);printWindow.document.body.innerHTML='<p>Não foi possível preparar o documento para impressão.</p>';}
+  });
   search?.addEventListener('input',render); tbody.addEventListener('click',async e=>{const b=e.target.closest('.view-family');if(b)await openFamily(b.dataset.id);});
 }
 
@@ -665,6 +710,27 @@ async function initAttendancesPage(){
     updateMetrics();render();
     const openId=new URLSearchParams(location.search).get('id'); if(openId&&items.some(a=>a.id===openId)){await openDetail(openId,new URLSearchParams(location.search).get('evolucao')==='1'); history.replaceState({},'',location.pathname);}
   }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="6" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
+
+  document.getElementById('printAttendancePdf')?.addEventListener('click',async()=>{
+    if(!activeAttendance)return;
+    const printWindow=openProtegePrintWindow('Relatório de Atendimento');if(!printWindow)return;
+    try{
+      const a=activeAttendance,dados=a.dados||{},evolutions=await ProtegeApp.loadAttendanceEvolutions(a.id);
+      const stepsHtml=stepGroups.map(([title,keys])=>{const fields=keys.map(k=>{const v=String(dados[k]||'').trim();return v?`<div class="print-field"><span>${ProtegeApp.esc(labels[k]||k)}</span><p>${ProtegeApp.esc(v)}</p></div>`:''}).join('');return `<div class="print-step"><h3>${ProtegeApp.esc(title)}</h3>${fields||'<div class="print-empty">Sem registro nesta etapa.</div>'}</div>`;}).join('');
+      const evolutionsHtml=evolutions.length?`<div class="print-timeline">${evolutions.map(ev=>`<article class="print-evolution"><h3>Etapa ${Number(ev.etapa)} · ${ProtegeApp.esc(stepNames[ev.etapa]||'')}${ev.titulo?' — '+ProtegeApp.esc(ev.titulo):''}</h3><small>${ProtegeApp.esc(ProtegeApp.formatDate(ev.created_at))} · ${ProtegeApp.esc(ev.profissionais?.nome||'Profissional não informado')}</small><p>${ProtegeApp.esc(ev.conteudo||'')}</p></article>`).join('')}</div>`:'<p class="print-empty">Nenhuma evolução acrescentada ao atendimento.</p>';
+      const sections=`
+        <section class="print-section"><h2>Identificação do atendimento</h2><div class="print-grid">
+          <div class="print-card"><span>Família</span><b>${ProtegeApp.esc(familyName(a))}</b></div>
+          <div class="print-card"><span>Atendimento para</span><b>${ProtegeApp.esc(memberName(a))}</b></div>
+          <div class="print-card"><span>Profissional</span><b>${ProtegeApp.esc(a.profissionais?.nome||'—')}</b></div>
+          <div class="print-card"><span>Data / horário</span><b>${ProtegeApp.esc(ProtegeApp.formatDate(a.data_hora))}</b></div>
+          <div class="print-card"><span>Status</span><b>${ProtegeApp.esc(statusText(a.status))}</b></div>
+        </div></section>
+        <section class="print-section"><h2>Registro inicial · 10 etapas</h2>${stepsHtml}</section>
+        <section class="print-section"><h2>Histórico de evoluções</h2>${evolutionsHtml}</section>`;
+      writeProtegePrintWindow(printWindow,ProtegePrintDocument({title:'Relatório de Atendimento',subtitle:`${memberName(a)} · ${familyName(a)}`,sections}));
+    }catch(err){console.error(err);printWindow.document.body.innerHTML='<p>Não foi possível preparar o documento para impressão.</p>';}
+  });
   evolutionForm?.addEventListener('submit',async e=>{
     e.preventDefault();if(!activeAttendance)return;
     const step=Number(document.getElementById('evolutionStep').value),professionalId=evolutionProfessional.value,title=document.getElementById('evolutionTitle').value.trim(),content=document.getElementById('evolutionContent').value.trim(),saveBtn=document.getElementById('saveEvolution');
