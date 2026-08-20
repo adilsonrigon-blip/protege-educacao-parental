@@ -1,0 +1,44 @@
+PROTEGE V13.8 — NOVO MODELO VISUAL DOS CADASTROS
+
+Objetivo:
+Padronizar as telas de cadastro no modelo visual aprovado: lista/consulta limpa,
+ações claras, ficha em painel lateral e cadastro novo sem ocupar a tela inteira.
+
+TELAS ATUALIZADAS:
+- ONGs
+- Profissionais
+- Famílias
+- Famílias interessadas
+- Formulário público "Quero participar"
+
+O QUE MUDA:
+- ONGs e Profissionais: botão "+ Novo..." no topo; o formulário abre em painel lateral.
+- Abrir/Editar registros: ficha passa a abrir como painel lateral (drawer), mantendo a lista visível.
+- Famílias: ficha, edição, ONG, filhos e histórico permanecem no mesmo fluxo, com novo layout.
+- Famílias interessadas: consulta e ficha seguem o mesmo padrão lateral.
+- Cadastro público: formulário com visual mais moderno, etapas destacadas e melhor leitura.
+- Nenhuma regra de banco foi alterada.
+
+PARA SUBIR NO GITHUB:
+Substitua:
+1. ongs.html
+2. profissionais.html
+3. familias.html
+4. familias-interessadas.html
+5. cadastro.html
+6. script-v126.js
+7. style-v126.css
+
+Também foram incluídos os demais HTMLs com cache V138 para manter consistência.
+Você pode substituir todos os HTMLs do pacote se preferir.
+
+NÃO PRECISA:
+- executar SQL novo;
+- alterar a Edge Function;
+- alterar config-v126.js.
+
+Depois do Commit:
+- aguarde a publicação do GitHub Pages;
+- pressione Ctrl+F5;
+- teste primeiro ONGs e Profissionais;
+- depois Família > Abrir e Famílias interessadas > Abrir.

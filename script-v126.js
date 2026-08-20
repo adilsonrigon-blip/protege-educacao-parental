@@ -1,4 +1,4 @@
-console.info("Protege build V13.7 - edição de cadastros");
+console.info("Protege build V13.8 - novo modelo visual de cadastros");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -712,7 +712,7 @@ async function initOngsPage(){
     document.getElementById('ongDetailStatus').value=o.status||'ativa';
     const ef=document.getElementById('ongEditForm');
     if(ef){['nome','cnpj','responsavel','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','observacoes','status'].forEach(k=>{if(ef.elements[k])ef.elements[k].value=o[k]??'';});}
-    document.getElementById('ongEditSection').hidden=true; document.getElementById('ongDetailGrid').hidden=false; document.getElementById('editOngBtn').hidden=false;
+    document.getElementById('ongEditSection').hidden=true; document.getElementById('ongDetailGrid').hidden=false; const editBtn=document.getElementById('editOngBtn'); if(editBtn){editBtn.hidden=false;editBtn.style.display='inline-flex';}
     document.getElementById('ongDetailMessage').textContent='';
     dialog.showModal();
   }
@@ -730,7 +730,7 @@ async function initOngsPage(){
         estado:String(fd.get('estado')||'').trim().toUpperCase()||null,observacoes:String(fd.get('observacoes')||'').trim()||null,
         status:String(fd.get('status')||'ativa')
       });
-      form.reset();msg.textContent='ONG cadastrada com sucesso.';await refresh();
+      form.reset();msg.textContent='ONG cadastrada com sucesso.';await refresh();document.getElementById('ongCreateDialog')?.close();
     }catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro inesperado');}
     finally{btn.disabled=false;}
   });
@@ -867,7 +867,7 @@ async function initProfessionalsPage(){
         status:String(fd.get('status')||'ativo'),
         ong_id:String(fd.get('ong_id')||'')||null
       });
-      msg.textContent='Profissional e usuário de acesso criados com sucesso.';
+      msg.textContent='Profissional e usuário de acesso criados com sucesso.';document.getElementById('professionalCreateDialog')?.close();
       form.reset();
       document.getElementById('professionalProfile').value='profissional';
       await refresh();

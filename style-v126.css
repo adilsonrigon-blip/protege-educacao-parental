@@ -267,3 +267,193 @@
 .child-edit-row{display:grid;grid-template-columns:minmax(0,1fr) 120px auto;gap:10px;align-items:center;margin-top:10px}
 .child-edit-row small{color:#786d7d}
 @media(max-width:760px){.record-edit-form{grid-template-columns:1fr}.record-edit-form .full-field{grid-column:1}.child-edit-row{grid-template-columns:1fr 100px}.child-edit-row small{grid-column:1/-1}}
+
+
+/* V13.7.1 - Hotfix botão Editar ONG */
+.ong-dialog-head{
+  position:sticky;
+  top:-28px;
+  z-index:10;
+  background:#fff;
+  margin:-28px -28px 18px;
+  padding:24px 28px 16px;
+  border-bottom:1px solid #eee5f1;
+  align-items:center;
+}
+.ong-dialog-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.ong-dialog-actions #editOngBtn{
+  min-width:128px;
+  min-height:42px;
+  padding:0 18px;
+}
+.ong-dialog-actions .modal-close{
+  position:static;
+  flex:0 0 auto;
+}
+@media(max-width:620px){
+  .ong-dialog-head{
+    top:-22px;
+    margin:-22px -22px 16px;
+    padding:18px 22px 14px;
+  }
+  .ong-dialog-actions #editOngBtn{
+    min-width:auto;
+    padding:0 12px;
+  }
+}
+
+
+/* =========================================================
+   V13.8 — NOVO MODELO VISUAL PARA TELAS DE CADASTRO
+   ========================================================= */
+.cadastro-workspace-page .app-main{max-width:none}
+.workspace-topbar{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+  margin-bottom:22px;
+}
+.workspace-new-btn{min-width:170px;box-shadow:0 12px 28px rgba(115,49,147,.18)}
+.workspace-list-panel{
+  border:1px solid #e9e0ec;
+  box-shadow:0 10px 34px rgba(45,31,53,.045);
+  border-radius:22px;
+}
+.workspace-list-panel .panel-head{padding-bottom:16px;border-bottom:1px solid #eee7f0}
+.workspace-list-panel .data-table thead th{background:#faf6fc;color:#705b78}
+.workspace-list-panel .data-table tbody tr{transition:background .16s ease,transform .16s ease}
+.workspace-list-panel .data-table tbody tr:hover{background:#fcf8fd}
+.workspace-list-panel .small-btn{border-radius:9px;padding:8px 13px}
+
+/* Drawer de consulta/edição, mantendo lista visível ao fundo */
+.cadastro-workspace-page dialog.lead-dialog,
+.cadastro-workspace-page dialog.family-dialog,
+.cadastro-workspace-page dialog.professional-detail-dialog{
+  width:min(880px,60vw)!important;
+  max-width:none!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0 0 0 auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:24px 0 0 24px!important;
+  background:transparent!important;
+  overflow:visible!important;
+}
+.cadastro-workspace-page dialog::backdrop{background:rgba(38,27,43,.22);backdrop-filter:blur(1px)}
+.cadastro-workspace-page dialog .dialog-shell{
+  height:100vh;max-height:100vh!important;overflow:auto!important;
+  border-radius:24px 0 0 24px!important;
+  padding:28px 30px 34px!important;
+  background:#fff;box-shadow:-22px 0 55px rgba(36,25,41,.15);
+}
+.cadastro-workspace-page .dialog-head{
+  position:sticky;top:-28px;z-index:20;background:#fff;
+  margin:-28px -30px 20px;padding:25px 30px 17px;
+  border-bottom:1px solid #eee7f0;
+}
+.cadastro-workspace-page .dialog-actions{
+  position:sticky;bottom:-34px;z-index:15;background:#fff;
+  margin:20px -30px -34px!important;padding:16px 30px 22px!important;
+  border-top:1px solid #ece4ef!important;
+}
+.cadastro-workspace-page .detail-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.cadastro-workspace-page .detail-card{
+  border:1px solid #e9e1ec;border-radius:14px;background:#fcfafd;padding:14px;
+}
+.cadastro-workspace-page .record-edit-section{background:#fff;border:0;padding:0;margin:0}
+.cadastro-workspace-page .record-edit-form{gap:14px}
+.cadastro-workspace-page .record-edit-form input,
+.cadastro-workspace-page .record-edit-form select,
+.cadastro-workspace-page .record-edit-form textarea{
+  border-radius:11px;background:#fff;border-color:#ded5e3;
+}
+.cadastro-workspace-page .panel-inline{background:#faf6fc}
+
+/* Criação como drawer/modal */
+.create-record-dialog{
+  width:min(850px,60vw);max-width:none;height:100vh;max-height:100vh;
+  margin:0 0 0 auto;padding:0;border:0;border-radius:24px 0 0 24px;background:transparent;
+}
+.create-record-dialog::backdrop{background:rgba(38,27,43,.28);backdrop-filter:blur(1px)}
+.create-dialog-shell{
+  height:100vh;overflow:auto;background:#fff;padding:28px 30px 38px;
+  border-radius:24px 0 0 24px;box-shadow:-22px 0 55px rgba(36,25,41,.16)
+}
+.create-dialog-shell .workspace-dialog-head{
+  position:sticky;top:-28px;z-index:20;background:#fff;margin:-28px -30px 20px;
+  padding:25px 30px 17px;border-bottom:1px solid #eee7f0;
+}
+.create-dialog-shell .panel-head{display:none}
+.create-dialog-shell .professional-form,
+.create-dialog-shell .ong-form{margin-top:4px}
+.create-dialog-shell .form-submit-cell{
+  position:sticky;bottom:-38px;background:#fff;margin:10px -30px -38px;
+  padding:16px 30px 24px;border-top:1px solid #eee7f0;z-index:12
+}
+
+/* Lista mais parecida com painel administrativo */
+.cadastro-workspace-page .professionals-filters,
+.cadastro-workspace-page .toolbar-controls{
+  background:#faf7fb;border:1px solid #eee6f0;border-radius:14px;padding:8px;
+}
+.cadastro-workspace-page .table-search,
+.cadastro-workspace-page .table-filter{
+  background:#fff!important;
+}
+.cadastro-workspace-page .metric-grid{gap:14px}
+.cadastro-workspace-page .metric{border-radius:18px}
+
+/* Cadastro público: visual mais editorial e organizado */
+.public-cadastro-v138 .registration-page{background:linear-gradient(180deg,#fbf8fd 0,#fff 40%)}
+.public-cadastro-v138 .registration-heading{max-width:820px;text-align:center}
+.public-cadastro-v138 .registration-heading h1{font-size:clamp(34px,5vw,52px)}
+.public-cadastro-v138 .registration-shell{max-width:980px}
+.public-cadastro-v138 .registration-card-v138{
+  border:1px solid #e9dfee;border-radius:26px;box-shadow:0 22px 60px rgba(50,34,58,.08);
+  padding:34px;
+}
+.public-cadastro-v138 .form-section-title{
+  background:#faf5fc;border:1px solid #eadfed;border-radius:16px;padding:15px 16px;margin:26px 0 16px
+}
+.public-cadastro-v138 .form-section-title>span{
+  width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:#743293;color:#fff;font-weight:800
+}
+.public-cadastro-v138 .registration-card input{
+  min-height:50px;border-radius:12px;background:#fff
+}
+.public-cadastro-v138 .registration-actions{
+  position:sticky;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+  margin:28px -34px -34px;padding:18px 34px;border-top:1px solid #ede5f0
+}
+
+/* Responsivo */
+@media(max-width:1050px){
+  .cadastro-workspace-page dialog.lead-dialog,
+  .cadastro-workspace-page dialog.family-dialog,
+  .cadastro-workspace-page dialog.professional-detail-dialog,
+  .create-record-dialog{width:min(760px,78vw)!important}
+}
+@media(max-width:760px){
+  .workspace-topbar{flex-direction:column}
+  .workspace-new-btn{width:100%}
+  .cadastro-workspace-page dialog.lead-dialog,
+  .cadastro-workspace-page dialog.family-dialog,
+  .cadastro-workspace-page dialog.professional-detail-dialog,
+  .create-record-dialog{
+    width:100vw!important;height:100vh!important;border-radius:0!important
+  }
+  .cadastro-workspace-page dialog .dialog-shell,.create-dialog-shell{border-radius:0!important;padding:22px}
+  .cadastro-workspace-page .dialog-head,.create-dialog-shell .workspace-dialog-head{
+    top:-22px;margin:-22px -22px 16px;padding:18px 22px 14px
+  }
+  .cadastro-workspace-page .dialog-actions{margin:18px -22px -22px!important;padding:14px 22px 18px!important}
+  .cadastro-workspace-page .detail-grid{grid-template-columns:1fr}
+  .public-cadastro-v138 .registration-card-v138{padding:22px}
+  .public-cadastro-v138 .registration-actions{margin:24px -22px -22px;padding:16px 22px}
+}
