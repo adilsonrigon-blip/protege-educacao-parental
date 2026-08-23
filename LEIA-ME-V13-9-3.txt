@@ -1,0 +1,20 @@
+PROTEGE – V13.9.3 – RECUPERAÇÃO DE NAVEGAÇÃO / DNS
+
+Objetivo desta versão:
+- impedir que os CTAs públicos continuem abrindo protegeeducparental.com.br enquanto o DNS do domínio está sendo desfeito/reconfigurado;
+- direcionar temporariamente os links públicos principais para o endereço estável do GitHub Pages;
+- manter o restante da aplicação e Supabase sem alterações.
+
+Links corrigidos:
+- Quero participar
+- Quero participar do programa
+- Quero conhecer a Protege
+- Área do profissional
+- links Home/retorno entre index, cadastro e login
+- Abrir formulário público em Famílias interessadas
+
+Destino temporário:
+https://adilsonrigon-blip.github.io/protege-educacao-parental/
+
+IMPORTANTE:
+Quando o DNS do domínio próprio estiver novamente configurado e validado, podemos gerar uma versão seguinte removendo esse redirecionamento temporário e voltar a links relativos/domínio definitivo.

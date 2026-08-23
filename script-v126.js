@@ -1,4 +1,4 @@
-console.info("Protege build V13.9.2 - hotfix botoes e modais");
+console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);
@@ -347,36 +347,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (toggle && nav) toggle.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
     toggle.setAttribute('aria-expanded', open);
-  });
-
-  // MODAIS DE NOVOS CADASTROS (ONG e PROFISSIONAL)
-  // Hotfix: os botoes data-open-create-dialog existiam no HTML, mas nao havia
-  // listener global para abrir/fechar os dialogs.
-  document.querySelectorAll('[data-open-create-dialog]').forEach(button => {
-    button.addEventListener('click', () => {
-      const id = button.getAttribute('data-open-create-dialog');
-      const dialog = id ? document.getElementById(id) : null;
-      if (!dialog) return;
-      if (typeof dialog.showModal === 'function') dialog.showModal();
-      else dialog.setAttribute('open', '');
-      dialog.querySelector('input:not([type=hidden]), select, textarea')?.focus();
-    });
-  });
-  document.querySelectorAll('[data-close-create-dialog]').forEach(button => {
-    button.addEventListener('click', () => {
-      const dialog = button.closest('dialog');
-      if (!dialog) return;
-      if (typeof dialog.close === 'function') dialog.close();
-      else dialog.removeAttribute('open');
-    });
-  });
-  document.querySelectorAll('dialog.create-record-dialog').forEach(dialog => {
-    dialog.addEventListener('click', e => {
-      if (e.target === dialog) {
-        if (typeof dialog.close === 'function') dialog.close();
-        else dialog.removeAttribute('open');
-      }
-    });
   });
 
   // LOGIN REAL COM SUPABASE; fallback demonstrativo enquanto o projeto não estiver configurado.
