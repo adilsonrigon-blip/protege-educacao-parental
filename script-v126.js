@@ -1,4 +1,4 @@
-// Protege build V13.9.7 - correção Agenda / Novo agendamento / diagnóstico Supabase
+// Protege build V13.9.8 - novo layout do modal de Agenda
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};

@@ -1,0 +1,19 @@
+PROTEGE — V13.9.8
+Ajuste visual da tela/modal Novo agendamento
+
+ALTERAÇÕES
+- modal maior, centralizado e com melhor aproveitamento do espaço;
+- cabeçalho visual limpo e fixo;
+- campos organizados em duas colunas no desktop e uma coluna no mobile;
+- bloco de período destacado;
+- cartões separados para horário de início e fim;
+- indicação visual de duração automática de 1 hora;
+- campos e labels maiores e mais legíveis;
+- área de observações mais confortável;
+- rodapé com Cancelar / Salvar fixo e visível;
+- fundo com blur e contraste mais elegante;
+- versão de cache atualizada para 1398.
+
+A lógica da Agenda e o banco não foram alterados nesta versão.
+Ela parte da V13.9.7, portanto mantém a correção do botão Novo agendamento
+e o diagnóstico detalhado do Supabase.

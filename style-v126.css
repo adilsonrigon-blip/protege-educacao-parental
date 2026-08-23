@@ -496,3 +496,314 @@ input.field-invalid:focus{outline:none;border-color:#b33d49!important;box-shadow
   border-color:#c94b57!important;
   background:#fff8f8!important;
 }
+
+
+/* ===== V13.9.8 · Agenda — modal Novo agendamento ===== */
+.schedule-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  background:rgba(37,25,43,.58);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+.schedule-modal-backdrop[hidden]{display:none!important}
+body.schedule-modal-open{overflow:hidden}
+
+#scheduleDialog.schedule-dialog{
+  position:relative;
+  width:min(1060px,calc(100vw - 56px));
+  max-height:min(92vh,900px);
+  margin:0;
+  overflow:auto;
+  border:1px solid rgba(111,73,132,.12);
+  border-radius:28px;
+  padding:0;
+  background:#fff;
+  box-shadow:0 30px 100px rgba(37,19,47,.34);
+}
+
+#scheduleDialog .schedule-dialog-head{
+  position:sticky;
+  top:0;
+  z-index:5;
+  padding:30px 34px 24px;
+  background:linear-gradient(135deg,#fff 0%,#fbf7fd 100%);
+  border-bottom:1px solid #eee6f1;
+}
+#scheduleDialog .schedule-dialog-head h2{
+  margin:6px 0 8px;
+  font-size:30px;
+  line-height:1.1;
+  color:#29202e;
+  letter-spacing:-.02em;
+}
+#scheduleDialog .schedule-dialog-head p{
+  margin:0;
+  color:#7c6f82;
+  font-size:14px;
+  line-height:1.5;
+}
+#scheduleDialog .modal-close{
+  position:fixed;
+  margin-left:min(994px,calc(100vw - 112px));
+  margin-top:22px;
+  z-index:12;
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px solid #e7dbea;
+  border-radius:50%;
+  background:#fff;
+  color:#6e4b7e;
+  font-size:27px;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(60,36,72,.12);
+}
+#scheduleDialog .modal-close:hover{
+  background:#f6eff9;
+  color:#5f2f79;
+}
+
+#scheduleDialog form{padding:28px 34px 32px}
+#scheduleDialog .schedule-main-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px 20px;
+  align-items:start;
+}
+#scheduleDialog .schedule-field,
+#scheduleDialog .schedule-notes-field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:0;
+  color:#45394b;
+  font-size:13px;
+  font-weight:800;
+}
+#scheduleDialog select,
+#scheduleDialog input[type="date"],
+#scheduleDialog textarea,
+#scheduleDialog .readonly-info{
+  width:100%;
+  border:1px solid #ddd1e2;
+  border-radius:13px;
+  background:#fff;
+  color:#2f2735;
+  font:inherit;
+  transition:border-color .18s,box-shadow .18s,background .18s;
+}
+#scheduleDialog select,
+#scheduleDialog input[type="date"],
+#scheduleDialog .readonly-info{
+  min-height:50px;
+  padding:0 14px;
+}
+#scheduleDialog textarea{
+  min-height:112px;
+  padding:13px 14px;
+  line-height:1.5;
+  resize:vertical;
+}
+#scheduleDialog select:focus,
+#scheduleDialog input[type="date"]:focus,
+#scheduleDialog textarea:focus{
+  outline:none;
+  border-color:#9d6db9;
+  box-shadow:0 0 0 4px rgba(126,64,160,.08);
+}
+#scheduleDialog .readonly-info{
+  display:flex;
+  align-items:center;
+  background:#f8f5fa;
+  color:#776b7c;
+  font-weight:650;
+}
+
+#scheduleDialog .schedule-period{
+  grid-column:1/-1;
+  margin:4px 0 0;
+  padding:20px;
+  border:1px solid #e5d7ea;
+  border-radius:20px;
+  background:linear-gradient(180deg,#fcf9fd 0%,#f8f3fa 100%);
+}
+#scheduleDialog .schedule-period-head{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-start;
+  margin-bottom:16px;
+}
+#scheduleDialog .schedule-datetime-label{
+  display:block;
+  color:#332638;
+  font-size:15px;
+  font-weight:900;
+}
+#scheduleDialog .schedule-period-head small{
+  display:block;
+  margin-top:5px;
+  color:#827587;
+  font-size:12px;
+  font-weight:500;
+}
+#scheduleDialog .duration-badge{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:0 11px;
+  border-radius:999px;
+  background:#eadcf1;
+  color:#6c3d83;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+#scheduleDialog .schedule-period-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+#scheduleDialog .schedule-time-card{
+  min-width:0;
+  padding:16px;
+  border:1px solid #e7ddea;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 8px 22px rgba(53,31,64,.045);
+}
+#scheduleDialog .schedule-time-card>strong{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:12px;
+  color:#352a39;
+  font-size:14px;
+}
+#scheduleDialog .schedule-time-card>strong small{
+  padding:4px 7px;
+  border-radius:999px;
+  background:#f1ebf4;
+  color:#85748d;
+  font-size:10px;
+}
+#scheduleDialog .schedule-date-line{
+  display:grid;
+  grid-template-columns:minmax(170px,1.4fr) minmax(170px,1fr);
+  gap:12px;
+  align-items:end;
+}
+#scheduleDialog .schedule-clock-group{
+  display:grid;
+  grid-template-columns:1fr 14px 1fr;
+  gap:5px;
+  align-items:end;
+}
+#scheduleDialog .schedule-mini-field{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:6px!important;
+  min-width:0;
+}
+#scheduleDialog .schedule-mini-field>span{
+  color:#776a7d;
+  font-size:11px;
+  font-weight:800;
+}
+#scheduleDialog .schedule-mini-field input,
+#scheduleDialog .schedule-mini-field select{
+  min-height:46px;
+  padding:0 10px;
+  border-radius:11px;
+}
+#scheduleDialog .time-separator{
+  align-self:center;
+  margin-top:21px;
+  color:#68576f;
+  font-size:18px;
+  font-weight:900;
+  text-align:center;
+}
+#scheduleDialog input[type=hidden]{display:none!important}
+
+#scheduleDialog .schedule-status-field{grid-column:1/2}
+#scheduleDialog .schedule-notes-field{
+  margin-top:18px;
+}
+#scheduleDialog .modal-actions{
+  position:sticky;
+  bottom:-32px;
+  z-index:4;
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin:24px -34px -32px;
+  padding:18px 34px 22px;
+  border-top:1px solid #ece5ef;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(8px);
+}
+#scheduleDialog .modal-actions .btn{
+  min-width:170px;
+  min-height:48px;
+  border-radius:12px;
+}
+#scheduleDialog .form-message{
+  margin:14px 0 0;
+  text-align:right;
+}
+
+@media(max-width:850px){
+  .schedule-modal-backdrop{padding:14px}
+  #scheduleDialog.schedule-dialog{
+    width:min(760px,calc(100vw - 28px));
+    max-height:94vh;
+    border-radius:22px;
+  }
+  #scheduleDialog .schedule-dialog-head{padding:24px 24px 20px}
+  #scheduleDialog form{padding:22px 24px 26px}
+  #scheduleDialog .schedule-main-grid{grid-template-columns:1fr}
+  #scheduleDialog .schedule-period-grid{grid-template-columns:1fr}
+  #scheduleDialog .schedule-status-field{grid-column:auto}
+  #scheduleDialog .modal-actions{
+    margin:22px -24px -26px;
+    padding:16px 24px 20px;
+  }
+  #scheduleDialog .modal-close{
+    position:absolute;
+    right:18px;
+    top:16px;
+    margin:0;
+  }
+}
+@media(max-width:560px){
+  .schedule-modal-backdrop{padding:0}
+  #scheduleDialog.schedule-dialog{
+    width:100vw;
+    max-height:100vh;
+    height:100vh;
+    border-radius:0;
+  }
+  #scheduleDialog .schedule-dialog-head{padding:22px 20px 18px}
+  #scheduleDialog .schedule-dialog-head h2{font-size:25px;padding-right:44px}
+  #scheduleDialog form{padding:20px}
+  #scheduleDialog .schedule-period{padding:14px}
+  #scheduleDialog .schedule-period-head{flex-direction:column;gap:8px}
+  #scheduleDialog .schedule-date-line{grid-template-columns:1fr}
+  #scheduleDialog .schedule-clock-group{grid-template-columns:1fr 12px 1fr}
+  #scheduleDialog .modal-actions{
+    flex-direction:column-reverse;
+    margin:20px -20px -20px;
+    padding:14px 20px 18px;
+  }
+  #scheduleDialog .modal-actions .btn{width:100%}
+}
