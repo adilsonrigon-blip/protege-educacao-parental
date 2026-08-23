@@ -1,4 +1,4 @@
-// Protege build V13.10.2 - menu lateral padronizado em todas as telas
+// Protege build V13.10.3 - inclusão de filhos na edição da família
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -102,6 +102,14 @@ const ProtegeApp = (() => {
     if (!configured) throw new Error('Supabase não configurado.');
     const body=await auditPatch(patch);
     const {data,error}=await db.from('filhos').update(body).eq('id',id).select().single();
+    if(error) throw error;
+    return data;
+  }
+
+  async function saveChild(payload) {
+    if (!configured) throw new Error('Supabase não configurado.');
+    const body=await auditPatch(payload);
+    const {data,error}=await db.from('filhos').insert(body).select().single();
     if(error) throw error;
     return data;
   }
@@ -247,7 +255,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,updateFamily,updateChild,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,updateProfessionalDetails,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,updateFamily,updateChild,saveChild,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,updateProfessionalDetails,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 // =========================================================
@@ -765,13 +773,28 @@ async function initFamiliesPage() {
       <div class="detail-card"><span>Última alteração</span><b>${ProtegeApp.formatDate(f.updated_at)}</b><small>${ProtegeApp.esc(f.updated_by_email||'—')}</small></div>
       <div class="detail-card detail-wide"><span>Filhos</span>${ch.length?ch.map(c=>`<div class="child-chip"><b>${ProtegeApp.esc(c.nome)}</b><small>${c.idade??'—'} ano(s) · cadastro ${ProtegeApp.formatDate(c.created_at)}</small></div>`).join(''):'<small>Nenhum filho cadastrado.</small>'}</div>`;
   }
+  function familyChildEditRow(c=null){
+    const isNew=!c?.id;
+    return `<div class="child-edit-row ${isNew?'child-edit-row-new':''}" data-child-id="${ProtegeApp.esc(c?.id||'')}">
+      <div class="child-edit-fields">
+        <label>Nome do filho(a)<input class="child-edit-name" value="${ProtegeApp.esc(c?.nome||'')}" placeholder="Nome completo"></label>
+        <label>Idade<input class="child-edit-age" type="number" min="0" max="99" value="${ProtegeApp.esc(c?.idade??'')}" placeholder="Idade"></label>
+      </div>
+      <div class="child-edit-meta">
+        <small>${isNew?'Novo filho — será cadastrado ao salvar':`Cadastrado em ${ProtegeApp.formatDate(c.created_at)}`}</small>
+        ${isNew?'<button class="small-btn remove-new-family-child" type="button">Remover</button>':''}
+      </div>
+    </div>`;
+  }
   function fillFamilyEdit(f){
     const form=document.getElementById('familyEditForm'); if(!form)return;
     ['responsavel1','responsavel2','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','status','observacoes'].forEach(k=>{
       const el=form.elements[k]; if(el) el.value=f[k]??'';
     });
     const box=document.getElementById('familyChildrenEdit');
-    box.innerHTML=childrenOf(f).length?childrenOf(f).map(c=>`<div class="child-edit-row" data-child-id="${ProtegeApp.esc(c.id)}"><input class="child-edit-name" value="${ProtegeApp.esc(c.nome||'')}" placeholder="Nome"><input class="child-edit-age" type="number" min="0" max="99" value="${ProtegeApp.esc(c.idade??'')}" placeholder="Idade"><small>Cadastrado em ${ProtegeApp.formatDate(c.created_at)}</small></div>`).join(''):'<div class="empty-state">Nenhum filho cadastrado.</div>';
+    box.innerHTML=childrenOf(f).length
+      ? childrenOf(f).map(c=>familyChildEditRow(c)).join('')
+      : '<div class="empty-state family-no-children">Nenhum filho cadastrado. Clique em “+ Adicionar filho”.</div>';
   }
   function setFamilyEditMode(editing){
     document.getElementById('familyDetails').hidden=editing;
@@ -823,6 +846,21 @@ async function initFamiliesPage() {
 
   document.getElementById('editFamilyBtn')?.addEventListener('click',()=>{if(activeFamily){fillFamilyEdit(activeFamily);setFamilyEditMode(true);}});
   document.getElementById('cancelFamilyEdit')?.addEventListener('click',()=>setFamilyEditMode(false));
+  document.getElementById('addFamilyChild')?.addEventListener('click',()=>{
+    const box=document.getElementById('familyChildrenEdit');
+    box.querySelector('.family-no-children')?.remove();
+    box.insertAdjacentHTML('beforeend',familyChildEditRow());
+    box.lastElementChild?.querySelector('.child-edit-name')?.focus();
+  });
+  document.getElementById('familyChildrenEdit')?.addEventListener('click',e=>{
+    const btn=e.target.closest('.remove-new-family-child');
+    if(!btn)return;
+    btn.closest('.child-edit-row')?.remove();
+    const box=document.getElementById('familyChildrenEdit');
+    if(!box.querySelector('.child-edit-row')){
+      box.innerHTML='<div class="empty-state family-no-children">Nenhum filho cadastrado. Clique em “+ Adicionar filho”.</div>';
+    }
+  });
   document.getElementById('familyEditForm')?.addEventListener('submit',async e=>{
     e.preventDefault(); if(!activeFamily)return;
     const m=document.getElementById('familyEditMessage'),b=document.getElementById('saveFamilyEdit'),fd=new FormData(e.currentTarget);
@@ -834,8 +872,15 @@ async function initFamiliesPage() {
       patch.estado=patch.estado?patch.estado.toUpperCase():null;
       await ProtegeApp.updateFamily(activeFamily.id,patch);
       for(const row of document.querySelectorAll('#familyChildrenEdit .child-edit-row')){
-        const nome=row.querySelector('.child-edit-name').value.trim(), age=row.querySelector('.child-edit-age').value;
-        if(nome) await ProtegeApp.updateChild(row.dataset.childId,{nome,idade:age===''?null:Number(age)});
+        const nome=row.querySelector('.child-edit-name').value.trim();
+        const age=row.querySelector('.child-edit-age').value;
+        if(!nome) throw new Error('Informe o nome de todos os filhos adicionados.');
+        const childPatch={nome,idade:age===''?null:Number(age)};
+        if(row.dataset.childId){
+          await ProtegeApp.updateChild(row.dataset.childId,childPatch);
+        }else{
+          await ProtegeApp.saveChild({familia_id:activeFamily.id,...childPatch});
+        }
       }
       families=await ProtegeApp.loadFamilies(); activeFamily=families.find(x=>x.id===activeFamily.id);
       render();renderDetails(activeFamily);fillFamilyEdit(activeFamily);setFamilyEditMode(false);m.textContent='Dados atualizados com sucesso.';

@@ -1,0 +1,15 @@
+PROTEGE — V13.10.3
+Adicionar filhos na edição da família
+
+NOVO
+- Ao clicar em "Editar dados", a seção FILHOS agora possui o botão "+ Adicionar filho".
+- É possível incluir um ou vários filhos antes de salvar.
+- Novos filhos são destacados visualmente.
+- Um filho novo pode ser removido antes do salvamento.
+- Ao clicar em "Salvar alterações":
+  - filhos já existentes são atualizados;
+  - filhos novos são inseridos na tabela public.filhos com familia_id da família atual.
+- Após salvar, a lista da família é recarregada e os novos filhos passam a aparecer normalmente.
+
+Não foi adicionada exclusão de filhos já cadastrados nesta versão.
+Cache atualizado para v=13103.

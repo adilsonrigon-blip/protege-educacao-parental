@@ -945,3 +945,110 @@ body.schedule-modal-open{overflow:hidden}
     width:100% !important;
   }
 }
+
+
+/* ===== V13.10.3 — inclusão de filhos na edição da família ===== */
+.family-children-editor{
+  margin-top:8px;
+  padding:20px;
+  border:1px solid #eadfeb;
+  border-radius:18px;
+  background:#fbf8fc;
+}
+.family-children-editor-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:14px;
+}
+.family-children-editor-head>div{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.family-children-editor-head small{
+  color:#817487;
+  font-size:12px;
+  font-weight:500;
+}
+#addFamilyChild{
+  min-width:170px;
+  white-space:nowrap;
+}
+#familyChildrenEdit{
+  display:grid;
+  gap:12px;
+}
+.child-edit-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  align-items:end;
+  padding:15px;
+  border:1px solid #e4d9e7;
+  border-radius:14px;
+  background:#fff;
+}
+.child-edit-row-new{
+  border-style:dashed;
+  border-color:#ae78c7;
+  background:#fdfaff;
+}
+.child-edit-fields{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 130px;
+  gap:12px;
+}
+.child-edit-fields label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  color:#493b4e;
+  font-size:12px;
+  font-weight:800;
+}
+.child-edit-fields input{
+  width:100%;
+  min-height:46px;
+  padding:0 12px;
+  border:1px solid #ddd1e2;
+  border-radius:11px;
+  background:#fff;
+}
+.child-edit-meta{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:8px;
+  min-width:180px;
+}
+.child-edit-meta small{
+  color:#817487;
+  font-size:11px;
+  text-align:right;
+}
+.family-no-children{
+  padding:18px !important;
+  border:1px dashed #d8c6dd;
+  border-radius:12px;
+  background:#fff;
+}
+@media(max-width:760px){
+  .family-children-editor-head{
+    align-items:stretch;
+    flex-direction:column;
+  }
+  #addFamilyChild{width:100%}
+  .child-edit-row{
+    grid-template-columns:1fr;
+  }
+  .child-edit-fields{
+    grid-template-columns:1fr;
+  }
+  .child-edit-meta{
+    min-width:0;
+    align-items:flex-start;
+  }
+  .child-edit-meta small{text-align:left}
+}
