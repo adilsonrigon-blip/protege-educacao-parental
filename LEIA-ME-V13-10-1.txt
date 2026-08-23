@@ -1,0 +1,21 @@
+PROTEGE — V13.10.1
+Padronização do menu lateral
+
+CORRIGIDO
+- A opção ONGs volta a aparecer no menu lateral da tela Agenda.
+- A opção Filhos foi removida do menu lateral.
+- A ordem do menu foi mantida consistente nas páginas administrativas.
+- Cache atualizado para CSS/JS v=13101.
+
+AUDITORIA
+- agenda.html: ONGs=OK | Filhos=REMOVIDO
+- atendimento.html: ONGs=OK | Filhos=REMOVIDO
+- atendimentos.html: ONGs=OK | Filhos=REMOVIDO
+- dashboard.html: ONGs=OK | Filhos=REMOVIDO
+- familias-interessadas.html: ONGs=OK | Filhos=PRESENTE
+- familias.html: ONGs=OK | Filhos=PRESENTE
+- minha-conta.html: ONGs=OK | Filhos=REMOVIDO
+- ongs.html: ONGs=OK | Filhos=REMOVIDO
+- profissionais-v13-2-1.html: ONGs=OK | Filhos=REMOVIDO
+- profissionais.html: ONGs=OK | Filhos=REMOVIDO
+- relatorios.html: ONGs=OK | Filhos=REMOVIDO

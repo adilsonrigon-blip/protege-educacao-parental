@@ -1,4 +1,4 @@
-// Protege build V13.10.0 - correção consolidada saudação + Agenda
+// Protege build V13.10.1 - padronização do menu lateral
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
