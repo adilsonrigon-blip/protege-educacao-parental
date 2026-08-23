@@ -1,0 +1,41 @@
+PROTEGE — V13.10.0
+Correção consolidada após validação visual
+
+CORRIGIDO
+1) Saudação do Dashboard
+- A V13.9.9 usava uma variável inexistente (`supabaseClient`).
+- Agora usa o cliente real da aplicação (`ProtegeApp`) e a sessão autenticada.
+- Procura o profissional primeiro por auth_user_id e depois pelo e-mail.
+- Exibe somente o primeiro nome.
+
+2) Modal Novo agendamento
+- Removido overflow horizontal.
+- O botão X fica dentro do modal.
+- Campos de data/hora não ultrapassam a largura.
+- Início e fim ficam lado a lado quando houver espaço.
+- Em telas menores passam para uma coluna.
+- Botões ficam no fluxo normal e sempre acessíveis.
+- O modal passa a usar somente rolagem vertical.
+
+3) Cache
+- CSS e JS atualizados para v=13100.
+
+AUDITORIA ESTÁTICA
+- Nenhum botão com ID ficou sem referência de JavaScript na auditoria estática.
+
+LINKS href="#" ENCONTRADOS
+agenda.html: link 'Filhos' usa href="#"
+atendimento.html: link 'Filhos' usa href="#"
+atendimentos.html: link 'Filhos' usa href="#"
+dashboard.html: link 'Filhos' usa href="#"
+familias-interessadas.html: link 'Filhos' usa href="#"
+familias-interessadas.html: link 'WhatsApp' usa href="#"
+familias.html: link 'Filhos' usa href="#"
+familias.html: link 'WhatsApp' usa href="#"
+minha-conta.html: link 'Filhos' usa href="#"
+minha-conta.html: link 'Relatórios' usa href="#"
+ongs.html: link 'Filhos' usa href="#"
+profissionais-v13-2-1.html: link 'Filhos' usa href="#"
+profissionais-v13-2-1.html: link 'Relatórios' usa href="#"
+profissionais.html: link 'Filhos' usa href="#"
+relatorios.html: link 'Filhos' usa href="#"

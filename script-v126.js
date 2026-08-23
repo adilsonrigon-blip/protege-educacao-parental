@@ -1,4 +1,4 @@
-// Protege build V13.9.9 - saudacao personalizada do profissional
+// Protege build V13.10.0 - correção consolidada saudação + Agenda
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -412,10 +412,46 @@ function initCreateRecordDialogs(){
   });
 }
 
+
+async function updateProfessionalGreeting() {
+  const greeting = document.getElementById('professionalGreeting');
+  if (!greeting) return;
+
+  try {
+    const session = await ProtegeApp.currentSession();
+    const user = session?.user;
+    if (!user) return;
+
+    let fullName =
+      user.user_metadata?.nome ||
+      user.user_metadata?.name ||
+      user.user_metadata?.full_name ||
+      '';
+
+    if (!fullName && ProtegeApp.configured) {
+      const professionals = await ProtegeApp.loadProfessionals();
+      const email = String(user.email || '').trim().toLowerCase();
+
+      const professional = professionals.find(p =>
+        (p.auth_user_id && p.auth_user_id === user.id) ||
+        (email && String(p.email || '').trim().toLowerCase() === email)
+      );
+
+      fullName = professional?.nome || '';
+    }
+
+    const firstName = String(fullName || '').trim().split(/\s+/)[0];
+    if (firstName) greeting.textContent = `Olá, ${firstName} 👋`;
+  } catch (error) {
+    console.warn('Protege: não foi possível personalizar a saudação.', error);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   initBrazilianFieldValidation();
   initCreateRecordDialogs();
   await ProtegeApp.requireAuth();
+  if (document.getElementById('professionalGreeting')) await updateProfessionalGreeting();
 
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
@@ -1484,48 +1520,3 @@ async function initAgendaPage(){
 
 
 
-async function updateProfessionalGreeting() {
-  const greeting = document.getElementById("professionalGreeting");
-  if (!greeting || !supabaseClient) return;
-
-  try {
-    const { data: authData } = await supabaseClient.auth.getUser();
-    const user = authData && authData.user;
-    if (!user) return;
-
-    let fullName = "";
-    const metadata = user.user_metadata || {};
-    fullName = metadata.full_name || metadata.name || metadata.nome || "";
-
-    if (!fullName && user.email) {
-      const professionalTables = ["professionals", "profissionais"];
-      for (const table of professionalTables) {
-        try {
-          const { data, error } = await supabaseClient
-            .from(table)
-            .select("*")
-            .eq("email", user.email)
-            .limit(1);
-          if (!error && data && data.length) {
-            const row = data[0];
-            fullName = row.name || row.nome || row.full_name || row.nome_completo || "";
-            if (fullName) break;
-          }
-        } catch (_) {}
-      }
-    }
-
-    if (fullName) {
-      const firstName = String(fullName).trim().split(/\s+/)[0];
-      if (firstName) greeting.textContent = `Olá, ${firstName} 👋`;
-    }
-  } catch (error) {
-    console.warn("Não foi possível personalizar a saudação do profissional.", error);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (document.getElementById("professionalGreeting")) {
-    updateProfessionalGreeting();
-  }
-});
