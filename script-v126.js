@@ -1,4 +1,4 @@
-// Protege build V13.10.1 - padronização do menu lateral
+// Protege build V13.10.2 - menu lateral padronizado em todas as telas
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};

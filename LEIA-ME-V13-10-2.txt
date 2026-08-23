@@ -1,0 +1,31 @@
+PROTEGE — V13.10.2
+Correção definitiva do menu lateral
+
+ALTERADO EM TODAS AS TELAS ADMINISTRATIVAS
+- Removida a opção "Filhos" do menu lateral em todas as páginas.
+- Mantida a funcionalidade de filhos dentro do cadastro de famílias; apenas o item de menu foi removido.
+- Mantida a opção "ONGs" em todas as páginas do menu lateral.
+- Menu padronizado nesta ordem:
+  Dashboard
+  Famílias interessadas
+  Profissionais
+  ONGs
+  Agenda
+  Famílias
+  Atendimentos
+  Relatórios
+
+Cache atualizado para v=13102.
+
+AUDITORIA AUTOMÁTICA
+- dashboard.html: ONGs=OK | Filhos=REMOVIDO
+- familias-interessadas.html: ONGs=OK | Filhos=REMOVIDO
+- profissionais.html: ONGs=OK | Filhos=REMOVIDO
+- ongs.html: ONGs=OK | Filhos=REMOVIDO
+- agenda.html: ONGs=OK | Filhos=REMOVIDO
+- familias.html: ONGs=OK | Filhos=REMOVIDO
+- atendimento.html: ONGs=OK | Filhos=REMOVIDO
+- atendimentos.html: ONGs=OK | Filhos=REMOVIDO
+- relatorios.html: ONGs=OK | Filhos=REMOVIDO
+- minha-conta.html: ONGs=OK | Filhos=REMOVIDO
+- profissionais-v13-2-1.html: ONGs=OK | Filhos=REMOVIDO
