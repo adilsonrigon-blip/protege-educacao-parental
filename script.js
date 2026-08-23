@@ -1,3 +1,41 @@
+
+async function loadPublicWhatsappFromDatabase() {
+  const link = document.getElementById('publicWhatsappLink');
+  if (!link) return;
+
+  const cfg = window.PROTEGE_CONFIG || {};
+  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) return;
+
+  try {
+    const url = `${cfg.SUPABASE_URL}/rest/v1/configuracoes_publicas?chave=eq.whatsapp_contato&select=valor&limit=1`;
+    const response = await fetch(url, {
+      headers: {
+        apikey: cfg.SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${cfg.SUPABASE_ANON_KEY}`,
+        Accept: 'application/json'
+      }
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const rows = await response.json();
+    const raw = rows?.[0]?.valor || '';
+    const number = String(raw).replace(/\D/g, '');
+
+    if (number.length >= 10 && number.length <= 15) {
+      link.href = `https://wa.me/${number}`;
+      link.dataset.whatsappSource = 'database';
+    } else if (raw) {
+      console.warn('Protege: whatsapp_contato possui formato inválido no banco.');
+    }
+  } catch (error) {
+    console.warn('Protege: não foi possível carregar o WhatsApp do banco; mantendo fallback do HTML.', error);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadPublicWhatsappFromDatabase();
+});
+
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
   const configured = Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase?.createClient);

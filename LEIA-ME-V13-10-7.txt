@@ -1,0 +1,15 @@
+PROTEGE — V13.10.7
+WhatsApp público administrado pelo banco
+
+1. Execute no Supabase SQL Editor:
+   supabase-v13.10.7-configuracoes-publicas.sql
+
+2. Para trocar o número depois:
+   update public.configuracoes_publicas
+   set valor = '5511999999999', updated_at = now()
+   where chave = 'whatsapp_contato';
+
+Use formato internacional sem símbolos: 55 + DDD + número.
+
+A Home consulta a chave `whatsapp_contato`. Se a consulta falhar, mantém o número fallback do HTML.
+Não existe tela administrativa. A policy pública criada é somente SELECT.
