@@ -1,0 +1,10 @@
+{
+  "name": "protege-educacao-parental-tests",
+  "private": true,
+  "version": "13.10.4",
+  "scripts": {
+    "test": "node --check script-v126.js && node --test tests/contracts.test.mjs",
+    "test:browser": "python tests/browser_smoke.py",
+    "test:all": "npm test"
+  }
+}

@@ -1,4 +1,4 @@
-// Protege build V13.10.3 - inclusão de filhos na edição da família
+// Protege build V13.10.4 - suíte automatizada de regressão
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
