@@ -1,0 +1,26 @@
+PROTEGE — V13.9.6
+Correção dos modais de novos registros
+
+Corrigido:
+- botão + Nova ONG abre o modal ongCreateDialog;
+- botão + Novo profissional abre o modal professionalCreateDialog;
+- botão X fecha os modais;
+- tecla ESC fecha os modais;
+- clique fora da caixa do modal fecha o modal;
+- proteção contra listeners duplicados;
+- cache-busting do script atualizado para ?v=1396.
+
+Não foram alterados:
+- Supabase;
+- tabelas ou SQL;
+- regras de acesso;
+- dados cadastrados;
+- layout dos formulários.
+
+Arquivos principais alterados:
+- script-v126.js
+- HTMLs que carregam script-v126.js (somente versão de cache)
+
+Para publicar:
+Suba os arquivos do ZIP na RAIZ do repositório protege-educacao-parental,
+substituindo os existentes. Aguarde o GitHub Pages concluir o deploy e use Ctrl+F5.

@@ -1,3 +1,4 @@
+// Protege build V13.9.6 - correção dos modais Nova ONG / Novo profissional
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -335,8 +336,85 @@ function initBrazilianFieldValidation(){
   },true);
 }
 
+
+// V13.9.6 — controle genérico dos modais de criação
+function initCreateRecordDialogs(){
+  const openButtons = document.querySelectorAll('[data-open-create-dialog]');
+  const closeButtons = document.querySelectorAll('[data-close-create-dialog]');
+
+  openButtons.forEach(button => {
+    if (button.dataset.createDialogBound === '1') return;
+    button.dataset.createDialogBound = '1';
+
+    button.addEventListener('click', () => {
+      const dialogId = button.dataset.openCreateDialog;
+      const dialog = dialogId ? document.getElementById(dialogId) : null;
+      if (!dialog) {
+        console.error(`Protege: diálogo de criação não encontrado: ${dialogId || '(sem id)'}`);
+        return;
+      }
+
+      if (dialog.open) return;
+
+      try {
+        if (typeof dialog.showModal === 'function') {
+          dialog.showModal();
+        } else {
+          dialog.setAttribute('open', '');
+        }
+      } catch (err) {
+        console.error('Protege: não foi possível abrir o diálogo.', err);
+        dialog.setAttribute('open', '');
+      }
+
+      requestAnimationFrame(() => {
+        dialog.querySelector('input:not([type="hidden"]), select, textarea, button')?.focus();
+      });
+    });
+  });
+
+  closeButtons.forEach(button => {
+    if (button.dataset.createDialogCloseBound === '1') return;
+    button.dataset.createDialogCloseBound = '1';
+
+    button.addEventListener('click', () => {
+      const dialog = button.closest('dialog');
+      if (!dialog) return;
+      if (typeof dialog.close === 'function') dialog.close();
+      else dialog.removeAttribute('open');
+    });
+  });
+
+  document.querySelectorAll('dialog.create-record-dialog').forEach(dialog => {
+    if (dialog.dataset.createDialogBackdropBound === '1') return;
+    dialog.dataset.createDialogBackdropBound = '1';
+
+    dialog.addEventListener('click', event => {
+      if (event.target !== dialog) return;
+      const rect = dialog.getBoundingClientRect();
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+
+      if (!inside) {
+        if (typeof dialog.close === 'function') dialog.close();
+        else dialog.removeAttribute('open');
+      }
+    });
+
+    dialog.addEventListener('cancel', event => {
+      event.preventDefault();
+      if (typeof dialog.close === 'function') dialog.close();
+      else dialog.removeAttribute('open');
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   initBrazilianFieldValidation();
+  initCreateRecordDialogs();
   await ProtegeApp.requireAuth();
 
   const year = document.getElementById('year');
