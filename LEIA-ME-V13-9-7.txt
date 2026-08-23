@@ -1,0 +1,31 @@
+PROTEGE — V13.9.7
+Correção da Agenda
+
+PROBLEMAS IDENTIFICADOS
+1. O JavaScript da Agenda usava a variável `ongFilter` sem declará-la dentro de initAgendaPage().
+   Isso gerava ReferenceError e interrompia a inicialização antes de registrar o clique em
+   "+ Novo agendamento".
+2. A mensagem "Execute o SQL da V12" era genérica e escondia o erro real retornado pelo Supabase.
+
+CORRIGIDO
+- declaração de agendaOngFilter;
+- listeners defensivos;
+- botão + Novo agendamento volta a abrir o modal mesmo se a consulta da agenda falhar;
+- mensagem da tela agora exibe o detalhe real retornado pelo Supabase;
+- cache do script atualizado para ?v=1397;
+- arquivo supabase-v12-agenda.sql mantido no pacote.
+
+IMPORTANTE SOBRE O BANCO
+Se após publicar a V13.9.7 aparecer no detalhe algo como:
+  relation "public.agenda" does not exist
+então a tabela Agenda ainda não foi criada no Supabase.
+
+Nesse caso:
+1. Supabase > SQL Editor > New query
+2. Abra o arquivo supabase-v12-agenda.sql deste ZIP
+3. Cole todo o conteúdo
+4. Clique em Run
+5. Volte ao site e faça Ctrl+F5
+
+Se o detalhe mostrar outro erro (RLS, coluna inexistente, relacionamento etc.),
+não execute alterações aleatórias: envie o texto do erro para ajuste específico.
