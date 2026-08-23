@@ -22,3 +22,11 @@ Teste complementar em Chromium com Supabase simulado. Ele depende de um ambiente
 
 ## Regra de release
 Toda alteração futura deve: alterar código → rodar `npm test` → corrigir qualquer falha → somente então gerar o ZIP.
+
+
+## Testes responsivos
+
+A partir da V13.10.8, `npm test` executa também `tests/responsive.test.mjs`.
+A suíte valida viewport, breakpoints, menu administrativo em tablet/celular,
+wrappers de tabelas, modais, formulários, filtros, tamanho mínimo de toque
+e comportamento do site público em telas estreitas.

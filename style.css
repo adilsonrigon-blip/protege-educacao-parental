@@ -114,3 +114,18 @@
 .schedule-clock-group .time-separator{align-self:center;margin-top:18px}
 @media(max-width:820px){.schedule-period-grid{grid-template-columns:1fr}.schedule-date-line{grid-template-columns:1.25fr 1fr}}
 @media(max-width:560px){.schedule-period{padding:13px}.schedule-period-head{align-items:flex-start}.schedule-date-line{grid-template-columns:1fr}.schedule-clock-group{grid-template-columns:1fr 12px 1fr}.duration-badge{display:none}}
+
+
+/* ===== V13.10.8 — reforço responsivo público ===== */
+img,svg,video,canvas{max-width:100%;height:auto}
+input,select,textarea,button{max-width:100%}
+@media(max-width:600px){
+  .container{width:min(100% - 24px,1120px)}
+  .hero-actions,.cta-actions{align-items:stretch}
+  .hero-actions .btn,.cta-actions .btn{width:100%}
+  .main-nav.open{max-height:calc(100vh - 78px);overflow-y:auto}
+}
+@media(max-width:390px){
+  .container{width:calc(100% - 20px)}
+  .hero h1{font-size:36px}
+}

@@ -1,0 +1,26 @@
+PROTEGE — V13.10.8
+Auditoria de responsividade + testes permanentes
+
+TELAS AUDITADAS
+Home pública, cadastro público, login, Dashboard, famílias interessadas,
+profissionais, ONGs, Agenda, famílias, atendimentos, novo atendimento,
+relatórios e Minha conta.
+
+CORREÇÕES
+- Em tablet/celular o menu administrativo não desaparece mais:
+  vira barra superior horizontal rolável.
+- app-main remove a margem da sidebar em telas estreitas.
+- filtros e buscas deixam de impor larguras mínimas problemáticas.
+- formulários administrativos colapsam para uma coluna no celular.
+- botões recebem altura mínima de 44px para toque.
+- modais respeitam a largura do viewport.
+- tabelas permanecem dentro de wrappers com rolagem horizontal.
+- reforço também aplicado à navegação e CTAs do site público.
+
+TESTES AUTOMATIZADOS
+Foi adicionado tests/responsive.test.mjs ao comando obrigatório `npm test`.
+A release agora verifica também responsividade estrutural, além das
+funcionalidades já cobertas pelos testes anteriores.
+
+Observação: estes testes evitam regressões comuns de CSS/estrutura.
+Para mudanças visuais grandes, validação em dispositivos reais continua recomendada.

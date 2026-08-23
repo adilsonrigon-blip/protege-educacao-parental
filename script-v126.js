@@ -1,4 +1,4 @@
-// Protege build V13.10.5 - WhatsApp com mensagem padrão + mostrar senha no login
+// Protege build V13.10.8 - auditoria responsiva e testes responsivos
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
