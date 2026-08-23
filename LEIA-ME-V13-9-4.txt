@@ -1,0 +1,14 @@
+PROTEGE EDUCAÇÃO PARENTAL – V13.9.4
+
+Correção principal desta versão:
+- Todos os links internos públicos passaram a usar navegação relativa (index.html, cadastro.html e login.html).
+- Removidas dependências de domínio fixo do GitHub Pages e do domínio protegeeducparental.com.br.
+- Corrigido suporte para links que eventualmente tenham sido gravados no formato Markdown [URL](URL) dentro do atributo href.
+- A plataforma passa a funcionar tanto no GitHub Pages quanto em futuro domínio próprio sem alteração do código.
+
+Publicação:
+1. Extraia este ZIP.
+2. Envie todos os arquivos para a raiz do repositório no GitHub, substituindo os existentes.
+3. Faça o Commit.
+4. Aguarde o deploy do GitHub Pages e teste em janela anônima.
+
