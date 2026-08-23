@@ -1,0 +1,7 @@
+PROTEGE V13.9.9
+- Dashboard agora exibe "Olá, [primeiro nome] 👋".
+- O nome é obtido do usuário autenticado.
+- Primeiro tenta os metadados da autenticação.
+- Se necessário, procura o e-mail do usuário na tabela de profissionais.
+- Mantém "Olá, profissional 👋" como fallback caso não encontre o nome.
+- Cache atualizado para v=1399.

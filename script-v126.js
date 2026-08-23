@@ -1,4 +1,4 @@
-// Protege build V13.9.8 - novo layout do modal de Agenda
+// Protege build V13.9.9 - saudacao personalizada do profissional
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -1482,3 +1482,50 @@ async function initAgendaPage(){
   form.addEventListener('submit',async e=>{e.preventDefault();const t=selectedTarget(),msg=document.getElementById('scheduleMessage');if(!familySel.value||!professionalSel.value||!t){msg.textContent='Preencha família, pessoa atendida e profissional.';return;}syncHiddenDateTimes();const start=document.getElementById('scheduleStart').value,end=document.getElementById('scheduleEnd').value;if(!start){msg.textContent='Informe data e hora de início.';return;}if(end&&new Date(end)<=new Date(start)){msg.textContent='O horário de término deve ser posterior ao início.';return;}const body={familia_id:familySel.value,filho_id:t.filho_id,profissional_id:professionalSel.value,atendimento_para:t.nome,tipo_alvo:t.tipo_alvo,tipo:document.getElementById('scheduleType').value,data_inicio:new Date(start).toISOString(),data_fim:end?new Date(end).toISOString():null,status:document.getElementById('scheduleStatus').value,observacoes:document.getElementById('scheduleNotes').value.trim()||null};try{document.getElementById('saveScheduleButton').disabled=true;if(editingId)await ProtegeApp.updateSchedule(editingId,body);else await ProtegeApp.saveSchedule(body);msg.textContent='Agendamento salvo com sucesso.';await reload();setTimeout(()=>closeScheduleModal(),350);}catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}finally{document.getElementById('saveScheduleButton').disabled=false;}});
 }
 
+
+
+async function updateProfessionalGreeting() {
+  const greeting = document.getElementById("professionalGreeting");
+  if (!greeting || !supabaseClient) return;
+
+  try {
+    const { data: authData } = await supabaseClient.auth.getUser();
+    const user = authData && authData.user;
+    if (!user) return;
+
+    let fullName = "";
+    const metadata = user.user_metadata || {};
+    fullName = metadata.full_name || metadata.name || metadata.nome || "";
+
+    if (!fullName && user.email) {
+      const professionalTables = ["professionals", "profissionais"];
+      for (const table of professionalTables) {
+        try {
+          const { data, error } = await supabaseClient
+            .from(table)
+            .select("*")
+            .eq("email", user.email)
+            .limit(1);
+          if (!error && data && data.length) {
+            const row = data[0];
+            fullName = row.name || row.nome || row.full_name || row.nome_completo || "";
+            if (fullName) break;
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (fullName) {
+      const firstName = String(fullName).trim().split(/\s+/)[0];
+      if (firstName) greeting.textContent = `Olá, ${firstName} 👋`;
+    }
+  } catch (error) {
+    console.warn("Não foi possível personalizar a saudação do profissional.", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("professionalGreeting")) {
+    updateProfessionalGreeting();
+  }
+});
