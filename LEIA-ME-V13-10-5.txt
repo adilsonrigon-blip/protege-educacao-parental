@@ -1,0 +1,19 @@
+PROTEGE — V13.10.5
+
+ALTERAÇÕES
+1. Botão "Falar pelo WhatsApp"
+- Abre o WhatsApp já com mensagem padrão preenchida:
+  Olá! 👋 Seja bem-vindo(a) ao Protege – Educação Parental. Estamos felizes em falar com você. Como podemos ajudar?
+
+2. Login do profissional
+- Incluído botão "Mostrar" ao lado do campo Senha.
+- Ao clicar, alterna entre Mostrar/Ocultar sem alterar o valor digitado.
+- Incluídos aria-label e aria-pressed para acessibilidade.
+
+TESTES
+- Mantidos todos os testes anteriores.
+- Adicionados testes para WhatsApp com mensagem padrão.
+- Adicionado teste para botão Mostrar/Ocultar senha no login.
+- O ZIP só é gerado se 100% da suíte passar.
+
+Cache atualizado para v=13105.

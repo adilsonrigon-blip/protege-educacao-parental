@@ -1,4 +1,4 @@
-// Protege build V13.10.4 - suíte automatizada de regressão
+// Protege build V13.10.5 - WhatsApp com mensagem padrão + mostrar senha no login
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -469,6 +469,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (toggle && nav) toggle.addEventListener('click', () => {
     const open = nav.classList.toggle('open');
     toggle.setAttribute('aria-expanded', open);
+  });
+
+
+  const loginPasswordInput = document.getElementById('password');
+  const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+  toggleLoginPassword?.addEventListener('click', () => {
+    const showing = loginPasswordInput?.type === 'text';
+    if (loginPasswordInput) loginPasswordInput.type = showing ? 'password' : 'text';
+    toggleLoginPassword.textContent = showing ? 'Mostrar' : 'Ocultar';
+    toggleLoginPassword.setAttribute('aria-pressed', showing ? 'false' : 'true');
+    toggleLoginPassword.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
   });
 
   // LOGIN REAL COM SUPABASE; fallback demonstrativo enquanto o projeto não estiver configurado.
