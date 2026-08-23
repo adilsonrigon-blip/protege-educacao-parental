@@ -1,0 +1,9 @@
+PROTEGE – V13.9.5 – LINKS RELATIVOS / ZIP RAIZ
+
+Correções:
+- arquivos estão diretamente na raiz do ZIP (sem pasta intermediária);
+- links internos do GitHub Pages convertidos para relativos;
+- referências ao domínio protegeeducparental.com.br removidas dos HTML/JS;
+- links acidentalmente em formato Markdown normalizados.
+
+Para publicar: extraia e envie/substitua os arquivos diretamente na raiz do repositório GitHub.
