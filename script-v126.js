@@ -1,4 +1,4 @@
-// Protege build V13.10.8 - auditoria responsiva e testes responsivos
+// Protege build V13.10.9 - responsaveis, CEP, editar familia e wizard sem salto
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -458,6 +458,7 @@ async function updateProfessionalGreeting() {
 document.addEventListener('DOMContentLoaded', async () => {
   initBrazilianFieldValidation();
   initCreateRecordDialogs();
+  document.querySelectorAll('form').forEach(bindCepAutoFill);
   await ProtegeApp.requireAuth();
   if (document.getElementById('professionalGreeting')) await updateProfessionalGreeting();
 
@@ -538,6 +539,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   initAttendanceWizard();
 });
 
+async function lookupBrazilianCep(rawCep){
+  const cep=ProtegeApp.onlyDigits(rawCep||'');
+  if(cep.length!==8) return null;
+  const response=await fetch(`https://viacep.com.br/ws/${cep}/json/`,{headers:{Accept:'application/json'}});
+  if(!response.ok) throw new Error('Não foi possível consultar o CEP.');
+  const data=await response.json();
+  if(data?.erro) throw new Error('CEP não encontrado.');
+  return data;
+}
+
+function bindCepAutoFill(form){
+  if(!form)return;
+  const cepInput=form.elements?.cep;
+  if(!cepInput||cepInput.dataset.cepAutofillBound==='true')return;
+  cepInput.dataset.cepAutofillBound='true';
+  cepInput.setAttribute('inputmode','numeric');
+  cepInput.setAttribute('autocomplete','postal-code');
+  let feedback=form.querySelector('.cep-feedback');
+  if(!feedback){
+    feedback=document.createElement('small');
+    feedback.className='cep-feedback';
+    feedback.setAttribute('aria-live','polite');
+    cepInput.insertAdjacentElement('afterend',feedback);
+  }
+  const setValue=(name,value)=>{const el=form.elements?.[name];if(el&&value)el.value=value;};
+  const run=async()=>{
+    const cep=ProtegeApp.onlyDigits(cepInput.value);
+    if(cep.length!==8){feedback.textContent=cep.length?'Informe um CEP com 8 dígitos.':'';return;}
+    feedback.textContent='Buscando endereço...';
+    try{
+      const address=await lookupBrazilianCep(cep);
+      setValue('logradouro',address.logradouro);
+      setValue('bairro',address.bairro);
+      setValue('cidade',address.localidade);
+      setValue('estado',address.uf);
+      cepInput.value=`${cep.slice(0,5)}-${cep.slice(5)}`;
+      feedback.textContent='Endereço preenchido pelo CEP.';
+      form.elements?.numero?.focus();
+    }catch(err){feedback.textContent=err?.message||'CEP não encontrado.';}
+  };
+  cepInput.addEventListener('input',()=>{const d=ProtegeApp.onlyDigits(cepInput.value).slice(0,8);cepInput.value=d.length>5?`${d.slice(0,5)}-${d.slice(5)}`:d;feedback.textContent='';});
+  cepInput.addEventListener('blur',run);
+}
+
 function initInterestForm() {
   const form = document.getElementById('interestForm');
   if (!form) return;
@@ -545,6 +590,7 @@ function initInterestForm() {
   const add = document.getElementById('addInterestChild');
   const message = document.getElementById('interestMessage');
   const submit = document.getElementById('interestSubmitBtn');
+  bindCepAutoFill(form);
 
   function updateRemoveButtons() {
     const buttons = rows.querySelectorAll('.remove-child');
@@ -808,9 +854,18 @@ async function initFamiliesPage() {
       : '<div class="empty-state family-no-children">Nenhum filho cadastrado. Clique em “+ Adicionar filho”.</div>';
   }
   function setFamilyEditMode(editing){
-    document.getElementById('familyDetails').hidden=editing;
-    document.getElementById('familyEditSection').hidden=!editing;
-    document.getElementById('editFamilyBtn').hidden=editing;
+    const details=document.getElementById('familyDetails');
+    const section=document.getElementById('familyEditSection');
+    const editButton=document.getElementById('editFamilyBtn');
+    if(details)details.hidden=editing;
+    if(section)section.hidden=!editing;
+    if(editButton)editButton.hidden=editing;
+    if(editing&&section){
+      requestAnimationFrame(()=>{
+        section.scrollIntoView({behavior:'smooth',block:'start'});
+        section.querySelector('input,select,textarea')?.focus({preventScroll:true});
+      });
+    }
   }
   async function renderHistory(f){
     const box=document.getElementById('familyHistory');
@@ -855,7 +910,13 @@ async function initFamiliesPage() {
     finally{b.disabled=false;}
   });
 
-  document.getElementById('editFamilyBtn')?.addEventListener('click',()=>{if(activeFamily){fillFamilyEdit(activeFamily);setFamilyEditMode(true);}});
+  bindCepAutoFill(document.getElementById('familyEditForm'));
+  document.getElementById('editFamilyBtn')?.addEventListener('click',()=>{
+    if(!activeFamily)return;
+    fillFamilyEdit(activeFamily);
+    document.getElementById('familyEditMessage').textContent='';
+    setFamilyEditMode(true);
+  });
   document.getElementById('cancelFamilyEdit')?.addEventListener('click',()=>setFamilyEditMode(false));
   document.getElementById('addFamilyChild')?.addEventListener('click',()=>{
     const box=document.getElementById('familyChildrenEdit');
@@ -879,7 +940,7 @@ async function initFamiliesPage() {
     try{
       const patch={};
       ['responsavel1','responsavel2','telefone','email','cep','logradouro','numero','complemento','bairro','cidade','estado','status','observacoes'].forEach(k=>patch[k]=String(fd.get(k)||'').trim()||null);
-      if(!patch.responsavel1||!patch.telefone) throw new Error('Responsável principal e telefone são obrigatórios.');
+      if(!patch.responsavel1||!patch.telefone) throw new Error('Mãe/responsável 1 e telefone são obrigatórios.');
       patch.estado=patch.estado?patch.estado.toUpperCase():null;
       await ProtegeApp.updateFamily(activeFamily.id,patch);
       for(const row of document.querySelectorAll('#familyChildrenEdit .child-edit-row')){
@@ -1480,7 +1541,7 @@ async function initAttendanceWizard() {
   let current=1; const total=10; let families=[]; let professionals=[];
   const familySel=document.getElementById('attendanceFamily'),professionalSel=document.getElementById('attendanceProfessional'),targetSel=document.getElementById('attendanceTarget'),dateInput=document.getElementById('attendanceDateTime'),statusSel=document.getElementById('attendanceStatus');
   const panels=[...document.querySelectorAll('.wizard-panel')],steps=[...document.querySelectorAll('.wizard-step')],counter=document.getElementById('stepCounter'),prev=document.getElementById('prevStep'),next=document.getElementById('nextStep'),save=document.getElementById('saveAttendance'),message=document.getElementById('saveMessage');
-  function render(){panels.forEach(p=>p.classList.toggle('active',Number(p.dataset.panel)===current));steps.forEach(s=>s.classList.toggle('active',Number(s.dataset.step)===current));counter.textContent=`Passo ${current} de ${total}`;prev.disabled=current===1;prev.style.opacity=current===1?'.45':'1';next.hidden=current===total;save.hidden=current!==total;window.scrollTo({top:0,behavior:'smooth'});}
+  function render(){panels.forEach(p=>p.classList.toggle('active',Number(p.dataset.panel)===current));steps.forEach(s=>s.classList.toggle('active',Number(s.dataset.step)===current));counter.textContent=`Passo ${current} de ${total}`;prev.disabled=current===1;prev.style.opacity=current===1?'.45':'1';next.hidden=current===total;save.hidden=current!==total;}
   function selectedFamily(){return families.find(f=>f.id===familySel.value);}
   function refreshFamily(){
     const f=selectedFamily();

@@ -1180,3 +1180,10 @@ input,select,textarea,button{max-width:100%}
   .login-card{padding:24px 18px!important}
   .registration-card{padding:20px 14px!important}
 }
+
+
+/* ===== V13.10.9 — correções de formulário e edição ===== */
+[hidden]{display:none!important}
+.cep-feedback{display:block;margin-top:6px;color:#76667e;font-size:11px;font-weight:500;line-height:1.35}
+.cep-feedback:not(:empty){min-height:15px}
+#familyEditSection{scroll-margin-top:24px}

@@ -1,0 +1,42 @@
+PROTEGE — V13.10.9
+
+CORREÇÕES DESTA VERSÃO
+
+1. RESPONSÁVEIS
+- Responsável 1 passa a ser apresentado como Mãe / responsável 1.
+- Responsável 2 passa a ser apresentado como Pai / responsável 2.
+- Os nomes técnicos responsavel1 e responsavel2 foram preservados no banco para não exigir migração.
+- Mãe/responsável 1 permanece obrigatória; pai/responsável 2 permanece opcional.
+
+2. CEP COM PREENCHIMENTO AUTOMÁTICO
+- Ao informar 8 dígitos e sair do campo CEP, a plataforma consulta ViaCEP.
+- Preenche automaticamente Rua/Avenida, Bairro, Cidade e Estado.
+- Número e Complemento continuam manuais.
+- CEP recebe máscara 00000-000.
+- Em caso de CEP inválido/não encontrado, uma mensagem é exibida sem apagar os dados já digitados.
+- O recurso foi ligado a todos os formulários da plataforma que tenham um campo name="cep".
+
+3. FAMÍLIAS — EDITAR DADOS
+- Corrigido o comportamento do botão Editar dados.
+- Ao clicar, a seção de edição é exibida e a janela rola até ela, evitando a impressão de que o botão não funcionou.
+- Corrigido também o comportamento de elementos com atributo hidden, inclusive botões.
+- Mantida a edição e inclusão de filhos.
+
+4. ATENDIMENTO — WIZARD
+- Removido o window.scrollTo que levava a página para o início ao avançar de etapa.
+- Próximo/Anterior e as 10 etapas continuam funcionando normalmente.
+
+TESTES
+- O ZIP recebido não continha a pasta tests apesar de package.json referenciá-la.
+- A suíte foi recriada nesta versão.
+- 40 testes automatizados executados e aprovados antes da geração da release.
+- Inclui regressão funcional e contratos de responsividade.
+
+ARQUIVOS DE PRODUÇÃO ALTERADOS
+- cadastro.html
+- familias.html
+- atendimento.html
+- script-v126.js
+- style-v126.css
+
+Cache desses arquivos: v=13109.
