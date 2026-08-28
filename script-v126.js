@@ -1169,47 +1169,96 @@ async function initProfessionalsPage(){
   });
 
   const professionalEmailInput=document.getElementById('professionalEmail');
-  const professionalEmailValidation=document.getElementById('professionalEmailValidation');
+  const professionalClearBtn=document.getElementById('professionalClearBtn');
+  const professionalCancelBtn=document.getElementById('professionalCancelBtn');
+  const professionalCreateDialog=document.getElementById('professionalCreateDialog');
+  const professionalAlertDialog=document.getElementById('professionalAlertDialog');
+  const professionalAlertTitle=document.getElementById('professionalAlertTitle');
+  const professionalAlertMessage=document.getElementById('professionalAlertMessage');
+  const professionalAlertEyebrow=document.getElementById('professionalAlertEyebrow');
+  const professionalAlertConfirm=document.getElementById('professionalAlertConfirm');
+  const professionalAlertCancel=document.getElementById('professionalAlertCancel');
+  const professionalAlertClose=document.getElementById('professionalAlertClose');
 
   function normalizeProfessionalEmail(value){
     return String(value||'').trim().toLowerCase();
   }
 
-  function validateProfessionalEmail(value,{showEmpty=false}={}){
+  function getProfessionalByEmail(value){
     const email=normalizeProfessionalEmail(value);
-    if(!professionalEmailValidation||!professionalEmailInput)return {email,duplicate:null};
-    professionalEmailInput.classList.remove('field-invalid','field-warning','field-valid');
-    professionalEmailValidation.className='field-validation-hint';
-
-    if(!email){
-      professionalEmailValidation.textContent=showEmpty?'Informe o e-mail do profissional.':'';
-      if(showEmpty)professionalEmailInput.classList.add('field-invalid');
-      return {email,duplicate:null};
-    }
-
-    const duplicate=items
+    const matches=items
       .filter(p=>normalizeProfessionalEmail(p.email)===email)
-      .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0]||null;
-
-    if(duplicate?.status==='ativo'){
-      professionalEmailInput.classList.add('field-invalid');
-      professionalEmailValidation.classList.add('is-error');
-      professionalEmailValidation.textContent='Este e-mail já está vinculado a um profissional ativo. Abra o cadastro existente para alterar os dados.';
-    }else if(duplicate?.status==='inativo'){
-      professionalEmailInput.classList.add('field-warning');
-      professionalEmailValidation.classList.add('is-warning');
-      professionalEmailValidation.textContent='Cadastro inativo encontrado. Ao salvar, o cadastro existente será reutilizado e o acesso poderá ser reativado com os novos dados.';
-    }else{
-      professionalEmailInput.classList.add('field-valid');
-      professionalEmailValidation.classList.add('is-success');
-      professionalEmailValidation.textContent='E-mail disponível para cadastro.';
-    }
-    return {email,duplicate};
+      .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+    return {
+      email,
+      active:matches.find(p=>p.status==='ativo')||null,
+      inactive:matches.find(p=>p.status==='inativo')||null
+    };
   }
 
-  professionalEmailInput?.addEventListener('blur',()=>validateProfessionalEmail(professionalEmailInput.value));
-  professionalEmailInput?.addEventListener('input',()=>{
-    if(professionalEmailValidation?.textContent)validateProfessionalEmail(professionalEmailInput.value);
+  function showProfessionalAlert({title='Atenção',message='',eyebrow='AVISO',confirmText='Entendi',showCancel=false,cancelText='Cancelar'}={}){
+    return new Promise(resolve=>{
+      if(!professionalAlertDialog){
+        window.alert(message);
+        resolve(true);
+        return;
+      }
+      professionalAlertTitle.textContent=title;
+      professionalAlertMessage.textContent=message;
+      professionalAlertEyebrow.textContent=eyebrow;
+      professionalAlertConfirm.textContent=confirmText;
+      professionalAlertCancel.textContent=cancelText;
+      professionalAlertCancel.hidden=!showCancel;
+
+      let settled=false;
+      const cleanup=()=>{
+        professionalAlertConfirm.removeEventListener('click',onConfirm);
+        professionalAlertCancel.removeEventListener('click',onCancel);
+        professionalAlertClose.removeEventListener('click',onCancel);
+        professionalAlertDialog.removeEventListener('cancel',onDialogCancel);
+      };
+      const done=value=>{
+        if(settled)return;
+        settled=true;
+        if(professionalAlertDialog.open)professionalAlertDialog.close();
+        cleanup();
+        resolve(value);
+      };
+      const onConfirm=()=>done(true);
+      const onCancel=()=>done(false);
+      const onDialogCancel=e=>{e.preventDefault();done(false);};
+
+      professionalAlertConfirm.addEventListener('click',onConfirm);
+      professionalAlertCancel.addEventListener('click',onCancel);
+      professionalAlertClose.addEventListener('click',onCancel);
+      professionalAlertDialog.addEventListener('cancel',onDialogCancel);
+      professionalAlertDialog.showModal();
+    });
+  }
+
+  function resetProfessionalCreateForm(){
+    form?.reset();
+    const profile=document.getElementById('professionalProfile');
+    if(profile)profile.value='profissional';
+    const status=form?.elements?.status;
+    if(status)status.value='ativo';
+    if(passwordInput){
+      passwordInput.type='password';
+      passwordInput.value='';
+    }
+    if(togglePassword)togglePassword.textContent='Mostrar';
+    if(msg)msg.textContent='';
+    professionalEmailInput?.classList.remove('field-invalid','field-warning','field-valid');
+  }
+
+  professionalClearBtn?.addEventListener('click',()=>{
+    resetProfessionalCreateForm();
+    form?.querySelector('input[name="nome"]')?.focus();
+  });
+
+  professionalCancelBtn?.addEventListener('click',()=>{
+    resetProfessionalCreateForm();
+    professionalCreateDialog?.close();
   });
 
   form?.addEventListener('submit',async e=>{
@@ -1219,14 +1268,52 @@ async function initProfessionalsPage(){
     const nome=String(fd.get('nome')||'').trim();
     const email=String(fd.get('email')||'').trim().toLowerCase();
     const password=String(fd.get('password')||'');
-    if(!nome||!email){msg.textContent='Informe nome e e-mail.';validateProfessionalEmail(email,{showEmpty:true});return;}
-    const emailCheck=validateProfessionalEmail(email);
-    if(emailCheck.duplicate?.status==='ativo'){
-      msg.textContent='Já existe um profissional ativo com este e-mail. Abra o cadastro existente para editar ou inativar antes de criar outro acesso.';
+    if(!nome||!email){
+      await showProfessionalAlert({
+        title:'Campos obrigatórios',
+        message:'Informe o nome completo e o e-mail de acesso do profissional.',
+        eyebrow:'CADASTRO'
+      });
+      (!nome?form.querySelector('input[name="nome"]'):professionalEmailInput)?.focus();
+      return;
+    }
+
+    const emailCheck=getProfessionalByEmail(email);
+    if(emailCheck.active){
+      await showProfessionalAlert({
+        title:'E-mail já cadastrado',
+        message:'Já existe um profissional ativo com este e-mail. Abra o cadastro existente para editar os dados ou inative-o antes de criar outro acesso.',
+        eyebrow:'E-MAIL EM USO'
+      });
       professionalEmailInput?.focus();
       return;
     }
-    if(password.length<8){msg.textContent='A senha deve ter pelo menos 8 caracteres.';return;}
+
+    if(emailCheck.inactive){
+      const proceed=await showProfessionalAlert({
+        title:'Cadastro inativo encontrado',
+        message:'Este e-mail pertence a um cadastro inativo. Deseja reutilizar esse cadastro e atualizar o acesso com os dados informados?',
+        eyebrow:'REATIVAÇÃO',
+        confirmText:'Reutilizar cadastro',
+        showCancel:true,
+        cancelText:'Voltar'
+      });
+      if(!proceed){
+        professionalEmailInput?.focus();
+        return;
+      }
+    }
+
+    if(password.length<8){
+      await showProfessionalAlert({
+        title:'Senha muito curta',
+        message:'A senha inicial deve ter pelo menos 8 caracteres.',
+        eyebrow:'SEGURANÇA'
+      });
+      passwordInput?.focus();
+      return;
+    }
+
     msg.textContent='Criando profissional e acesso...';
     saveBtn.disabled=true;
     try{
@@ -1238,13 +1325,21 @@ async function initProfessionalsPage(){
         status:String(fd.get('status')||'ativo'),
         ong_id:String(fd.get('ong_id')||'')||null
       });
-      msg.textContent=result?.reativado?'Cadastro inativo reutilizado e acesso atualizado com sucesso.':'Profissional e usuário de acesso criados com sucesso.';document.getElementById('professionalCreateDialog')?.close();
-      form.reset();
-      document.getElementById('professionalProfile').value='profissional';
+      professionalCreateDialog?.close();
+      resetProfessionalCreateForm();
       await refresh();
+      await showProfessionalAlert({
+        title:result?.reativado?'Cadastro reativado':'Profissional criado',
+        message:result?.reativado?'O cadastro inativo foi reutilizado e o acesso foi atualizado com sucesso.':'Profissional e usuário de acesso criados com sucesso.',
+        eyebrow:'SUCESSO'
+      });
     }catch(err){
       console.error(err);
-      msg.textContent=`Não foi possível criar: ${err?.message||'erro inesperado'}`;
+      await showProfessionalAlert({
+        title:'Não foi possível concluir',
+        message:err?.message||'Não foi possível criar o profissional.',
+        eyebrow:'ERRO'
+      });
     }finally{saveBtn.disabled=false;}
   });
 

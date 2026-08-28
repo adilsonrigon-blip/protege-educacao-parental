@@ -1425,3 +1425,101 @@ input.field-warning{
 input.field-valid{
   border-color:#69a886!important;
 }
+
+
+/* ===== V13.11.5 — cadastro profissional alinhado, popup e ações ===== */
+.professional-create-actions{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.professional-create-actions .btn{min-height:48px}
+.professional-create-actions .btn-primary{min-width:250px}
+.professional-create-actions .btn-secondary{min-width:150px}
+
+.professional-alert-dialog{
+  width:min(520px,calc(100vw - 36px));
+  max-width:none;
+  padding:0;
+  border:0;
+  border-radius:22px;
+  background:transparent;
+  overflow:visible;
+}
+.professional-alert-dialog::backdrop{
+  background:rgba(38,27,43,.42);
+  backdrop-filter:blur(2px);
+}
+.professional-alert-card{
+  position:relative;
+  padding:30px 30px 26px;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 24px 70px rgba(45,29,52,.24);
+}
+.professional-alert-card .dialog-close{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:50%;
+  background:#f4edf6;
+  color:#725a78;
+  font-size:24px;
+  cursor:pointer;
+}
+.professional-alert-card h2{
+  margin:6px 50px 10px 0;
+  font-size:26px;
+  line-height:1.15;
+  color:#2f2634;
+}
+.professional-alert-card p{
+  margin:0;
+  color:#6c6071;
+  font-size:15px;
+  line-height:1.6;
+}
+.professional-alert-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:24px;
+}
+.professional-alert-actions .btn{
+  min-width:130px;
+  min-height:46px;
+}
+
+/* Mantém o e-mail alinhado com os demais campos. */
+#professionalCreateDialog .professional-access-form > label{
+  align-self:start;
+}
+#professionalCreateDialog #professionalEmail{
+  margin-bottom:0;
+}
+
+@media(max-width:700px){
+  .professional-create-actions{
+    flex-direction:column-reverse;
+    align-items:stretch;
+  }
+  .professional-create-actions .btn{
+    width:100%;
+    min-width:0;
+  }
+  .professional-alert-card{
+    padding:26px 20px 22px;
+  }
+  .professional-alert-actions{
+    flex-direction:column-reverse;
+  }
+  .professional-alert-actions .btn{
+    width:100%;
+  }
+}

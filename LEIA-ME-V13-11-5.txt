@@ -1,0 +1,29 @@
+PROTEGE — V13.11.5
+
+AJUSTES NA TELA PROFISSIONAIS > CRIAR PROFISSIONAL E ACESSO
+
+- Corrigido o desalinhamento do campo de e-mail.
+- Removida a mensagem fixa abaixo do e-mail.
+- Alertas agora aparecem em popup/modal:
+  * e-mail ativo já cadastrado;
+  * cadastro inativo encontrado;
+  * senha curta;
+  * campos obrigatórios;
+  * sucesso;
+  * erro.
+- Para cadastro inativo, o popup pede confirmação antes de reutilizar.
+- Incluído botão "Limpar campos".
+- Incluído botão "Cancelar".
+- Cancelar fecha o formulário e limpa os dados.
+- Limpar campos mantém o modal aberto.
+- Regra de validação da V13.11.4 continua aplicada na Edge Function.
+
+NÃO HÁ SQL NOVO.
+A Edge Function v138 da V13.11.4 continua sendo a versão necessária.
+
+ARQUIVOS PRINCIPAIS PARA O GITHUB:
+- profissionais.html
+- script-v126.js
+- style-v126.css
+
+Após o deploy: Ctrl+F5.
