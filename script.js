@@ -632,3 +632,42 @@ async function initAgendaPage(){
   form.addEventListener('submit',async e=>{e.preventDefault();const t=selectedTarget(),msg=document.getElementById('scheduleMessage');if(!familySel.value||!professionalSel.value||!t){msg.textContent='Preencha família, pessoa atendida e profissional.';return;}syncHiddenDateTimes();const start=document.getElementById('scheduleStart').value,end=document.getElementById('scheduleEnd').value;if(!start){msg.textContent='Informe data e hora de início.';return;}if(end&&new Date(end)<=new Date(start)){msg.textContent='O horário de término deve ser posterior ao início.';return;}const body={familia_id:familySel.value,filho_id:t.filho_id,profissional_id:professionalSel.value,atendimento_para:t.nome,tipo_alvo:t.tipo_alvo,tipo:document.getElementById('scheduleType').value,data_inicio:new Date(start).toISOString(),data_fim:end?new Date(end).toISOString():null,status:document.getElementById('scheduleStatus').value,observacoes:document.getElementById('scheduleNotes').value.trim()||null};try{document.getElementById('saveScheduleButton').disabled=true;if(editingId)await ProtegeApp.updateSchedule(editingId,body);else await ProtegeApp.saveSchedule(body);msg.textContent='Agendamento salvo com sucesso.';await reload();setTimeout(()=>closeScheduleModal(),350);}catch(err){console.error(err);msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}finally{document.getElementById('saveScheduleButton').disabled=false;}});
 }
 
+
+
+// ===== V13.11.0 — depoimentos, notícias e eventos públicos =====
+function protegePublicConfig(){ return window.PROTEGE_CONFIG || {}; }
+function protegePublicEsc(v=''){ return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+async function protegePublicRest(table,query=''){
+  const cfg=protegePublicConfig();
+  if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY) return [];
+  const r=await fetch(`${cfg.SUPABASE_URL}/rest/v1/${table}${query?`?${query}`:''}`,{headers:{apikey:cfg.SUPABASE_ANON_KEY,Authorization:`Bearer ${cfg.SUPABASE_ANON_KEY}`,Accept:'application/json'}});
+  if(!r.ok) throw new Error(`Falha ao carregar conteúdo (${r.status})`);
+  return r.json();
+}
+function protegePublicationTypeLabel(t){return ({noticia:'Notícia',evento:'Evento',conteudo:'Conteúdo'})[t]||'Conteúdo';}
+function protegePublicDate(v,withTime=false){if(!v)return '';const d=new Date(v);return new Intl.DateTimeFormat('pt-BR',withTime?{dateStyle:'long',timeStyle:'short'}:{dateStyle:'long'}).format(d);}
+function protegePublicationCard(p){
+  const img=p.imagem_url?`<img class="publication-public-image" src="${protegePublicEsc(p.imagem_url)}" alt="${protegePublicEsc(p.titulo)}" loading="lazy">`:`<div class="publication-public-image"></div>`;
+  const meta=p.tipo==='evento'&&p.data_evento?`Evento · ${protegePublicDate(p.data_evento,true)}`:protegePublicDate(p.publicado_em||p.created_at);
+  return `<a class="publication-public-card" href="publicacao.html?id=${encodeURIComponent(p.id)}">${img}<div class="publication-public-body"><span class="publication-type">${protegePublicEsc(protegePublicationTypeLabel(p.tipo))}</span><h3>${protegePublicEsc(p.titulo)}</h3><p>${protegePublicEsc(p.resumo||'')}</p><span class="publication-public-meta">${protegePublicEsc(meta)}</span></div></a>`;
+}
+async function initPublicTestimonials(){
+  const box=document.getElementById('publicTestimonials');if(!box)return;
+  try{const rows=await protegePublicRest('depoimentos','select=id,nome_exibicao,localidade,texto,foto_url,ordem,created_at&publicado=eq.true&autorizado_publicacao=eq.true&order=ordem.asc,created_at.desc&limit=6');
+    box.innerHTML=rows.length?rows.map(x=>{const avatar=x.foto_url?`<img class="testimonial-avatar" src="${protegePublicEsc(x.foto_url)}" alt="${protegePublicEsc(x.nome_exibicao)}" loading="lazy">`:`<span class="testimonial-avatar">${protegePublicEsc((x.nome_exibicao||'F').trim().slice(0,1).toUpperCase())}</span>`;return `<article class="testimonial-public-card"><p class="testimonial-quote">“${protegePublicEsc(x.texto)}”</p><div class="testimonial-person">${avatar}<div><strong>${protegePublicEsc(x.nome_exibicao)}</strong>${x.localidade?`<small>${protegePublicEsc(x.localidade)}</small>`:''}</div></div></article>`;}).join(''):'<div class="public-content-empty">Novos depoimentos serão publicados em breve.</div>';
+  }catch(e){console.warn(e);box.innerHTML='<div class="public-content-empty">Não foi possível carregar os depoimentos agora.</div>';}
+}
+let protegeAllPublications=[];
+async function initPublicPublications(){
+  const home=document.getElementById('publicHomePublications'),list=document.getElementById('publicPublicationsList');if(!home&&!list)return;
+  try{protegeAllPublications=await protegePublicRest('publicacoes','select=id,tipo,titulo,resumo,imagem_url,paper_url,link_url,data_evento,publicado_em,created_at&publicado=eq.true&order=publicado_em.desc.nullslast,created_at.desc');
+    if(home){home.innerHTML=protegeAllPublications.slice(0,3).map(protegePublicationCard).join('')||'<div class="public-content-empty">Novas publicações serão divulgadas em breve.</div>';}
+    if(list){const render=filter=>{const rows=filter?protegeAllPublications.filter(x=>x.tipo===filter):protegeAllPublications;list.innerHTML=rows.map(protegePublicationCard).join('')||'<div class="public-content-empty">Nenhuma publicação encontrada.</div>';};render('');document.querySelectorAll('[data-publication-filter]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-publication-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');render(b.dataset.publicationFilter||'');}));}
+  }catch(e){console.warn(e);if(home)home.innerHTML='<div class="public-content-empty">Não foi possível carregar as publicações agora.</div>';if(list)list.innerHTML='<div class="public-content-empty">Não foi possível carregar as publicações agora.</div>';}
+}
+async function initPublicPublicationDetail(){
+  const host=document.getElementById('publicPublicationDetail');if(!host)return;const id=new URLSearchParams(location.search).get('id');if(!id){host.innerHTML='<div class="container"><div class="public-content-empty">Publicação não encontrada.</div></div>';return;}
+  try{const rows=await protegePublicRest('publicacoes',`select=*&id=eq.${encodeURIComponent(id)}&publicado=eq.true&limit=1`);const p=rows[0];if(!p)throw new Error('not found');document.title=`${p.titulo} | Protege`;const event=p.tipo==='evento'&&p.data_evento?`<div class="publication-detail-event">📅 ${protegePublicEsc(protegePublicDate(p.data_evento,true))}</div>`:'';const image=p.imagem_url?`<img class="publication-detail-image" src="${protegePublicEsc(p.imagem_url)}" alt="${protegePublicEsc(p.titulo)}">`:'';const body=protegePublicEsc(p.conteudo||'').replace(/\n/g,'<br>');const actions=[p.paper_url?`<a class="btn btn-primary" target="_blank" rel="noopener" href="${protegePublicEsc(p.paper_url)}">Abrir paper / material</a>`:'',p.link_url?`<a class="btn btn-secondary" target="_blank" rel="noopener" href="${protegePublicEsc(p.link_url)}">Acessar link relacionado</a>`:''].join('');host.innerHTML=`<div class="container"><div class="publication-detail-shell"><span class="publication-type">${protegePublicEsc(protegePublicationTypeLabel(p.tipo))}</span><h1>${protegePublicEsc(p.titulo)}</h1><p class="publication-detail-summary">${protegePublicEsc(p.resumo||'')}</p>${event}${image}<div class="publication-detail-text">${body}</div>${actions?`<div class="publication-detail-actions">${actions}</div>`:''}</div></div>`;
+  }catch(e){host.innerHTML='<div class="container"><div class="public-content-empty">Publicação não encontrada ou ainda não publicada.</div></div>';}
+}
+document.addEventListener('DOMContentLoaded',()=>{initPublicTestimonials();initPublicPublications();initPublicPublicationDetail();});

@@ -30,3 +30,13 @@ A partir da V13.10.8, `npm test` executa também `tests/responsive.test.mjs`.
 A suíte valida viewport, breakpoints, menu administrativo em tablet/celular,
 wrappers de tabelas, modais, formulários, filtros, tamanho mínimo de toque
 e comportamento do site público em telas estreitas.
+
+## V13.11.0 — Conteúdos públicos
+A suíte obrigatória passou a validar também:
+- áreas de depoimentos e notícias/eventos na Home;
+- acesso administrativo exclusivo à tela Conteúdos;
+- autorização obrigatória para publicar depoimentos;
+- suporte a foto, texto, PDF/paper, link e data de evento;
+- leitura pública somente de registros publicados;
+- migração RLS e Storage para conteúdo público;
+- responsividade das novas áreas públicas e administrativas.

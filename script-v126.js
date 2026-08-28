@@ -1,4 +1,4 @@
-// Protege build V13.10.9 - responsaveis, CEP, editar familia e wizard sem salto
+// Protege build V13.11.0 - depoimentos, noticias, eventos e conteudos
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -460,6 +460,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCreateRecordDialogs();
   document.querySelectorAll('form').forEach(bindCepAutoFill);
   await ProtegeApp.requireAuth();
+  const currentAccessProfile = await initAdminNavigationAndGuard();
+  if (document.body.dataset.requiresAdmin && currentAccessProfile?.perfil !== 'admin') return;
   if (document.getElementById('professionalGreeting')) await updateProfessionalGreeting();
 
   const year = document.getElementById('year');
@@ -533,6 +535,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.getElementById('attendancesTable')) await initAttendancesPage();
   if (document.getElementById('agendaDayList')) await initAgendaPage();
   if (document.getElementById('reportsTable')) await initReportsPage();
+  if (document.getElementById('testimonialsAdminList')) await initContentAdminPage();
   if (document.body.dataset.requiresAuth) await ProtegeApp.countNewLeads();
 
   // WIZARD DE ATENDIMENTO
@@ -1637,3 +1640,64 @@ async function initAgendaPage(){
 
 
 
+
+
+// ===== V13.11.0 — controle admin e gestão de conteúdo público =====
+let protegeAccessProfileCache;
+async function protegeCurrentAccessProfile(){
+  if(protegeAccessProfileCache!==undefined)return protegeAccessProfileCache;
+  try{
+    const session=await ProtegeApp.currentSession();
+    if(!session?.user){protegeAccessProfileCache=null;return null;}
+    if(!ProtegeApp.configured){protegeAccessProfileCache={perfil:'admin',ativo:true};return protegeAccessProfileCache;}
+    const {data,error}=await ProtegeApp.db.from('usuarios_perfis').select('user_id,profissional_id,nome,email,perfil,ativo').eq('user_id',session.user.id).maybeSingle();
+    if(error)throw error;protegeAccessProfileCache=data||null;return protegeAccessProfileCache;
+  }catch(err){console.warn('Protege: não foi possível validar o perfil de acesso.',err);protegeAccessProfileCache=null;return null;}
+}
+async function initAdminNavigationAndGuard(){
+  if(!document.body.dataset.requiresAuth)return null;
+  const profile=await protegeCurrentAccessProfile();
+  const nav=document.querySelector('.sidebar nav');
+  if(profile?.perfil==='admin'&&profile?.ativo!==false&&nav&&!nav.querySelector('a[href="conteudos.html"]')){
+    const link=document.createElement('a');link.href='conteudos.html';link.textContent='Conteúdos';if(location.pathname.endsWith('/conteudos.html')||location.pathname.endsWith('conteudos.html'))link.classList.add('active');const reports=nav.querySelector('a[href="relatorios.html"]');nav.insertBefore(link,reports||null);
+  }
+  if(document.body.dataset.requiresAdmin&&profile?.perfil!=='admin'){
+    document.body.innerHTML='<main class="access-denied"><div><img src="logo-protege.jpeg" alt="Protege"><h1>Acesso restrito</h1><p>Esta área é exclusiva para profissionais com perfil de administrador.</p><a class="btn btn-primary" href="dashboard.html">Voltar ao dashboard</a></div></main>';
+    setTimeout(()=>{if(location.pathname.endsWith('conteudos.html'))location.replace('dashboard.html');},1800);
+  }
+  return profile;
+}
+function protegeContentEsc(v=''){return ProtegeApp.esc(v??'');}
+function protegeContentStatus(p){return p?'<span class="content-status published">Publicado</span>':'<span class="content-status">Rascunho</span>';}
+function protegeContentDate(v){return v?new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v)):'—';}
+async function protegeUploadPublicFile(file,folder){
+  if(!file||!file.size)return null;
+  const safe=String(file.name||'arquivo').toLowerCase().replace(/[^a-z0-9._-]+/g,'-');
+  const path=`${folder}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safe}`;
+  const {error}=await ProtegeApp.db.storage.from('protege-conteudos').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+  if(error)throw error;
+  const {data}=ProtegeApp.db.storage.from('protege-conteudos').getPublicUrl(path);return data.publicUrl;
+}
+async function initContentAdminPage(){
+  const profile=await protegeCurrentAccessProfile();if(profile?.perfil!=='admin')return;
+  const testimonialList=document.getElementById('testimonialsAdminList'),publicationList=document.getElementById('publicationsAdminList');
+  const testimonialForm=document.getElementById('testimonialForm'),publicationForm=document.getElementById('publicationForm');
+  const testimonialDialog=document.getElementById('testimonialDialog'),publicationDialog=document.getElementById('publicationDialog');
+  let testimonials=[],publications=[];
+  document.querySelectorAll('.content-admin-tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.content-admin-tab').forEach(x=>x.classList.toggle('active',x===btn));document.getElementById('testimonialsAdminPanel').hidden=btn.dataset.contentTab!=='testimonials';document.getElementById('publicationsAdminPanel').hidden=btn.dataset.contentTab!=='publications';}));
+  async function reload(){
+    const [td,pd]=await Promise.all([ProtegeApp.db.from('depoimentos').select('*').order('ordem',{ascending:true}).order('created_at',{ascending:false}),ProtegeApp.db.from('publicacoes').select('*').order('created_at',{ascending:false})]);
+    if(td.error)throw td.error;if(pd.error)throw pd.error;testimonials=td.data||[];publications=pd.data||[];renderTestimonials();renderPublications();
+  }
+  function renderTestimonials(){testimonialList.innerHTML=testimonials.length?testimonials.map(x=>`<article class="content-admin-item"><div class="content-admin-main">${x.foto_url?`<img class="content-admin-avatar" src="${protegeContentEsc(x.foto_url)}" alt="">`:`<span class="content-admin-avatar">${protegeContentEsc((x.nome_exibicao||'F')[0])}</span>`}<div><h3>${protegeContentEsc(x.nome_exibicao)}</h3><p>${protegeContentEsc(x.texto)}</p></div></div><div>${protegeContentStatus(x.publicado&&x.autorizado_publicacao)}</div><div><small>${protegeContentEsc(x.localidade||'Sem localidade')} · ordem ${Number(x.ordem||0)}</small></div><div class="content-admin-actions"><button class="small-btn content-edit-testimonial" data-id="${x.id}" type="button">Editar</button><button class="small-btn content-delete-testimonial" data-id="${x.id}" type="button">Excluir</button></div></article>`).join(''):'<div class="empty-state">Nenhum depoimento cadastrado.</div>';}
+  function renderPublications(){publicationList.innerHTML=publications.length?publications.map(x=>`<article class="content-admin-item"><div class="content-admin-main">${x.imagem_url?`<img class="content-admin-thumb" src="${protegeContentEsc(x.imagem_url)}" alt="">`:`<span class="content-admin-thumb"></span>`}<div><h3>${protegeContentEsc(x.titulo)}</h3><p>${protegeContentEsc(x.resumo)}</p><div class="content-file-links">${x.paper_url?`<a href="${protegeContentEsc(x.paper_url)}" target="_blank" rel="noopener">PDF</a>`:''}${x.link_url?`<a href="${protegeContentEsc(x.link_url)}" target="_blank" rel="noopener">Link externo</a>`:''}</div></div></div><div>${protegeContentStatus(x.publicado)}</div><div><small>${protegeContentEsc(({noticia:'Notícia',evento:'Evento',conteudo:'Conteúdo'})[x.tipo]||x.tipo)}${x.data_evento?' · '+protegeContentDate(x.data_evento):''}</small></div><div class="content-admin-actions"><button class="small-btn content-edit-publication" data-id="${x.id}" type="button">Editar</button><button class="small-btn content-delete-publication" data-id="${x.id}" type="button">Excluir</button></div></article>`).join(''):'<div class="empty-state">Nenhuma publicação cadastrada.</div>';}
+  function resetTestimonial(){testimonialForm.reset();testimonialForm.elements.id.value='';testimonialForm.elements.ordem.value='0';document.getElementById('testimonialDialogTitle').textContent='Novo depoimento';document.getElementById('testimonialMessage').textContent='';}
+  function resetPublication(){publicationForm.reset();publicationForm.elements.id.value='';document.getElementById('publicationDialogTitle').textContent='Nova publicação';document.getElementById('publicationMessage').textContent='';}
+  document.querySelector('[data-open-create-dialog="testimonialDialog"]')?.addEventListener('click',resetTestimonial,{capture:true});
+  document.querySelector('[data-open-create-dialog="publicationDialog"]')?.addEventListener('click',resetPublication,{capture:true});
+  testimonialList.addEventListener('click',async e=>{const edit=e.target.closest('.content-edit-testimonial'),del=e.target.closest('.content-delete-testimonial');if(edit){const x=testimonials.find(v=>v.id===edit.dataset.id);if(!x)return;resetTestimonial();testimonialForm.elements.id.value=x.id;testimonialForm.elements.nome_exibicao.value=x.nome_exibicao||'';testimonialForm.elements.localidade.value=x.localidade||'';testimonialForm.elements.texto.value=x.texto||'';testimonialForm.elements.ordem.value=x.ordem||0;testimonialForm.elements.publicado.checked=!!x.publicado;testimonialForm.elements.autorizado_publicacao.checked=!!x.autorizado_publicacao;document.getElementById('testimonialDialogTitle').textContent='Editar depoimento';testimonialDialog.showModal();}if(del&&confirm('Excluir este depoimento?')){const {error}=await ProtegeApp.db.from('depoimentos').delete().eq('id',del.dataset.id);if(error)alert(error.message);else await reload();}});
+  publicationList.addEventListener('click',async e=>{const edit=e.target.closest('.content-edit-publication'),del=e.target.closest('.content-delete-publication');if(edit){const x=publications.find(v=>v.id===edit.dataset.id);if(!x)return;resetPublication();publicationForm.elements.id.value=x.id;publicationForm.elements.tipo.value=x.tipo||'noticia';publicationForm.elements.titulo.value=x.titulo||'';publicationForm.elements.resumo.value=x.resumo||'';publicationForm.elements.conteudo.value=x.conteudo||'';publicationForm.elements.link_url.value=x.link_url||'';publicationForm.elements.publicado.checked=!!x.publicado;if(x.data_evento){const d=new Date(x.data_evento);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());publicationForm.elements.data_evento.value=d.toISOString().slice(0,16);}document.getElementById('publicationDialogTitle').textContent='Editar publicação';publicationDialog.showModal();}if(del&&confirm('Excluir esta publicação?')){const {error}=await ProtegeApp.db.from('publicacoes').delete().eq('id',del.dataset.id);if(error)alert(error.message);else await reload();}});
+  testimonialForm.addEventListener('submit',async e=>{e.preventDefault();const msg=document.getElementById('testimonialMessage');if(!testimonialForm.reportValidity())return;const fd=new FormData(testimonialForm),id=fd.get('id'),file=fd.get('foto');msg.textContent='Salvando...';try{const existing=id?testimonials.find(x=>x.id===id):null;const foto_url=file?.size?await protegeUploadPublicFile(file,'depoimentos'):existing?.foto_url||null;const session=await ProtegeApp.currentSession();const body={nome_exibicao:String(fd.get('nome_exibicao')).trim(),localidade:String(fd.get('localidade')||'').trim()||null,texto:String(fd.get('texto')).trim(),foto_url,ordem:Number(fd.get('ordem')||0),publicado:fd.get('publicado')==='on',autorizado_publicacao:fd.get('autorizado_publicacao')==='on',updated_at:new Date().toISOString()};if(!body.autorizado_publicacao&&body.publicado)throw new Error('Para publicar, confirme a autorização da família.');let result;if(id)result=await ProtegeApp.db.from('depoimentos').update(body).eq('id',id);else result=await ProtegeApp.db.from('depoimentos').insert({...body,created_by:session?.user?.id||null});if(result.error)throw result.error;msg.textContent='Depoimento salvo com sucesso.';await reload();setTimeout(()=>testimonialDialog.close(),350);}catch(err){msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}});
+  publicationForm.addEventListener('submit',async e=>{e.preventDefault();const msg=document.getElementById('publicationMessage');if(!publicationForm.reportValidity())return;const fd=new FormData(publicationForm),id=fd.get('id'),image=fd.get('imagem'),paper=fd.get('paper');msg.textContent='Salvando...';try{const existing=id?publications.find(x=>x.id===id):null;const imagem_url=image?.size?await protegeUploadPublicFile(image,'publicacoes/imagens'):existing?.imagem_url||null;const paper_url=paper?.size?await protegeUploadPublicFile(paper,'publicacoes/papers'):existing?.paper_url||null;const published=fd.get('publicado')==='on';const session=await ProtegeApp.currentSession();const body={tipo:String(fd.get('tipo')),titulo:String(fd.get('titulo')).trim(),resumo:String(fd.get('resumo')).trim(),conteudo:String(fd.get('conteudo')||'').trim()||null,imagem_url,paper_url,link_url:String(fd.get('link_url')||'').trim()||null,data_evento:fd.get('data_evento')?new Date(String(fd.get('data_evento'))).toISOString():null,publicado:published,publicado_em:published?(existing?.publicado_em||new Date().toISOString()):null,updated_at:new Date().toISOString()};let result;if(id)result=await ProtegeApp.db.from('publicacoes').update(body).eq('id',id);else result=await ProtegeApp.db.from('publicacoes').insert({...body,created_by:session?.user?.id||null});if(result.error)throw result.error;msg.textContent='Publicação salva com sucesso.';await reload();setTimeout(()=>publicationDialog.close(),350);}catch(err){msg.textContent='Não foi possível salvar: '+(err?.message||'erro');}});
+  try{await reload();}catch(err){console.error(err);testimonialList.innerHTML=publicationList.innerHTML='<div class="empty-state">Não foi possível carregar os conteúdos. Execute a migração SQL da V13.11.0 no Supabase.</div>';}
+}

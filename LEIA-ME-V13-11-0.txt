@@ -1,0 +1,33 @@
+PROTEGE — V13.11.0
+Depoimentos + Notícias, Eventos e Conteúdos
+
+NOVAS FUNCIONALIDADES
+1. Home: área de depoimentos autorizados de famílias.
+2. Home: últimas notícias, eventos e conteúdos publicados.
+3. Páginas públicas publicacoes.html e publicacao.html.
+4. Área profissional de administrador: Conteúdos.
+5. Cadastro/edição/exclusão de depoimentos.
+6. Cadastro/edição/exclusão de notícias, eventos e conteúdos.
+7. Upload de fotos e papers PDF no Supabase Storage.
+8. Links externos e data/hora para eventos.
+9. Segurança em duas camadas: tela exige perfil admin + RLS do Supabase permite escrita somente para admin.
+10. Depoimento só fica público se estiver publicado E tiver autorização registrada.
+
+BANCO
+Antes de usar a nova área, execute no SQL Editor do Supabase:
+  supabase-v13.11-conteudos.sql
+
+O SQL cria:
+- public.depoimentos
+- public.publicacoes
+- bucket público protege-conteudos
+- políticas RLS de leitura pública apenas do que está publicado
+- políticas de gravação exclusivamente para perfil admin
+
+USO
+Entre como administrador > menu Conteúdos.
+Cadastre os conteúdos e marque Publicar no site quando estiverem prontos.
+
+PRIVACIDADE
+Depoimentos exigem a confirmação "a família autorizou a publicação".
+Recomenda-se usar apenas o nome/identificação que a família autorizou divulgar.
