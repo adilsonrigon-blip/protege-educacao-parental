@@ -1,0 +1,24 @@
+PROTEGE — V13.11.3
+
+Ajustes combinados na seção pública de depoimentos da Home:
+- Card do carrossel reduzido e proporcional ao conteúdo.
+- Largura máxima do carrossel reduzida para melhorar a composição.
+- Removida a altura mínima excessiva do card.
+- Nome da família aproximado do texto do depoimento.
+- Cabeçalho reorganizado: texto auxiliar abaixo do título e alinhado à esquerda.
+- Texto auxiliar maior, com melhor contraste, largura e espaçamento.
+- Conteúdo da frase institucional mantido.
+- Seção inteira ficou mais compacta.
+- Responsividade preservada.
+- Nenhuma alteração em Supabase, cadastro ou lógica dos depoimentos.
+
+ARQUIVOS PRINCIPAIS PARA SUBIR:
+- index.html
+- style.css
+
+Depois do deploy, use Ctrl+F5.
+
+AJUSTE COMPLEMENTAR:
+- Corrigida a imagem publicada no depoimento para não ficar sobre o texto.
+- Imagem passa a respeitar o fluxo do card, com tamanho controlado e responsivo.
+- Mantida a versão V13.11.3.
