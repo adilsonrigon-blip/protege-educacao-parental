@@ -1399,3 +1399,29 @@ input,select,textarea,button{max-width:100%}
   }
   .content-dialog .content-form-actions .btn{width:100%;min-width:0}
 }
+
+
+/* ===== V13.11.4 — validação de e-mail no cadastro de profissionais ===== */
+.field-validation-hint{
+  display:block;
+  min-height:18px;
+  margin-top:6px;
+  font-size:12px;
+  line-height:1.4;
+  font-weight:700;
+  color:#746878;
+}
+.field-validation-hint.is-error{color:#a83246}
+.field-validation-hint.is-warning{color:#94661c}
+.field-validation-hint.is-success{color:#2d7855}
+input.field-invalid{
+  border-color:#cf5267!important;
+  box-shadow:0 0 0 3px rgba(207,82,103,.10)!important;
+}
+input.field-warning{
+  border-color:#c99943!important;
+  box-shadow:0 0 0 3px rgba(201,153,67,.10)!important;
+}
+input.field-valid{
+  border-color:#69a886!important;
+}

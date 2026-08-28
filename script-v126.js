@@ -1168,6 +1168,50 @@ async function initProfessionalsPage(){
     togglePassword.textContent=showing?'Mostrar':'Ocultar';
   });
 
+  const professionalEmailInput=document.getElementById('professionalEmail');
+  const professionalEmailValidation=document.getElementById('professionalEmailValidation');
+
+  function normalizeProfessionalEmail(value){
+    return String(value||'').trim().toLowerCase();
+  }
+
+  function validateProfessionalEmail(value,{showEmpty=false}={}){
+    const email=normalizeProfessionalEmail(value);
+    if(!professionalEmailValidation||!professionalEmailInput)return {email,duplicate:null};
+    professionalEmailInput.classList.remove('field-invalid','field-warning','field-valid');
+    professionalEmailValidation.className='field-validation-hint';
+
+    if(!email){
+      professionalEmailValidation.textContent=showEmpty?'Informe o e-mail do profissional.':'';
+      if(showEmpty)professionalEmailInput.classList.add('field-invalid');
+      return {email,duplicate:null};
+    }
+
+    const duplicate=items
+      .filter(p=>normalizeProfessionalEmail(p.email)===email)
+      .sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')))[0]||null;
+
+    if(duplicate?.status==='ativo'){
+      professionalEmailInput.classList.add('field-invalid');
+      professionalEmailValidation.classList.add('is-error');
+      professionalEmailValidation.textContent='Este e-mail já está vinculado a um profissional ativo. Abra o cadastro existente para alterar os dados.';
+    }else if(duplicate?.status==='inativo'){
+      professionalEmailInput.classList.add('field-warning');
+      professionalEmailValidation.classList.add('is-warning');
+      professionalEmailValidation.textContent='Cadastro inativo encontrado. Ao salvar, o cadastro existente será reutilizado e o acesso poderá ser reativado com os novos dados.';
+    }else{
+      professionalEmailInput.classList.add('field-valid');
+      professionalEmailValidation.classList.add('is-success');
+      professionalEmailValidation.textContent='E-mail disponível para cadastro.';
+    }
+    return {email,duplicate};
+  }
+
+  professionalEmailInput?.addEventListener('blur',()=>validateProfessionalEmail(professionalEmailInput.value));
+  professionalEmailInput?.addEventListener('input',()=>{
+    if(professionalEmailValidation?.textContent)validateProfessionalEmail(professionalEmailInput.value);
+  });
+
   form?.addEventListener('submit',async e=>{
     e.preventDefault();
     const fd=new FormData(form);
@@ -1175,12 +1219,18 @@ async function initProfessionalsPage(){
     const nome=String(fd.get('nome')||'').trim();
     const email=String(fd.get('email')||'').trim().toLowerCase();
     const password=String(fd.get('password')||'');
-    if(!nome||!email){msg.textContent='Informe nome e e-mail.';return;}
+    if(!nome||!email){msg.textContent='Informe nome e e-mail.';validateProfessionalEmail(email,{showEmpty:true});return;}
+    const emailCheck=validateProfessionalEmail(email);
+    if(emailCheck.duplicate?.status==='ativo'){
+      msg.textContent='Já existe um profissional ativo com este e-mail. Abra o cadastro existente para editar ou inativar antes de criar outro acesso.';
+      professionalEmailInput?.focus();
+      return;
+    }
     if(password.length<8){msg.textContent='A senha deve ter pelo menos 8 caracteres.';return;}
     msg.textContent='Criando profissional e acesso...';
     saveBtn.disabled=true;
     try{
-      await ProtegeApp.createProfessionalWithAccess({
+      const result=await ProtegeApp.createProfessionalWithAccess({
         nome,email,password,
         telefone:String(fd.get('telefone')||'').trim()||null,
         especialidade:String(fd.get('especialidade')||'').trim()||null,
@@ -1188,7 +1238,7 @@ async function initProfessionalsPage(){
         status:String(fd.get('status')||'ativo'),
         ong_id:String(fd.get('ong_id')||'')||null
       });
-      msg.textContent='Profissional e usuário de acesso criados com sucesso.';document.getElementById('professionalCreateDialog')?.close();
+      msg.textContent=result?.reativado?'Cadastro inativo reutilizado e acesso atualizado com sucesso.':'Profissional e usuário de acesso criados com sucesso.';document.getElementById('professionalCreateDialog')?.close();
       form.reset();
       document.getElementById('professionalProfile').value='profissional';
       await refresh();

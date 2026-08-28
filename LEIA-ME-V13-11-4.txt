@@ -1,0 +1,39 @@
+PROTEGE — V13.11.4
+
+NOVA REGRA DE CADASTRO DE PROFISSIONAIS
+
+1. E-mail já cadastrado em profissional ATIVO:
+   - o novo cadastro é bloqueado;
+   - a tela informa que o administrador deve abrir o cadastro existente.
+
+2. E-mail encontrado em profissional INATIVO:
+   - o cadastro pode ser feito novamente pela mesma tela;
+   - tecnicamente o sistema REUTILIZA o cadastro inativo, em vez de criar duplicidade;
+   - os dados são atualizados;
+   - a nova senha é aplicada;
+   - perfil, ONG e status são atualizados;
+   - o usuário do Supabase Authentication é reaproveitado sempre que possível.
+
+3. E-mail nunca utilizado:
+   - fluxo normal de criação permanece igual.
+
+IMPORTANTE — EDGE FUNCTION
+É necessário atualizar a Edge Function "administrar-profissional":
+Supabase > Edge Functions > administrar-profissional > Code
+Substitua o código atual pelo arquivo:
+administrar-profissional-index-v138.ts
+Depois clique em "Deploy updates".
+
+Não há SQL novo nesta versão.
+
+ARQUIVOS PRINCIPAIS PARA O GITHUB
+- profissionais.html
+- script-v126.js
+- style-v126.css
+
+Depois do deploy no GitHub, use Ctrl+F5.
+
+SEGURANÇA
+A validação existe em dois níveis:
+- navegador: melhora a experiência do administrador;
+- Edge Function: aplica a regra de verdade no servidor, evitando contorno da validação do navegador.
