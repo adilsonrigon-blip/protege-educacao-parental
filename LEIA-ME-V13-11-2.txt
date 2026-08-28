@@ -1,0 +1,20 @@
+PROTEGE — V13.11.2
+
+Correção visual da tela Conteúdos > Nova publicação / Novo depoimento.
+
+CORREÇÕES
+- Modal/drawer com largura adequada.
+- Cabeçalho fixo e botão fechar alinhado.
+- Campos com estilo consistente com o restante do sistema.
+- Textareas em largura total.
+- Upload de foto e PDF estilizados.
+- Ações Salvar/Cancelar fixas no rodapé do modal.
+- Layout responsivo: 2 colunas no desktop e 1 coluna em telas menores.
+- Nenhuma alteração de banco/Supabase.
+- Nenhuma alteração nas regras administrativas ou funcionalidades de gravação.
+
+ARQUIVOS PARA SUBIR
+- conteudos.html
+- style-v126.css
+
+Depois do deploy, use Ctrl+F5.

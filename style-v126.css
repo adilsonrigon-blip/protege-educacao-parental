@@ -1187,7 +1187,7 @@ input,select,textarea,button{max-width:100%}
 .cep-feedback{display:block;margin-top:6px;color:#76667e;font-size:11px;font-weight:500;line-height:1.35}
 .cep-feedback:not(:empty){min-height:15px}
 #familyEditSection{scroll-margin-top:24px}
-\n\n/* ===== V13.11.0 — administração de conteúdos ===== */
+/* ===== V13.11.0 — administração de conteúdos ===== */
 .content-admin-tabs{display:flex;gap:8px;margin:0 0 18px;padding:6px;border:1px solid var(--line);border-radius:16px;background:#fff;width:max-content;max-width:100%}
 .content-admin-tab{border:0;background:transparent;color:#6f6275;border-radius:11px;padding:11px 18px;font-weight:800;cursor:pointer}
 .content-admin-tab.active{background:#7f35a2;color:#fff}
@@ -1209,3 +1209,193 @@ input,select,textarea,button{max-width:100%}
 .content-file-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.content-file-links a{font-size:.75rem;color:#6d2d8c;text-decoration:underline}
 @media(max-width:900px){.content-admin-item{grid-template-columns:1fr 1fr}.content-admin-actions{justify-content:flex-start}}
 @media(max-width:600px){.content-admin-tabs{width:100%}.content-admin-tab{flex:1;padding:10px}.content-admin-item{grid-template-columns:1fr}.content-admin-actions{display:grid;grid-template-columns:1fr 1fr}.content-admin-actions button{width:100%}.content-form-actions{flex-direction:column-reverse}.content-form-actions .btn{width:100%}}
+
+
+/* ===== V13.11.2 — correção visual definitiva dos modais de Conteúdos ===== */
+.content-dialog{
+  width:min(920px,72vw)!important;
+  max-width:none!important;
+  height:100vh!important;
+  max-height:100vh!important;
+  margin:0 0 0 auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:26px 0 0 26px!important;
+  background:transparent!important;
+  overflow:hidden!important;
+}
+.content-dialog::backdrop{
+  background:rgba(37,27,42,.38)!important;
+  backdrop-filter:blur(2px);
+}
+.content-dialog .create-dialog-shell{
+  height:100vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:0 32px 34px;
+  border-radius:26px 0 0 26px;
+  background:#fff;
+  box-shadow:-22px 0 58px rgba(39,27,46,.20);
+}
+.content-dialog .dialog-head{
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin:0 -32px 28px;
+  padding:28px 32px 22px;
+  background:rgba(255,255,255,.98);
+  border-bottom:1px solid #eee6f1;
+}
+.content-dialog .dialog-head h2{
+  margin:5px 0 0;
+  font-size:28px;
+  line-height:1.15;
+  color:#302536;
+}
+.content-dialog .dialog-close{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:50%;
+  background:#f3edf5;
+  color:#6b5a70;
+  font-size:26px;
+  line-height:1;
+  cursor:pointer;
+}
+.content-dialog .dialog-close:hover{
+  background:#eadff0;
+  color:#6f2f8d;
+}
+.content-dialog .content-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px 22px;
+  align-items:start;
+}
+.content-dialog .content-form label{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:0;
+  color:#403548;
+  font-size:13px;
+  font-weight:800;
+}
+.content-dialog .content-form .full-field{grid-column:1/-1}
+.content-dialog .content-form input[type="text"],
+.content-dialog .content-form input[type="url"],
+.content-dialog .content-form input[type="number"],
+.content-dialog .content-form input[type="datetime-local"],
+.content-dialog .content-form select,
+.content-dialog .content-form textarea{
+  width:100%;
+  min-width:0;
+  min-height:50px;
+  padding:12px 14px;
+  border:1px solid #ddd3e2;
+  border-radius:12px;
+  background:#fff;
+  color:#33283a;
+  font:inherit;
+  font-weight:500;
+  outline:none;
+  box-sizing:border-box;
+}
+.content-dialog .content-form textarea{
+  min-height:118px;
+  resize:vertical;
+  line-height:1.55;
+}
+.content-dialog #publicationForm textarea[name="conteudo"]{min-height:220px}
+.content-dialog .content-form input:focus,
+.content-dialog .content-form select:focus,
+.content-dialog .content-form textarea:focus{
+  border-color:#8a45a8;
+  box-shadow:0 0 0 3px rgba(127,53,162,.10);
+}
+.content-dialog .content-form input[type="file"]{
+  width:100%;
+  min-height:50px;
+  padding:9px 10px;
+  border:1px solid #ddd3e2;
+  border-radius:12px;
+  background:#faf8fb;
+  color:#5f5364;
+  font-weight:600;
+}
+.content-dialog .content-form input[type="file"]::file-selector-button{
+  min-height:32px;
+  margin-right:10px;
+  padding:0 12px;
+  border:1px solid #d6c8dd;
+  border-radius:9px;
+  background:#fff;
+  color:#62317a;
+  font-weight:800;
+  cursor:pointer;
+}
+.content-dialog .content-form .check-field{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:10px;
+  min-height:48px;
+  padding:12px 14px;
+  border:1px solid #e6dce9;
+  border-radius:12px;
+  background:#faf7fb;
+}
+.content-dialog .content-form .check-field input{
+  width:18px;height:18px;margin:0;flex:0 0 auto;
+}
+.content-dialog .content-form-actions{
+  position:sticky;
+  bottom:-34px;
+  z-index:15;
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin:12px -32px -34px;
+  padding:18px 32px 24px;
+  border-top:1px solid #eee6f1;
+  background:rgba(255,255,255,.98);
+  backdrop-filter:blur(8px);
+}
+.content-dialog .content-form-actions .btn{
+  min-width:170px;
+  min-height:50px;
+}
+.content-dialog .form-message{margin:0;min-height:18px}
+
+@media(max-width:900px){
+  .content-dialog{width:min(760px,88vw)!important}
+  .content-dialog .content-form{grid-template-columns:1fr}
+  .content-dialog .content-form .full-field{grid-column:1}
+}
+@media(max-width:650px){
+  .content-dialog{
+    width:100vw!important;height:100vh!important;border-radius:0!important;
+  }
+  .content-dialog .create-dialog-shell{
+    padding:0 18px 26px;border-radius:0;
+  }
+  .content-dialog .dialog-head{
+    margin:0 -18px 22px;padding:20px 18px 16px;
+  }
+  .content-dialog .dialog-head h2{font-size:24px;padding-right:4px}
+  .content-dialog .content-form{gap:16px}
+  .content-dialog .content-form-actions{
+    margin:10px -18px -26px;
+    padding:14px 18px 18px;
+    flex-direction:column-reverse;
+  }
+  .content-dialog .content-form-actions .btn{width:100%;min-width:0}
+}
