@@ -1,0 +1,22 @@
+PROTEGE — V13.11.1
+
+ALTERAÇÕES VISUAIS DA HOME
+- "Depoimentos" removido do menu principal.
+- "Notícias & eventos" permanece no menu.
+- Depoimentos movidos para o fim da Home, imediatamente antes do CTA final.
+- Depoimentos agora são exibidos em carrossel:
+  * setas anterior/próximo
+  * indicadores
+  * autoplay suave
+  * pausa ao passar o mouse/focar
+  * swipe no celular
+  * respeito a prefers-reduced-motion
+- Área de notícias ficou mais compacta quando ainda não há publicações.
+
+ADMINISTRAÇÃO
+- Nenhuma alteração no cadastro administrativo de depoimentos.
+- As regras de autorização da família e publicação permanecem iguais.
+- Nenhuma nova alteração de banco é necessária além do SQL da V13.11.0.
+
+TESTES
+- Regressão de menu, ordem das seções, carrossel, responsividade e cadastro admin.

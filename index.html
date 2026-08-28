@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Protege - Educação Parental. Cuidado, orientação e fortalecimento dos vínculos familiares.">
   <title>Protege | Educação Parental</title>
-  <link rel="stylesheet" href="style.css?v=13110">
+  <link rel="stylesheet" href="style.css?v=13111">
 
   <style>
     .benefits-marketing .benefits-heading{
@@ -96,7 +96,6 @@
         <a href="#sobre">Educação Parental</a>
         <a href="#como-funciona">Como funciona</a>
         <a href="#beneficios">Benefícios</a>
-        <a href="#depoimentos">Depoimentos</a>
         <a href="#noticias">Notícias & eventos</a>
         <a href="#contato">Contato</a>
         <a href="cadastro.html">Quero participar</a>
@@ -251,20 +250,6 @@
       </div>
     </section>
 
-
-    <section id="depoimentos" class="section home-testimonials">
-      <div class="container">
-        <div class="section-heading home-content-heading">
-          <span class="section-label">HISTÓRIAS REAIS</span>
-          <h2>Famílias que encontraram novos caminhos.</h2>
-          <p>Experiências compartilhadas por famílias que autorizaram a publicação de seus depoimentos.</p>
-        </div>
-        <div id="publicTestimonials" class="testimonial-public-grid" aria-live="polite">
-          <div class="public-content-loading">Carregando depoimentos...</div>
-        </div>
-      </div>
-    </section>
-
     <section id="noticias" class="section public-news-section">
       <div class="container">
         <div class="section-heading home-content-heading public-news-heading">
@@ -278,6 +263,30 @@
         <div id="publicHomePublications" class="publication-public-grid" aria-live="polite">
           <div class="public-content-loading">Carregando publicações...</div>
         </div>
+      </div>
+    </section>
+
+
+    <section id="depoimentos" class="home-testimonials-carousel" aria-labelledby="testimonialTitle">
+      <div class="container">
+        <div class="testimonial-carousel-head">
+          <div>
+            <span class="section-label">HISTÓRIAS REAIS</span>
+            <h2 id="testimonialTitle">O que as famílias dizem sobre a Protege.</h2>
+          </div>
+          <p>Experiências compartilhadas por famílias que autorizaram a publicação de seus depoimentos.</p>
+        </div>
+
+        <div class="testimonial-carousel-shell">
+          <button id="testimonialPrev" class="testimonial-carousel-arrow" type="button" aria-label="Depoimento anterior">←</button>
+          <div class="testimonial-carousel-viewport">
+            <div id="publicTestimonials" class="testimonial-carousel-track" aria-live="polite">
+              <div class="public-content-loading">Carregando depoimentos...</div>
+            </div>
+          </div>
+          <button id="testimonialNext" class="testimonial-carousel-arrow" type="button" aria-label="Próximo depoimento">→</button>
+        </div>
+        <div id="testimonialDots" class="testimonial-carousel-dots" aria-label="Navegação dos depoimentos"></div>
       </div>
     </section>
 
@@ -310,6 +319,6 @@
   </footer>
 
   <script src="config.js"></script>
-  <script src="script.js?v=13110"></script>
+  <script src="script.js?v=13111"></script>
 </body>
 </html>

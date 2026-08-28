@@ -653,9 +653,54 @@ function protegePublicationCard(p){
 }
 async function initPublicTestimonials(){
   const box=document.getElementById('publicTestimonials');if(!box)return;
-  try{const rows=await protegePublicRest('depoimentos','select=id,nome_exibicao,localidade,texto,foto_url,ordem,created_at&publicado=eq.true&autorizado_publicacao=eq.true&order=ordem.asc,created_at.desc&limit=6');
-    box.innerHTML=rows.length?rows.map(x=>{const avatar=x.foto_url?`<img class="testimonial-avatar" src="${protegePublicEsc(x.foto_url)}" alt="${protegePublicEsc(x.nome_exibicao)}" loading="lazy">`:`<span class="testimonial-avatar">${protegePublicEsc((x.nome_exibicao||'F').trim().slice(0,1).toUpperCase())}</span>`;return `<article class="testimonial-public-card"><p class="testimonial-quote">“${protegePublicEsc(x.texto)}”</p><div class="testimonial-person">${avatar}<div><strong>${protegePublicEsc(x.nome_exibicao)}</strong>${x.localidade?`<small>${protegePublicEsc(x.localidade)}</small>`:''}</div></div></article>`;}).join(''):'<div class="public-content-empty">Novos depoimentos serão publicados em breve.</div>';
-  }catch(e){console.warn(e);box.innerHTML='<div class="public-content-empty">Não foi possível carregar os depoimentos agora.</div>';}
+  const prev=document.getElementById('testimonialPrev'),next=document.getElementById('testimonialNext'),dots=document.getElementById('testimonialDots');
+  let current=0,timer=null,rows=[];
+  const stop=()=>{if(timer){clearInterval(timer);timer=null;}};
+  const go=index=>{
+    if(!rows.length)return;
+    current=(index+rows.length)%rows.length;
+    box.style.transform=`translateX(-${current*100}%)`;
+    dots?.querySelectorAll('.testimonial-carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  };
+  const start=()=>{
+    stop();
+    if(rows.length>1&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      timer=setInterval(()=>go(current+1),6500);
+    }
+  };
+  try{
+    rows=await protegePublicRest('depoimentos','select=id,nome_exibicao,localidade,texto,foto_url,ordem,created_at&publicado=eq.true&autorizado_publicacao=eq.true&order=ordem.asc,created_at.desc&limit=8');
+    if(!rows.length){
+      box.innerHTML='<div class="public-content-empty">Novos depoimentos serão publicados em breve.</div>';
+      if(prev)prev.hidden=true;if(next)next.hidden=true;if(dots)dots.innerHTML='';
+      return;
+    }
+    box.innerHTML=rows.map(x=>{
+      const avatar=x.foto_url
+        ?`<img class="testimonial-avatar" src="${protegePublicEsc(x.foto_url)}" alt="${protegePublicEsc(x.nome_exibicao)}" loading="lazy">`
+        :`<span class="testimonial-avatar">${protegePublicEsc((x.nome_exibicao||'F').trim().slice(0,1).toUpperCase())}</span>`;
+      return `<div class="testimonial-carousel-slide"><article class="testimonial-public-card"><p class="testimonial-quote">“${protegePublicEsc(x.texto)}”</p><div class="testimonial-person">${avatar}<div><strong>${protegePublicEsc(x.nome_exibicao)}</strong>${x.localidade?`<small>${protegePublicEsc(x.localidade)}</small>`:''}</div></div></article></div>`;
+    }).join('');
+    if(dots){
+      dots.innerHTML=rows.map((_,i)=>`<button type="button" class="testimonial-carousel-dot${i===0?' active':''}" data-testimonial-index="${i}" aria-label="Ver depoimento ${i+1}"></button>`).join('');
+      dots.querySelectorAll('[data-testimonial-index]').forEach(b=>b.addEventListener('click',()=>{go(Number(b.dataset.testimonialIndex));start();}));
+    }
+    if(prev){prev.hidden=rows.length<2;prev.addEventListener('click',()=>{go(current-1);start();});}
+    if(next){next.hidden=rows.length<2;next.addEventListener('click',()=>{go(current+1);start();});}
+    const viewport=box.closest('.testimonial-carousel-viewport');
+    viewport?.addEventListener('mouseenter',stop);
+    viewport?.addEventListener('mouseleave',start);
+    viewport?.addEventListener('focusin',stop);
+    viewport?.addEventListener('focusout',start);
+    let touchX=null;
+    viewport?.addEventListener('touchstart',e=>{touchX=e.changedTouches[0]?.clientX??null;stop();},{passive:true});
+    viewport?.addEventListener('touchend',e=>{if(touchX===null)return;const dx=(e.changedTouches[0]?.clientX??touchX)-touchX;if(Math.abs(dx)>45)go(current+(dx<0?1:-1));touchX=null;start();},{passive:true});
+    go(0);start();
+  }catch(e){
+    console.warn(e);
+    box.innerHTML='<div class="public-content-empty">Não foi possível carregar os depoimentos agora.</div>';
+    if(prev)prev.hidden=true;if(next)next.hidden=true;if(dots)dots.innerHTML='';
+  }
 }
 let protegeAllPublications=[];
 async function initPublicPublications(){

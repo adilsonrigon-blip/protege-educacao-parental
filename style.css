@@ -169,3 +169,142 @@ input,select,textarea,button{max-width:100%}
 .publication-detail-event{padding:14px 18px;border-radius:14px;background:#f4edf7;color:#622e7d;font-weight:700;margin:0 0 24px}
 @media(max-width:900px){.testimonial-public-grid,.publication-public-grid,.publication-public-grid-full{grid-template-columns:1fr 1fr}.public-news-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:600px){.testimonial-public-grid,.publication-public-grid,.publication-public-grid-full{grid-template-columns:1fr}.testimonial-public-card{padding:22px}.publications-filter{overflow-x:auto;flex-wrap:nowrap;padding-bottom:6px}.public-filter{flex:0 0 auto}.publication-detail-actions .btn{width:100%}}
+
+
+/* ===== V13.11.1 — depoimentos no rodapé em carrossel ===== */
+.home-testimonials-carousel{
+  padding:78px 0 84px;
+  background:linear-gradient(180deg,#fff 0%,#fcf8fd 100%);
+  border-top:1px solid #f0e7f2;
+}
+.testimonial-carousel-head{
+  display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);
+  gap:48px;
+  align-items:end;
+  margin-bottom:32px;
+}
+.testimonial-carousel-head h2{
+  margin:0;
+  max-width:760px;
+  font-size:clamp(2rem,4vw,3.35rem);
+  line-height:1.08;
+}
+.testimonial-carousel-head>p{
+  margin:0;
+  color:#786d7d;
+  line-height:1.7;
+  max-width:520px;
+}
+.testimonial-carousel-shell{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr) 48px;
+  gap:16px;
+  align-items:center;
+}
+.testimonial-carousel-viewport{
+  overflow:hidden;
+  border-radius:26px;
+}
+.testimonial-carousel-track{
+  display:flex;
+  transition:transform .48s cubic-bezier(.22,.61,.36,1);
+  will-change:transform;
+}
+.testimonial-carousel-slide{
+  min-width:100%;
+  padding:3px;
+}
+.testimonial-carousel-slide .testimonial-public-card{
+  min-height:265px;
+  padding:36px 42px;
+  border-radius:24px;
+  box-shadow:0 16px 42px rgba(74,46,83,.08);
+}
+.testimonial-carousel-slide .testimonial-quote{
+  font-size:clamp(1.05rem,2vw,1.28rem);
+  line-height:1.75;
+  max-width:900px;
+}
+.testimonial-carousel-arrow{
+  width:48px;
+  height:48px;
+  border:1px solid #ddcbe6;
+  border-radius:50%;
+  background:#fff;
+  color:#7d39a0;
+  font-size:1.25rem;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  transition:.2s ease;
+}
+.testimonial-carousel-arrow:hover{
+  background:#7d39a0;
+  color:#fff;
+  border-color:#7d39a0;
+}
+.testimonial-carousel-arrow:disabled{opacity:.35;cursor:default}
+.testimonial-carousel-dots{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-top:20px;
+}
+.testimonial-carousel-dot{
+  width:9px;height:9px;border:0;border-radius:50%;
+  background:#d9c7e2;padding:0;cursor:pointer;
+}
+.testimonial-carousel-dot.active{background:#7d39a0;transform:scale(1.22)}
+.home-testimonials-carousel .public-content-empty,
+.home-testimonials-carousel .public-content-loading{
+  width:100%;
+  min-height:150px;
+  display:grid;
+  place-items:center;
+  border:1px dashed #eadff0;
+  border-radius:22px;
+  color:#897c8e;
+  background:#fff;
+}
+
+/* A home não deve parecer vazia quando ainda não houver notícias. */
+.public-news-section{padding-top:82px;padding-bottom:82px}
+.public-news-section .public-content-empty{
+  grid-column:1/-1;
+  min-height:0;
+  padding:22px 24px;
+  border-radius:16px;
+  background:#fbf8fc;
+  border:1px dashed #e6d8eb;
+  text-align:left;
+}
+.public-news-section .publication-public-grid:has(.public-content-empty){
+  display:block;
+}
+
+@media(max-width:900px){
+  .testimonial-carousel-head{grid-template-columns:1fr;gap:16px}
+}
+@media(max-width:600px){
+  .home-testimonials-carousel{padding:58px 0 64px}
+  .testimonial-carousel-shell{grid-template-columns:1fr;gap:12px}
+  .testimonial-carousel-viewport{grid-column:1}
+  .testimonial-carousel-arrow{
+    width:44px;height:44px;
+    position:static;
+  }
+  #testimonialPrev{grid-row:2;justify-self:end;margin-right:26px}
+  #testimonialNext{grid-row:2;justify-self:start;margin-left:26px}
+  .testimonial-carousel-shell{
+    grid-template-columns:1fr 1fr;
+  }
+  .testimonial-carousel-viewport{grid-column:1/-1}
+  .testimonial-carousel-slide .testimonial-public-card{
+    min-height:285px;
+    padding:26px 22px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .testimonial-carousel-track{transition:none}
+}
