@@ -1,0 +1,4 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.12.0 SEO
+Base: V13.11.5.
+Melhorias: títulos e descriptions; canonical; Open Graph/Twitter; Schema.org; seção temática na Home; robots.txt; sitemap.xml; noindex nas páginas administrativas/acesso.
+O sitemap contém somente URLs públicas estáveis; publicações dinâmicas não foram inventadas.

@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /login.html
+Disallow: /dashboard.html
+Disallow: /agenda.html
+Disallow: /atendimento.html
+Disallow: /atendimentos.html
+Disallow: /conteudos.html
+Disallow: /familias.html
+Disallow: /familias-interessadas.html
+Disallow: /minha-conta.html
+Disallow: /ongs.html
+Disallow: /profissionais.html
+Disallow: /profissionais-v13-2-1.html
+Disallow: /relatorios.html
+Sitemap: https://protegeducparental.com.br/sitemap.xml
