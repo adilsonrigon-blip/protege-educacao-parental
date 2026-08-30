@@ -22,7 +22,3 @@ OBSERVAÇÕES
 - A senha só é informada pelo administrador no momento da aprovação.
 - A página administrativa está marcada noindex/nofollow.
 - Mantenha config-v126.js, script-v126.js, style-v126.css e logo-protege.jpeg já existentes no repositório.
-
-TESTES DA RELEASE
-Consulte RELATORIO-TESTES-V13-13-0.txt.
-Resultado: 81/81 testes formalmente enumerados aprovados, além das suítes auxiliares de CPF/SEO e 4 checks de sintaxe JavaScript.

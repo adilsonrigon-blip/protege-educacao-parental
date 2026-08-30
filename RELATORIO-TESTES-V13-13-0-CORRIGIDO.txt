@@ -1,0 +1,23 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.13.0
+RELATÓRIO DE TESTES — PACOTE COMPLETO CORRIGIDO
+
+Resultado da validação executada no pacote completo:
+
+1. Regressão funcional (tests/contracts.test.mjs): 60/60 aprovados.
+2. Responsividade estrutural (tests/responsive.test.mjs): 14/14 aprovados.
+3. Funcionalidade V13.13.0 (tests/test_v13130.py): 7/7 aprovados.
+
+TOTAL FORMAL: 81/81 aprovados; 0 falhas.
+
+Validações adicionais:
+- CPF (tests/test_cpf.js): aprovado.
+- SEO (tests/seo.test.py): aprovado.
+
+Observação importante:
+O ZIP anterior chamado 'v13.13.0-final-testada' continha apenas os arquivos alterados.
+Ao extrair aquele ZIP isoladamente, os testes de regressão e responsividade não podiam ser
+executados porque dependiam de arquivos compartilhados que não estavam dentro do pacote,
+como script-v126.js, style-v126.css e páginas públicas anteriores.
+
+Este pacote CORRIGIDO é completo e inclui os arquivos-base necessários, além das novas
+funcionalidades V13.13.0.
