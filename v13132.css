@@ -1,0 +1,16 @@
+/* PROTEGE V13.13.2 — menu público, acesso a pré-cadastros e validação de celular */
+@media (min-width:901px){
+  .main-nav{gap:20px;font-size:13px}
+  .nav-professional-interest{white-space:nowrap}
+}
+.professionals-top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.professional-preapproval-callout{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:22px;padding:24px 28px}
+.professional-preapproval-callout h2{margin:4px 0 8px}
+.professional-preapproval-callout p{margin:0;max-width:760px;color:var(--muted,#716979);line-height:1.55}
+.professional-preapproval-callout .btn{flex:0 0 auto;white-space:nowrap}
+#professionalPhone[aria-invalid="true"]{border-color:#b42318}
+@media(max-width:900px){
+  .professional-preapproval-callout{align-items:flex-start;flex-direction:column}
+  .professional-preapproval-callout .btn{width:100%;text-align:center}
+  .professionals-top-actions{justify-content:flex-start;width:100%}
+}

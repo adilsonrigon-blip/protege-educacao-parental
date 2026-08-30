@@ -12,6 +12,7 @@
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="style-v126.css?v=13130">
   <link rel="stylesheet" href="pre-cadastro-profissional-v13131.css?v=13131">
+  <link rel="stylesheet" href="v13132.css?v=13132">
 </head>
 <body>
 <header class="site-header">
@@ -25,7 +26,7 @@
       <a href="publicacoes.html">Notícias &amp; eventos</a>
       <a href="index.html#contato">Contato</a>
       <a href="cadastro.html">Quero participar</a>
-      <a class="nav-login" href="login.html">Área do profissional</a>
+      <a class="nav-professional-interest" href="cadastro-profissional.html">Quero atuar</a><a class="nav-login" href="login.html">Área do profissional</a>
     </nav>
   </div>
 </header>
@@ -39,7 +40,7 @@
       <label>Data de nascimento *<input name="data_nascimento" type="date" required></label>
       <label>Cidade *<input name="cidade" required autocomplete="address-level2" maxlength="120"></label>
       <label>Estado (UF) *<input name="estado" required autocomplete="address-level1" maxlength="2" minlength="2" placeholder="SP"></label>
-      <label>Número do celular *<input name="celular" required inputmode="tel" autocomplete="tel" maxlength="30"></label>
+      <label>Número do celular *<input id="professionalPhone" name="celular" required inputmode="tel" autocomplete="tel" maxlength="15" placeholder="(11) 99999-9999" aria-describedby="celularError"><span id="celularError" class="field-error" hidden></span></label>
       <label>Especialidade / área de atuação *<input name="especialidade" required maxlength="160" placeholder="Ex.: Psicologia, Pedagogia, Educação Parental"></label>
       <label class="full-field">Qual sua formação de origem? *<textarea name="formacao_origem" required maxlength="1200" placeholder="Informe graduação, cursos ou formação principal."></textarea></label>
       <label class="full-field">Você possui formação em Educação Parental? *<select name="formacao_educacao_parental" required><option value="">Selecione</option><option value="sim">Sim, tenho formação concluída</option><option value="cursando">Estou fazendo uma formação</option><option value="experiencia_sem_formacao">Já atuei na área, mas não tenho formação específica</option><option value="nao">Não tenho formação em Educação Parental</option></select></label>
@@ -57,7 +58,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config-v126.js?v=1391"></script>
 <script src="cpf-v13130.js?v=13130"></script>
-<script src="pre-cadastro-profissional-v13130.js?v=13130"></script>
+<script src="celular-v13132.js?v=13132"></script>
+<script src="pre-cadastro-profissional-v13130.js?v=13132"></script>
 <script>
 (function(){
   const toggle=document.querySelector('.menu-toggle');

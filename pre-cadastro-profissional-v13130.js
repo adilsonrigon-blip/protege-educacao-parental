@@ -22,15 +22,20 @@
   if (publicForm) {
     const cpfInput = document.getElementById('professionalCpf');
     const cpfError = document.getElementById('cpfError');
+    const phoneInput = document.getElementById('professionalPhone');
+    const phoneError = document.getElementById('celularError');
     const msg = document.getElementById('professionalInterestMessage');
     const submit = document.getElementById('professionalInterestSubmit');
     const success = document.getElementById('professionalInterestSuccess');
     cpfInput.addEventListener('input', () => { cpfInput.value = window.ProtegeCpf.formatarCpf(cpfInput.value); cpfError.hidden = true; });
     cpfInput.addEventListener('blur', () => { if (cpfInput.value && !window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; } });
+    phoneInput.addEventListener('input', () => { phoneInput.value = window.ProtegeCelular.formatarCelular(phoneInput.value); phoneError.hidden = true; });
+    phoneInput.addEventListener('blur', () => { if (phoneInput.value && !window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; } });
     publicForm.addEventListener('submit', async (ev) => {
       ev.preventDefault(); msg.textContent = '';
       if (!publicForm.reportValidity()) return;
       if (!window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; cpfInput.focus(); return; }
+      if (!window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; phoneInput.focus(); return; }
       const fd = new FormData(publicForm);
       const estado = String(fd.get('estado') || '').trim().toUpperCase();
       if (!/^[A-Z]{2}$/.test(estado)) { msg.textContent = 'Informe a UF com duas letras, por exemplo SP.'; return; }
@@ -39,13 +44,13 @@
         const client = resolveClient();
         const { data, error } = await client.rpc('enviar_pre_cadastro_profissional', {
           p_nome: String(fd.get('nome') || '').trim(), p_email: String(fd.get('email') || '').trim().toLowerCase(), p_cpf: window.ProtegeCpf.somenteDigitos(fd.get('cpf')),
-          p_data_nascimento: fd.get('data_nascimento') || null, p_cidade: String(fd.get('cidade') || '').trim(), p_estado: estado, p_celular: String(fd.get('celular') || '').trim(),
+          p_data_nascimento: fd.get('data_nascimento') || null, p_cidade: String(fd.get('cidade') || '').trim(), p_estado: estado, p_celular: window.ProtegeCelular.formatarCelular(fd.get('celular')),
           p_especialidade: String(fd.get('especialidade') || '').trim(), p_formacao_origem: String(fd.get('formacao_origem') || '').trim(), p_formacao_educacao_parental: String(fd.get('formacao_educacao_parental') || ''),
           p_como_conheceu: String(fd.get('como_conheceu') || ''), p_motivacao: String(fd.get('motivacao') || '').trim(), p_consentimento_lgpd: fd.get('consentimento_lgpd') === 'on'
         });
         if (error) throw error;
         if (data?.ok === false) throw new Error(data.message || 'Não foi possível enviar o pré-cadastro.');
-        publicForm.reset(); cpfError.hidden = true; publicForm.hidden = true; success.hidden = false;
+        publicForm.reset(); cpfError.hidden = true; phoneError.hidden = true; publicForm.hidden = true; success.hidden = false;
       } catch (err) { msg.textContent = err?.message || 'Não foi possível enviar o pré-cadastro. Tente novamente.'; }
       finally { submit.disabled = false; submit.textContent = 'Enviar pré-cadastro'; }
     });
@@ -71,7 +76,7 @@
     current = rows.find(r => r.id === id); if (!current) return;
     document.getElementById('preReviewName').textContent = current.nome; document.getElementById('preReviewEmail').textContent = current.email;
     document.getElementById('preReviewSummary').innerHTML = [
-      ['CPF', window.ProtegeCpf.formatarCpf(current.cpf)], ['Nascimento', formatDate(current.data_nascimento)], ['Local', `${current.cidade || '—'} / ${current.estado || '—'}`], ['Celular', current.celular || '—'],
+      ['CPF', window.ProtegeCpf.formatarCpf(current.cpf)], ['Nascimento', formatDate(current.data_nascimento)], ['Local', `${current.cidade || '—'} / ${current.estado || '—'}`], ['Celular', window.ProtegeCelular ? window.ProtegeCelular.formatarCelular(current.celular || '') || '—' : (current.celular || '—')],
       ['Especialidade', current.especialidade || '—'], ['Formação de origem', current.formacao_origem || '—'], ['Educação Parental', current.formacao_educacao_parental || '—'], ['Conheceu por', current.como_conheceu || '—'], ['Motivação', current.motivacao || '—']
     ].map(([k,v]) => `<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('');
     notes.value = current.observacoes_admin || ''; reviewMsg.textContent = ''; document.getElementById('preInitialPassword').value = ''; dialog.showModal();
