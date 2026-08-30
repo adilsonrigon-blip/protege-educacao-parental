@@ -1,0 +1,51 @@
+.professional-interest-hero{padding:54px 0 24px}.professional-interest-hero .container{max-width:980px}.professional-interest-card{max-width:920px;margin:0 auto 56px}.professional-interest-intro{max-width:760px;color:#5f5a69;line-height:1.65}.professional-interest-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.professional-interest-grid .full-field{grid-column:1/-1}.professional-interest-grid label,.professional-review-grid label{display:flex;flex-direction:column;gap:7px;font-weight:600}.professional-interest-grid input,.professional-interest-grid select,.professional-interest-grid textarea,.professional-review-grid input,.professional-review-grid select,.professional-review-grid textarea{width:100%;box-sizing:border-box}.professional-interest-grid textarea,.professional-review-grid textarea{min-height:120px;resize:vertical}.cpf-help,.privacy-note-v1313{font-size:.9rem;color:#746f7c}.field-error{color:#b42318;font-size:.88rem;margin-top:3px}.professional-success{padding:18px;border-radius:14px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;margin-top:18px}.professional-pre-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.professional-pre-card{border:1px solid #ece8f2;border-radius:14px;padding:16px;background:#fff}.professional-pre-card strong{display:block;margin-bottom:4px}.professional-pre-card small{color:#746f7c}.pre-status{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:.78rem;font-weight:700;background:#fff7ed;color:#9a3412}.pre-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.review-candidate-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}.review-candidate-summary>div{background:#f8f6fb;border-radius:12px;padding:12px}.review-candidate-summary span{display:block;font-size:.76rem;color:#746f7c;text-transform:uppercase}.professional-review-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.professional-review-grid .full-field{grid-column:1/-1}.pre-toolbar{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.pre-toolbar input,.pre-toolbar select{min-width:210px}.nav-badge-pre{margin-left:6px}@media(max-width:760px){.professional-interest-grid,.professional-review-grid,.professional-pre-grid,.review-candidate-summary{grid-template-columns:1fr}.professional-interest-grid .full-field,.professional-review-grid .full-field{grid-column:auto}}
+
+/* V13.13.1 - acabamento visual e responsividade do pré-cadastro profissional */
+.professional-interest-hero{padding:64px 0 28px;background:linear-gradient(180deg,#fcf9fd 0%,#fff 100%)}
+.professional-interest-hero h1{margin:10px 0 12px;font-size:clamp(2rem,4vw,3.15rem);line-height:1.08;color:#302737}
+.professional-interest-hero .section-label{letter-spacing:.14em}
+.professional-interest-card{padding:30px;border-radius:24px;box-shadow:0 18px 55px rgba(76,42,91,.08);border-color:#e9dfed}
+.professional-interest-grid{gap:20px 22px}
+.professional-interest-grid label,.professional-review-grid label{font-size:.9rem;color:#43394a}
+.professional-interest-grid input,.professional-interest-grid select,.professional-interest-grid textarea,.professional-review-grid input,.professional-review-grid select,.professional-review-grid textarea{font:inherit;color:#302737;background:#fff;border:1px solid #ddd3e2;border-radius:12px;outline:none;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.professional-interest-grid input,.professional-interest-grid select,.professional-review-grid input,.professional-review-grid select{min-height:48px;padding:11px 13px}
+.professional-interest-grid textarea,.professional-review-grid textarea{padding:13px 14px;line-height:1.55;min-height:128px}
+.professional-interest-grid input::placeholder,.professional-interest-grid textarea::placeholder{color:#9b8fa0}
+.professional-interest-grid input:focus,.professional-interest-grid select:focus,.professional-interest-grid textarea:focus,.professional-review-grid input:focus,.professional-review-grid select:focus,.professional-review-grid textarea:focus{border-color:#9d69bd;box-shadow:0 0 0 4px rgba(122,63,160,.09)}
+.professional-interest-grid input:invalid:not(:placeholder-shown){box-shadow:none}
+.cpf-help{font-weight:500;line-height:1.45;margin-top:1px}
+.consent-row{display:grid!important;grid-template-columns:22px 1fr;align-items:start;gap:11px!important;padding:15px 16px;border:1px solid #eadff0;border-radius:14px;background:#fcf9fd;font-weight:500!important;line-height:1.5}
+.consent-row input{width:18px!important;height:18px!important;min-height:0!important;margin-top:2px;padding:0!important;accent-color:#7a3fa0}
+.registration-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:4px}
+.registration-actions .btn{min-width:170px;text-align:center}
+.privacy-note-v1313{margin:18px 0 0;padding-top:17px;border-top:1px solid #eee7f1;line-height:1.5}
+.pre-toolbar>div:last-child{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pre-toolbar input,.pre-toolbar select{min-height:44px;border:1px solid #ded5e3;border-radius:10px;padding:0 12px;background:#fff;font:inherit;color:#302737}
+.professional-pre-card{box-shadow:0 8px 24px rgba(76,42,91,.05)}
+#preReviewDialog{width:min(860px,calc(100vw - 28px))}
+
+@media(max-width:900px){
+  .professional-interest-hero{padding-top:48px}
+  .professional-interest-card{padding:24px}
+}
+@media(max-width:760px){
+  .professional-interest-hero{padding:38px 0 20px}
+  .professional-interest-hero h1{font-size:2.15rem}
+  .professional-interest-card{margin-bottom:38px;padding:20px;border-radius:20px}
+  .professional-interest-grid{gap:16px}
+  .professional-interest-grid input,.professional-interest-grid select,.professional-review-grid input,.professional-review-grid select{min-height:50px;font-size:16px}
+  .professional-interest-grid textarea,.professional-review-grid textarea{font-size:16px}
+  .registration-actions{flex-direction:column-reverse;align-items:stretch}
+  .registration-actions .btn{width:100%;min-width:0}
+  .pre-toolbar{align-items:stretch}
+  .pre-toolbar>div:last-child{width:100%;display:grid;grid-template-columns:1fr}
+  .pre-toolbar input,.pre-toolbar select{width:100%;min-width:0}
+  .pre-actions{display:grid;grid-template-columns:1fr;gap:9px}
+  .pre-actions .btn{width:100%}
+}
+@media(max-width:420px){
+  .professional-interest-card{padding:17px}
+  .professional-interest-hero h1{font-size:1.95rem}
+  .professional-interest-intro{font-size:.96rem}
+  .consent-row{padding:13px}
+}

@@ -1,0 +1,43 @@
+RELATÓRIO DE TESTES — PROTEGE V13.13.1
+
+Resultado geral: APROVADO
+
+1. Regressão geral
+   74 testes executados
+   74 aprovados
+   0 falhas
+
+2. Nova funcionalidade V13.13.0 (pré-cadastro profissional)
+   7 testes executados
+   7 aprovados
+   0 falhas
+
+3. Correções V13.13.1 (visual e responsividade)
+   8 testes executados
+   8 aprovados
+   0 falhas
+
+4. CPF
+   Validação específica executada: OK
+
+5. SEO
+   Suíte específica executada: OK
+
+TOTAL FORMALMENTE ENUMERADO
+   89 testes
+   89 aprovados
+   0 falhas
+
+Validação visual gerada nas larguras:
+- Desktop
+- Tablet
+- 390 px
+- 320 px
+
+Arquivos de evidência no diretório de trabalho:
+visual-desktop.png
+visual-tablet.png
+visual-mobile390.png
+visual-mobile320.png
+
+Observação: V13.13.1 é uma correção de front-end. Não requer nova alteração no banco nem novo deploy da Edge Function quando a V13.13.0 já foi instalada.

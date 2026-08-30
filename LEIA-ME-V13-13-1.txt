@@ -1,0 +1,35 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.13.1
+Correção visual e responsiva do pré-cadastro profissional
+
+O que foi corrigido
+- Cabeçalho da página cadastro-profissional.html alinhado ao padrão da home.
+- Menu público com espaçamento e comportamento responsivo.
+- Menu móvel com abertura/fechamento.
+- Campos do formulário com acabamento visual do Protege.
+- Formulário em uma coluna no celular.
+- Botões empilhados em telas pequenas.
+- Inputs com tamanho de fonte apropriado para evitar zoom automático no iPhone.
+- Bloco LGPD com acabamento próprio.
+- Ajustes responsivos na tela administrativa de pré-cadastros.
+
+Banco de dados
+- NÃO há nova migração SQL nesta versão.
+- Se o SQL da V13.13.0 já foi executado, não execute novamente.
+
+Edge Function
+- NÃO há alteração adicional na Edge Function em relação à V13.13.0.
+- Se administrar-profissional da V13.13.0 já foi publicada, não é necessário novo deploy.
+
+Publicação
+- Enviar os arquivos deste pacote ao repositório GitHub Pages, substituindo os de mesmo nome.
+- O arquivo CNAME está incluído para preservar o domínio protegeducparental.com.br.
+- Após o commit, aguardar o GitHub Pages concluir o deploy e usar Ctrl+F5.
+
+Testes
+- 74/74 regressão geral aprovados.
+- 7/7 testes funcionais V13.13.0 aprovados.
+- 8/8 testes específicos V13.13.1 de visual/responsividade aprovados.
+- CPF: aprovado.
+- SEO: aprovado.
+- Total de testes formalmente enumerados: 89/89 aprovados.
+- Foram geradas capturas de validação em desktop, tablet, 390px e 320px.

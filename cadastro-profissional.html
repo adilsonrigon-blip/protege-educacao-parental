@@ -11,10 +11,24 @@
   <meta property="og:url" content="https://protegeducparental.com.br/cadastro-profissional.html">
   <meta property="og:type" content="website">
   <link rel="stylesheet" href="style-v126.css?v=13130">
-  <link rel="stylesheet" href="pre-cadastro-profissional-v13130.css?v=13130">
+  <link rel="stylesheet" href="pre-cadastro-profissional-v13131.css?v=13131">
 </head>
 <body>
-<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><img src="logo-protege.jpeg" alt="Protege Educação Parental"></a><nav><a href="index.html">Início</a><a href="cadastro.html">Quero participar</a><a class="nav-login" href="login.html">Área do profissional</a></nav></div></header>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html" aria-label="Protege Educação Parental"><img src="logo-protege.jpeg" alt="Protege Educação Parental"></a>
+    <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <nav class="main-nav">
+      <a href="index.html#sobre">Educação Parental</a>
+      <a href="index.html#como-funciona">Como funciona</a>
+      <a href="index.html#beneficios">Benefícios</a>
+      <a href="publicacoes.html">Notícias &amp; eventos</a>
+      <a href="index.html#contato">Contato</a>
+      <a href="cadastro.html">Quero participar</a>
+      <a class="nav-login" href="login.html">Área do profissional</a>
+    </nav>
+  </div>
+</header>
 <main>
   <section class="professional-interest-hero"><div class="container"><span class="section-label">PROFISSIONAIS</span><h1>Quero atuar no PROTEGE</h1><p class="professional-interest-intro">Preencha o pré-cadastro abaixo. A equipe Protege analisará sua formação, experiência e motivação. O envio não cria acesso à plataforma automaticamente.</p></div></section>
   <section class="container"><div class="panel professional-interest-card">
@@ -44,5 +58,18 @@
 <script src="config-v126.js?v=1391"></script>
 <script src="cpf-v13130.js?v=13130"></script>
 <script src="pre-cadastro-profissional-v13130.js?v=13130"></script>
+<script>
+(function(){
+  const toggle=document.querySelector('.menu-toggle');
+  const nav=document.querySelector('.main-nav');
+  if(!toggle||!nav)return;
+  toggle.addEventListener('click',function(){
+    const open=nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded',String(open));
+    toggle.setAttribute('aria-label',open?'Fechar menu':'Abrir menu');
+  });
+  nav.querySelectorAll('a').forEach(function(link){link.addEventListener('click',function(){nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');});});
+})();
+</script>
 </body>
 </html>
