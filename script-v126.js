@@ -1,4 +1,4 @@
-// Protege build V13.11.0 - depoimentos, noticias, eventos e conteudos
+// Protege build V13.13.3 - favicon e otimização de consultas
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -244,14 +244,20 @@ const ProtegeApp = (() => {
 
   async function countNewLeads() {
     try {
-      const leads = await loadLeads();
-      const n = leads.filter(x=>x.status==='novo').length;
+      let n = 0;
+      if (!configured) {
+        n = getLocalLeads().filter(x=>x.status==='novo').length;
+      } else {
+        const { count, error } = await db.from('familias_interessadas').select('id',{count:'exact',head:true}).eq('status','novo');
+        if (error) throw error;
+        n = count || 0;
+      }
       document.querySelectorAll('#sidebarLeadCount').forEach(el=>el.textContent=n);
       const dash = document.getElementById('dashboardNewLeads'); if (dash) dash.textContent=n;
-      return leads;
+      return n;
     } catch (e) {
       console.warn(e);
-      return [];
+      return 0;
     }
   }
 
@@ -1423,17 +1429,38 @@ async function initProfessionalsPage(){
 
 async function initDashboardCore(){
   try{
-    const [families,attendances,schedules]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadAttendances(null,500),ProtegeApp.loadSchedules()]);
-    document.getElementById('dashboardFamilies').textContent=families.length;
-    document.getElementById('dashboardAttendances').textContent=attendances.length;
+    if(!ProtegeApp.configured){
+      const [families,attendances,schedules]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadAttendances(null,500),ProtegeApp.loadSchedules()]);
+      document.getElementById('dashboardFamilies').textContent=families.length;
+      document.getElementById('dashboardAttendances').textContent=attendances.length;
+      const now=new Date(),localKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;},todayKey=localKey(now);
+      const today=schedules.filter(a=>localKey(a.data_inicio)===todayKey&&a.status!=='cancelado').sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));
+      document.getElementById('dashboardToday').textContent=today.length;
+      const future=schedules.filter(a=>new Date(a.data_inicio)>=now&&!['cancelado','realizado'].includes(a.status)).sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));
+      renderDashboardAgenda((today.length?today:future).slice(0,4),todayKey,localKey);
+      return;
+    }
+    const db=ProtegeApp.db,now=new Date();
     const localKey=d=>{const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;};
-    const now=new Date(),todayKey=localKey(now);
-    const today=schedules.filter(a=>localKey(a.data_inicio)===todayKey&&a.status!=='cancelado').sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));
-    document.getElementById('dashboardToday').textContent=today.length;
-    const future=schedules.filter(a=>new Date(a.data_inicio)>=now&&!['cancelado','realizado'].includes(a.status)).sort((a,b)=>new Date(a.data_inicio)-new Date(b.data_inicio));
-    const display=(today.length?today:future).slice(0,4),box=document.getElementById('dashboardAttendanceList');
-    box.innerHTML=display.length?display.map(a=>{const fam=a.familias?[a.familias.responsavel1,a.familias.responsavel2].filter(Boolean).join(' / '):'Família';const d=new Date(a.data_inicio);const time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),day=localKey(a.data_inicio)===todayKey?'Hoje':d.toLocaleDateString('pt-BR');return `<a class="agenda-item" href="agenda.html?data=${localKey(a.data_inicio)}"><strong>${time}</strong><div><b>${ProtegeApp.esc(fam)}</b><small>${ProtegeApp.esc(a.atendimento_para)} · ${day}</small></div><span class="agenda-dot"></span></a>`;}).join(''):'<div class="empty-state">Nenhum compromisso agendado.</div>';
+    const todayKey=localKey(now),startLocal=new Date(now.getFullYear(),now.getMonth(),now.getDate()),endLocal=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+    const [familyCountRes,attendanceCountRes,todayCountRes,todayRowsRes,futureRowsRes]=await Promise.all([
+      db.from('familias').select('id',{count:'exact',head:true}),
+      db.from('atendimentos').select('id',{count:'exact',head:true}),
+      db.from('agenda').select('id',{count:'exact',head:true}).gte('data_inicio',startLocal.toISOString()).lt('data_inicio',endLocal.toISOString()).neq('status','cancelado'),
+      db.from('agenda').select('id,data_inicio,atendimento_para,status,familias(responsavel1,responsavel2)').gte('data_inicio',startLocal.toISOString()).lt('data_inicio',endLocal.toISOString()).neq('status','cancelado').order('data_inicio',{ascending:true}).limit(4),
+      db.from('agenda').select('id,data_inicio,atendimento_para,status,familias(responsavel1,responsavel2)').gte('data_inicio',now.toISOString()).not('status','in','(cancelado,realizado)').order('data_inicio',{ascending:true}).limit(4)
+    ]);
+    for(const r of [familyCountRes,attendanceCountRes,todayCountRes,todayRowsRes,futureRowsRes]) if(r.error) throw r.error;
+    document.getElementById('dashboardFamilies').textContent=familyCountRes.count||0;
+    document.getElementById('dashboardAttendances').textContent=attendanceCountRes.count||0;
+    document.getElementById('dashboardToday').textContent=todayCountRes.count||0;
+    const display=(todayRowsRes.data?.length?todayRowsRes.data:futureRowsRes.data)||[];
+    renderDashboardAgenda(display,todayKey,localKey);
   }catch(err){console.error(err);}
+}
+function renderDashboardAgenda(display,todayKey,localKey){
+  const box=document.getElementById('dashboardAttendanceList'); if(!box)return;
+  box.innerHTML=display.length?display.map(a=>{const fam=a.familias?[a.familias.responsavel1,a.familias.responsavel2].filter(Boolean).join(' / '):'Família';const d=new Date(a.data_inicio);const time=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),day=localKey(a.data_inicio)===todayKey?'Hoje':d.toLocaleDateString('pt-BR');return `<a class="agenda-item" href="agenda.html?data=${localKey(a.data_inicio)}"><strong>${time}</strong><div><b>${ProtegeApp.esc(fam)}</b><small>${ProtegeApp.esc(a.atendimento_para)} · ${day}</small></div><span class="agenda-dot"></span></a>`;}).join(''):'<div class="empty-state">Nenhum compromisso agendado.</div>';
 }
 
 async function initAttendancesPage(){
