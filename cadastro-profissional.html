@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Profissionais | Protege Educação Parental</title>
+  <meta name="description" content="Faça seu pré-cadastro para participar da equipe de profissionais da Protege Educação Parental.">
+  <link rel="canonical" href="https://protegeducparental.com.br/cadastro-profissional.html">
+  <meta property="og:title" content="Cadastro de Profissionais | Protege Educação Parental">
+  <meta property="og:description" content="Envie seus dados para análise da equipe Protege e manifeste seu interesse em atuar no programa.">
+  <meta property="og:url" content="https://protegeducparental.com.br/cadastro-profissional.html">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="style-v126.css?v=13130">
+  <link rel="stylesheet" href="pre-cadastro-profissional-v13130.css?v=13130">
+</head>
+<body>
+<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><img src="logo-protege.jpeg" alt="Protege Educação Parental"></a><nav><a href="index.html">Início</a><a href="cadastro.html">Quero participar</a><a class="nav-login" href="login.html">Área do profissional</a></nav></div></header>
+<main>
+  <section class="professional-interest-hero"><div class="container"><span class="section-label">PROFISSIONAIS</span><h1>Quero atuar no PROTEGE</h1><p class="professional-interest-intro">Preencha o pré-cadastro abaixo. A equipe Protege analisará sua formação, experiência e motivação. O envio não cria acesso à plataforma automaticamente.</p></div></section>
+  <section class="container"><div class="panel professional-interest-card">
+    <form id="professionalInterestForm" class="professional-interest-grid" novalidate>
+      <label>Nome completo *<input name="nome" required autocomplete="name" maxlength="160"></label>
+      <label>E-mail *<input name="email" type="email" required autocomplete="email" maxlength="180"></label>
+      <label>CPF *<input id="professionalCpf" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"><span class="cpf-help">O CPF é validado e usado somente pela administração para identificação e prevenção de cadastros duplicados.</span><span id="cpfError" class="field-error" hidden></span></label>
+      <label>Data de nascimento *<input name="data_nascimento" type="date" required></label>
+      <label>Cidade *<input name="cidade" required autocomplete="address-level2" maxlength="120"></label>
+      <label>Estado (UF) *<input name="estado" required autocomplete="address-level1" maxlength="2" minlength="2" placeholder="SP"></label>
+      <label>Número do celular *<input name="celular" required inputmode="tel" autocomplete="tel" maxlength="30"></label>
+      <label>Especialidade / área de atuação *<input name="especialidade" required maxlength="160" placeholder="Ex.: Psicologia, Pedagogia, Educação Parental"></label>
+      <label class="full-field">Qual sua formação de origem? *<textarea name="formacao_origem" required maxlength="1200" placeholder="Informe graduação, cursos ou formação principal."></textarea></label>
+      <label class="full-field">Você possui formação em Educação Parental? *<select name="formacao_educacao_parental" required><option value="">Selecione</option><option value="sim">Sim, tenho formação concluída</option><option value="cursando">Estou fazendo uma formação</option><option value="experiencia_sem_formacao">Já atuei na área, mas não tenho formação específica</option><option value="nao">Não tenho formação em Educação Parental</option></select></label>
+      <label class="full-field">Como conheceu o PROTEGE? *<select name="como_conheceu" required><option value="">Selecione</option><option>Instagram</option><option>WhatsApp</option><option>Facebook</option><option>Indicação</option><option>Google</option><option>Evento / palestra</option><option>Outro</option></select></label>
+      <label class="full-field">Por que você gostaria de participar do PROTEGE? *<textarea name="motivacao" required maxlength="2500"></textarea></label>
+      <label class="consent-row full-field"><input name="consentimento_lgpd" type="checkbox" required><span>Autorizo o tratamento destes dados pela equipe Protege para análise do meu pré-cadastro profissional, contato e eventual ingresso na plataforma.</span></label>
+      <div class="registration-actions full-field"><a class="btn btn-secondary" href="index.html">Voltar</a><button id="professionalInterestSubmit" class="btn btn-primary" type="submit">Enviar pré-cadastro</button></div>
+      <p id="professionalInterestMessage" class="form-message full-field" role="status" aria-live="polite"></p>
+    </form>
+    <div id="professionalInterestSuccess" class="professional-success" hidden><strong>Pré-cadastro recebido.</strong><br>A equipe Protege fará a análise e poderá entrar em contato pelos dados informados.</div>
+    <p class="privacy-note-v1313">Seus dados não criam um usuário de acesso. A criação do profissional e do login ocorre somente após aprovação administrativa.</p>
+  </div></section>
+</main>
+<footer class="footer"><div class="container footer-wrap"><div><img src="logo-protege.jpeg" alt="Protege" class="footer-logo"><p>Protege - Educação Parental</p></div><div class="footer-right"><a href="login.html">Área do profissional</a><span>© 2026 Protege</span></div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config-v126.js?v=1391"></script>
+<script src="cpf-v13130.js?v=13130"></script>
+<script src="pre-cadastro-profissional-v13130.js?v=13130"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.13.0
+
+Nova funcionalidade: pré-cadastro de profissionais.
+
+FLUXO
+1. Interessado acessa cadastro-profissional.html e envia dados.
+2. CPF é formatado e validado no navegador e novamente no banco.
+3. CPF/e-mail duplicado é bloqueado no banco.
+4. Administrador acessa pre-cadastro-profissionais.html.
+5. Admin pode marcar "em análise", recusar ou aprovar.
+6. Na aprovação, o sistema cria o profissional + Auth + usuarios_perfis e vincula o pré-cadastro.
+
+INSTALAÇÃO (ORDEM OBRIGATÓRIA)
+1. Supabase SQL Editor: executar supabase-v13.13-pre-cadastro-profissionais.sql.
+2. Supabase Edge Functions: substituir o código da função "administrar-profissional" pelo conteúdo de administrar-profissional-index-v13130.ts e fazer Deploy.
+3. GitHub: enviar os arquivos web deste ZIP para a raiz do repositório, substituindo index.html, profissionais.html e sitemap.xml quando solicitado.
+4. Testar o pré-cadastro público com um CPF válido de teste que NÃO seja real/de terceiro e depois excluir o registro de teste.
+
+OBSERVAÇÕES
+- CPF fica visível somente na área administrativa.
+- O pré-cadastro não cria login automaticamente.
+- A senha só é informada pelo administrador no momento da aprovação.
+- A página administrativa está marcada noindex/nofollow.
+- Mantenha config-v126.js, script-v126.js, style-v126.css e logo-protege.jpeg já existentes no repositório.
+
+TESTES DA RELEASE
+Consulte RELATORIO-TESTES-V13-13-0.txt.
+Resultado: 81/81 testes formalmente enumerados aprovados, além das suítes auxiliares de CPF/SEO e 4 checks de sintaxe JavaScript.

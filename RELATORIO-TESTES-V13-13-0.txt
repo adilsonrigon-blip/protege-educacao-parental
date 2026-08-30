@@ -1,0 +1,73 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.13.0
+RELATÓRIO DE TESTES DA RELEASE
+Data: 30/08/2026
+
+RESULTADO GERAL
+- Suíte de regressão Node: 74/74 aprovados, 0 falhas.
+- Testes específicos V13.13.0: 7/7 aprovados, 0 falhas.
+- Suíte específica de CPF: APROVADA.
+- Suíte de SEO: APROVADA.
+- Validação de sintaxe JavaScript: APROVADA em 4 arquivos.
+- Smoke test em navegador Chromium: TENTADO, mas não executável neste ambiente porque a navegação localhost foi bloqueada administrativamente (ERR_BLOCKED_BY_ADMINISTRATOR). Conforme a política de testes existente do projeto, este smoke test é complementar e não faz parte do gate obrigatório neste ambiente.
+
+TOTAL DE TESTES FORMALMENTE ENUMERADOS
+81/81 aprovados (74 regressão + 7 específicos V13.13.0).
+Além disso, passaram as suítes auxiliares de CPF e SEO e as 4 verificações de sintaxe JS.
+
+SUÍTE DE REGRESSÃO — 74 TESTES
+Cobertura mantida para:
+- Cadastro de família (mãe/pai, endereço e CEP/ViaCEP)
+- Edição de família e inclusão/atualização de filhos
+- Wizard de atendimento com 10 etapas
+- Menus administrativos e ONGs
+- Agenda e modal de novo agendamento
+- Login e exibição/ocultação de senha
+- WhatsApp público
+- IDs HTML e contratos de interface
+- Depoimentos, notícias, eventos e conteúdos
+- Publicações e regras de RLS/storage
+- Cadastro de profissionais e validação de e-mail
+- Reutilização de cadastro profissional inativo
+- Popups, limpar/cancelar e confirmação
+- Responsividade desktop/tablet/mobile
+- Breakpoints, formulários, botões e carrosséis
+
+TESTES ESPECÍFICOS V13.13.0 — 7 TESTES
+1. Formulário público contém todos os campos definidos para pré-cadastro profissional.
+2. CPF é obrigatório e a área administrativa possui noindex/noarchive.
+3. SQL possui validação de CPF e unicidade de CPF/e-mail.
+4. Edge Function possui ações de listar, analisar, recusar e aprovar/converter pré-cadastro.
+5. sitemap.xml inclui cadastro-profissional.html.
+6. Tela de profissionais possui link para análise de pré-cadastros.
+7. Arquivos executados no navegador não expõem SUPABASE_SERVICE_ROLE_KEY.
+
+VALIDAÇÃO DE CPF
+- CPF válido com máscara: aprovado.
+- CPF válido sem máscara: aprovado.
+- Dígito verificador incorreto: rejeitado.
+- Sequências repetidas (000..., 111..., 222...): rejeitadas.
+- CPF incompleto: rejeitado.
+- Formatação automática 000.000.000-00: aprovada.
+- SQL impede CPF duplicado no pré-cadastro.
+- SQL impede CPF duplicado em profissionais.
+
+SEO
+- title e meta description nas páginas públicas verificadas.
+- canonical usando https://protegeducparental.com.br verificado.
+- Open Graph verificado.
+- páginas internas com noindex verificadas.
+- robots.txt e sitemap.xml válidos.
+- palavras-chave principais da estratégia SEO preservadas na Home.
+
+SINTAXE JAVASCRIPT
+Aprovada em:
+- script-v126.js
+- script.js
+- pre-cadastro-profissional-v13130.js
+- cpf-v13130.js
+
+OBSERVAÇÃO SOBRE O SMOKE TEST DE NAVEGADOR
+O teste automatizado Playwright/Chromium foi iniciado, mas o ambiente bloqueou o acesso a http://127.0.0.1:8765 com ERR_BLOCKED_BY_ADMINISTRATOR. Não houve falha funcional detectada; houve impedimento de infraestrutura para executar o teste de navegador.
+
+STATUS DA RELEASE
+APROVADA no gate automatizado obrigatório: 81/81 testes formais aprovados, 0 falhas.
