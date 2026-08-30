@@ -1,4 +1,4 @@
-// Protege build V13.13.3 - favicon e otimização de consultas
+// Protege build V13.14.0 - produtividade, auditoria, segurança e paginação
 console.info("Protege build V13.9.1 - hotfix celular Quero Participar");
 const ProtegeApp = (() => {
   const config = window.PROTEGE_CONFIG || {};
@@ -77,6 +77,28 @@ const ProtegeApp = (() => {
     return data || [];
   }
 
+  async function loadFamiliesPage({page=1,pageSize=25,q='',ong_id=''}={}) {
+    if (!configured) return {rows:[],count:0,page,pageSize};
+    let query=db.from('familias').select('*, filhos(*), ongs(id,nome,status)',{count:'exact'}).order('created_at',{ascending:false});
+    if(ong_id) query=query.eq('ong_id',ong_id);
+    const term=String(q||'').trim().replace(/[,%()]/g,' ');
+    if(term) query=query.or(`responsavel1.ilike.%${term}%,responsavel2.ilike.%${term}%,telefone.ilike.%${term}%,email.ilike.%${term}%,cidade.ilike.%${term}%`);
+    const from=(Math.max(1,page)-1)*pageSize;
+    const {data,error,count}=await query.range(from,from+pageSize-1);
+    if(error) throw error;
+    return {rows:data||[],count:count||0,page,pageSize};
+  }
+
+  async function loadAttendancesPage({page=1,pageSize=25,status=''}={}) {
+    if (!configured) return {rows:[],count:0,page,pageSize};
+    let query=db.from('atendimentos').select('*, profissionais(nome,ong_id,ongs(id,nome)), filhos(nome), familias(responsavel1,responsavel2,ong_id,ongs(id,nome))',{count:'exact'}).order('data_hora',{ascending:false});
+    if(status) query=query.eq('status',status);
+    const from=(Math.max(1,page)-1)*pageSize;
+    const {data,error,count}=await query.range(from,from+pageSize-1);
+    if(error) throw error;
+    return {rows:data||[],count:count||0,page,pageSize};
+  }
+
   async function auditPatch(patch={}) {
     const session=await currentSession();
     return {...patch,updated_at:new Date().toISOString(),updated_by:session?.user?.id||null,updated_by_email:session?.user?.email||null};
@@ -152,9 +174,9 @@ const ProtegeApp = (() => {
     return result;
   }
 
-  async function loadProfessionalsWithAccess() {
-    const result = await manageProfessionalAccess({action:'list'});
-    return result?.profissionais || [];
+  async function loadProfessionalsWithAccess(params={}) {
+    const result = await manageProfessionalAccess({action:'list', ...params});
+    return params?.paginated ? result : (result?.profissionais || []);
   }
 
   async function createProfessionalWithAccess(payload) {
@@ -261,7 +283,7 @@ const ProtegeApp = (() => {
     }
   }
 
-  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,updateFamilyOng,updateFamily,updateChild,saveChild,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,updateProfessionalDetails,loadAttendances,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
+  return {configured,db,esc,statusLabel,formatDate,onlyDigits,uid,getLocalLeads,setLocalLeads,currentSession,requireAuth,loadLeads,updateLead,loadOngs,saveOng,updateOng,loadFamilies,loadFamiliesPage,updateFamilyOng,updateFamily,updateChild,saveChild,convertLead,loadProfessionals,saveProfessional,manageProfessionalAccess,loadProfessionalsWithAccess,createProfessionalWithAccess,updateProfessionalAccess,resetProfessionalPassword,updateProfessionalOng,updateProfessionalDetails,loadAttendances,loadAttendancesPage,saveAttendance,loadAttendanceEvolutions,saveAttendanceEvolution,loadSchedules,getSchedule,saveSchedule,updateSchedule,countNewLeads};
 })();
 
 // =========================================================
@@ -802,7 +824,8 @@ async function initFamiliesPage() {
   const search=document.getElementById('familySearch');
   const ongFilter=document.getElementById('familyOngFilter');
   const dialog=document.getElementById('familyDialog');
-  let families=[],ongs=[],activeFamily=null;
+  const familyPager=document.getElementById('familyPagination');
+  let families=[],ongs=[],activeFamily=null,familyPage=1,familyTotal=0; const familyPageSize=25;
 
   function childrenOf(x){return x.filhos||[];}
   function familyName(f){return [f.responsavel1,f.responsavel2].filter(Boolean).join(' / ')||'Família';}
@@ -895,14 +918,17 @@ async function initFamiliesPage() {
     dialog.showModal();await renderHistory(f);
   }
 
+  function renderFamilyPager(){if(!familyPager)return;const pages=Math.max(1,Math.ceil(familyTotal/familyPageSize));familyPager.innerHTML=`<button type="button" class="small-btn" data-family-page="prev" ${familyPage<=1?'disabled':''}>← Anterior</button><span>Página <strong>${familyPage}</strong> de ${pages} · ${familyTotal} família(s)</span><button type="button" class="small-btn" data-family-page="next" ${familyPage>=pages?'disabled':''}>Próxima →</button>`;}
+  async function reloadFamiliesPage(){const result=await ProtegeApp.loadFamiliesPage({page:familyPage,pageSize:familyPageSize,q:search?.value||'',ong_id:ongFilter?.value||''});families=result.rows||[];familyTotal=Number(result.count||0);document.getElementById('metricFamilies').textContent=familyTotal;render();renderFamilyPager();}
+
   try{
-    [families,ongs]=await Promise.all([ProtegeApp.loadFamilies(),ProtegeApp.loadOngs()]);
-    document.getElementById('metricFamilies').textContent=families.length;
-    document.getElementById('metricChildren').textContent=families.reduce((n,f)=>n+childrenOf(f).length,0);
+    const [pageData,loadedOngs,childCountRes]=await Promise.all([ProtegeApp.loadFamiliesPage({page:1,pageSize:familyPageSize}),ProtegeApp.loadOngs(),ProtegeApp.db.from('filhos').select('id',{count:'exact',head:true})]);families=pageData.rows||[];familyTotal=Number(pageData.count||0);ongs=loadedOngs;
+    document.getElementById('metricFamilies').textContent=familyTotal;
+    document.getElementById('metricChildren').textContent=childCountRes.count||0;
     const activeOptions=ongs.filter(o=>o.status==='ativa').map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
     document.getElementById('familyOngSelect').innerHTML='<option value="">Nenhuma ONG</option>'+activeOptions;
     if(ongFilter)ongFilter.innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
-    render();
+    render();renderFamilyPager();
     const id=new URLSearchParams(location.search).get('id');
     if(id&&families.some(f=>f.id===id)){await openFamily(id);history.replaceState({},'',location.pathname);}
   }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="8" class="empty-state">Não foi possível carregar as famílias. Execute o SQL da V13.6.</td></tr>';}
@@ -993,8 +1019,9 @@ async function initFamiliesPage() {
     }catch(err){console.error(err);printWindow.document.body.innerHTML='<p>Não foi possível preparar o documento para impressão.</p>';}
   });
 
-  search?.addEventListener('input',render);
-  ongFilter?.addEventListener('change',render);
+  let familySearchTimer;search?.addEventListener('input',()=>{clearTimeout(familySearchTimer);familySearchTimer=setTimeout(async()=>{familyPage=1;try{await reloadFamiliesPage()}catch(err){console.error(err)}},300)});
+  ongFilter?.addEventListener('change',async()=>{familyPage=1;try{await reloadFamiliesPage()}catch(err){console.error(err)}});
+  familyPager?.addEventListener('click',async e=>{const b=e.target.closest('[data-family-page]');if(!b||b.disabled)return;const pages=Math.max(1,Math.ceil(familyTotal/familyPageSize));if(b.dataset.familyPage==='prev'&&familyPage>1)familyPage--;if(b.dataset.familyPage==='next'&&familyPage<pages)familyPage++;try{await reloadFamiliesPage()}catch(err){console.error(err)}});
   tbody.addEventListener('click',async e=>{const b=e.target.closest('.view-family');if(b)await openFamily(b.dataset.id);});
 }
 
@@ -1095,7 +1122,8 @@ async function initProfessionalsPage(){
   const statusFilter=document.getElementById('professionalStatusFilter');
   const resultCount=document.getElementById('professionalResultCount');
   const dialog=document.getElementById('professionalDetailDialog');
-  let items=[],ongs=[],activeProfessional=null;
+  const professionalPager=document.getElementById('professionalPagination');
+  let items=[],ongs=[],activeProfessional=null,professionalPage=1,professionalTotal=0; const professionalPageSize=25;
 
   function normalized(v=''){
     return String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -1131,13 +1159,18 @@ async function initProfessionalsPage(){
     </tr>`).join(''):'<tr><td colspan="9" class="empty-state">Nenhum profissional encontrado.</td></tr>';
   }
 
+  function renderProfessionalPager(){
+    if(!professionalPager)return;const pages=Math.max(1,Math.ceil(professionalTotal/professionalPageSize));
+    professionalPager.innerHTML=`<button type="button" class="small-btn" data-prof-page="prev" ${professionalPage<=1?'disabled':''}>← Anterior</button><span>Página <strong>${professionalPage}</strong> de ${pages} · ${professionalTotal} profissional(is)</span><button type="button" class="small-btn" data-prof-page="next" ${professionalPage>=pages?'disabled':''}>Próxima →</button>`;
+  }
   async function refresh(){
     try{
-      items=await ProtegeApp.loadProfessionalsWithAccess();
-      render();
+      const result=await ProtegeApp.loadProfessionalsWithAccess({paginated:true,page:professionalPage,page_size:professionalPageSize,q:search?.value||'',perfil:profileFilter?.value||'',status:statusFilter?.value||'',ong_id:document.getElementById('professionalOngFilter')?.value||''});
+      items=result?.profissionais||[];professionalTotal=Number(result?.count||items.length);
+      render();renderProfessionalPager();
     }catch(err){
       console.error(err);
-      tbody.innerHTML=`<tr><td colspan="8" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;
+      tbody.innerHTML=`<tr><td colspan="9" class="empty-state">${ProtegeApp.esc(err?.message||'Não foi possível carregar os profissionais.')}</td></tr>`;
     }
   }
 
@@ -1349,9 +1382,10 @@ async function initProfessionalsPage(){
     }finally{saveBtn.disabled=false;}
   });
 
-  [search,profileFilter,statusFilter,document.getElementById('professionalOngFilter')].forEach(el=>{
-    el?.addEventListener(el===search?'input':'change',render);
-  });
+  let professionalSearchTimer;
+  search?.addEventListener('input',()=>{clearTimeout(professionalSearchTimer);professionalSearchTimer=setTimeout(()=>{professionalPage=1;refresh();},300)});
+  [profileFilter,statusFilter,document.getElementById('professionalOngFilter')].forEach(el=>el?.addEventListener('change',()=>{professionalPage=1;refresh()}));
+  professionalPager?.addEventListener('click',e=>{const b=e.target.closest('[data-prof-page]');if(!b||b.disabled)return;const pages=Math.max(1,Math.ceil(professionalTotal/professionalPageSize));if(b.dataset.profPage==='prev'&&professionalPage>1)professionalPage--;if(b.dataset.profPage==='next'&&professionalPage<pages)professionalPage++;refresh();});
 
   tbody?.addEventListener('click',e=>{
     const b=e.target.closest('.view-professional');
@@ -1475,7 +1509,8 @@ async function initAttendancesPage(){
   const evolutionList=document.getElementById('attendanceEvolutionList');
   const evolutionProfessional=document.getElementById('evolutionProfessional');
   const evolutionMessage=document.getElementById('evolutionMessage');
-  let items=[],professionals=[],ongs=[],activeAttendance=null;
+  const attendancePager=document.getElementById('attendancePagination');
+  let items=[],professionals=[],ongs=[],activeAttendance=null,attendancePage=1,attendanceTotal=0; const attendancePageSize=25;
   const labels={demanda:'Demanda / motivo',objetivo:'Objetivo do encontro',participantes:'Participantes',contexto:'Contexto atual',sessao_relato:'Relato da sessão',sessao_conclusao:'Conclusões / combinados',dinamica_parental:'Perfil e dinâmica parental',estrategia:'Estratégia',orientacao:'Orientação',tecnica:'Técnica',observacoes:'Observações',encaminhamentos:'Encaminhamentos',proximo_passo:'Próximo passo',data_revisao:'Data da revisão',pontos_revisao:'Pontos para revisão',data_falta:'Data da ocorrência',falta_observacoes:'Falta / remarcação / contato',duvidas:'Dúvidas para supervisão',evolucao:'Evolução observada'};
   const stepGroups=[
     ['1 · Demanda',['demanda','objetivo']],['2 · Contexto',['participantes','contexto']],['3 · Sessão',['sessao_relato','sessao_conclusao']],['4 · Dinâmica',['dinamica_parental']],['5 · Ferramenta',['estrategia','orientacao','tecnica']],['6 · Observações',['observacoes']],['7 · Registro',['encaminhamentos','proximo_passo']],['8 · Revisão',['data_revisao','pontos_revisao']],['9 · Faltas',['data_falta','falta_observacoes']],['10 · Supervisão',['duvidas','evolucao']]
@@ -1517,11 +1552,13 @@ async function initAttendancesPage(){
     await refreshEvolutions();
     if(focusEvolution){setTimeout(()=>{evolutionForm?.scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('evolutionContent')?.focus();},80);}
   }
+  function renderAttendancePager(){if(!attendancePager)return;const pages=Math.max(1,Math.ceil(attendanceTotal/attendancePageSize));attendancePager.innerHTML=`<button type="button" class="small-btn" data-att-page="prev" ${attendancePage<=1?'disabled':''}>← Anterior</button><span>Página <strong>${attendancePage}</strong> de ${pages} · ${attendanceTotal} atendimento(s)</span><button type="button" class="small-btn" data-att-page="next" ${attendancePage>=pages?'disabled':''}>Próxima →</button>`;}
+  async function reloadAttendancePage(){const result=await ProtegeApp.loadAttendancesPage({page:attendancePage,pageSize:attendancePageSize,status:statusFilter?.value||''});items=result.rows||[];attendanceTotal=Number(result.count||0);updateMetrics();render();renderAttendancePager();}
   try{
-    [items,professionals,ongs]=await Promise.all([ProtegeApp.loadAttendances(null,500),ProtegeApp.loadProfessionals(),ProtegeApp.loadOngs()]);
+    const [pageData,loadedProfessionals,loadedOngs]=await Promise.all([ProtegeApp.loadAttendancesPage({page:1,pageSize:attendancePageSize,status:statusFilter?.value||''}),ProtegeApp.loadProfessionals(),ProtegeApp.loadOngs()]);items=pageData.rows||[];attendanceTotal=Number(pageData.count||0);professionals=loadedProfessionals;ongs=loadedOngs;
     ongFilter.innerHTML='<option value="">Todas as ONGs</option>'+ongs.map(o=>`<option value="${ProtegeApp.esc(o.id)}">${ProtegeApp.esc(o.nome)}</option>`).join('');
     evolutionProfessional.innerHTML='<option value="">Selecione</option>'+professionals.filter(p=>p.status==='ativo').map(p=>`<option value="${ProtegeApp.esc(p.id)}">${ProtegeApp.esc(p.nome)}</option>`).join('');
-    updateMetrics();render();
+    updateMetrics();render();renderAttendancePager();
     const openId=new URLSearchParams(location.search).get('id'); if(openId&&items.some(a=>a.id===openId)){await openDetail(openId,new URLSearchParams(location.search).get('evolucao')==='1'); history.replaceState({},'',location.pathname);}
   }catch(err){console.error(err);tbody.innerHTML='<tr><td colspan="7" class="empty-state">Não foi possível carregar os atendimentos.</td></tr>';}
 
@@ -1560,7 +1597,7 @@ async function initAttendancesPage(){
     }catch(err){console.error(err);evolutionMessage.textContent=`Não foi possível salvar: ${err?.message||'erro inesperado'}`;}
     finally{saveBtn.disabled=false;saveBtn.textContent='+ Adicionar evolução';}
   });
-  search?.addEventListener('input',render);statusFilter?.addEventListener('change',render);ongFilter?.addEventListener('change',render);tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
+  search?.addEventListener('input',render);statusFilter?.addEventListener('change',async()=>{attendancePage=1;try{await reloadAttendancePage()}catch(err){console.error(err)}});ongFilter?.addEventListener('change',render);attendancePager?.addEventListener('click',async e=>{const b=e.target.closest('[data-att-page]');if(!b||b.disabled)return;const pages=Math.max(1,Math.ceil(attendanceTotal/attendancePageSize));if(b.dataset.attPage==='prev'&&attendancePage>1)attendancePage--;if(b.dataset.attPage==='next'&&attendancePage<pages)attendancePage++;try{await reloadAttendancePage()}catch(err){console.error(err)}});tbody.addEventListener('click',e=>{const view=e.target.closest('.view-attendance');if(view){openDetail(view.dataset.id,false);return;}const evo=e.target.closest('.add-evolution');if(evo)openDetail(evo.dataset.id,true);});close1?.addEventListener('click',()=>dialog.close());close2?.addEventListener('click',()=>dialog.close());dialog?.addEventListener('click',e=>{if(e.target===dialog)dialog.close();});
 }
 
 
