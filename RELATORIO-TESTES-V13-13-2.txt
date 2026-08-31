@@ -1,0 +1,24 @@
+PROTEGE V13.13.2 — RELATÓRIO DE TESTES
+
+Correções verificadas:
+- Menu público "Quero atuar" nas páginas públicas principais.
+- Link "Pré-cadastros profissionais" em todos os menus laterais administrativos.
+- Acesso destacado à análise/aprovação dentro da página Profissionais.
+- Máscara e validação de celular brasileiro no navegador.
+- Validação de celular brasileiro também no Supabase/RPC.
+
+Testes executados e aprovados:
+- Regressão/contracts + responsividade: 74/74
+- V13.13.1 visual/estrutura: 8/8
+- V13.13.0 pré-cadastro: 7/7
+- V13.13.2 novos contratos: 7/7
+- Validação de celular V13.13.2: 8/8
+- SEO: aprovado
+- Sintaxe JS (celular + pré-cadastro): aprovada
+
+Total de testes numerados: 104/104 aprovados.
+
+Teste browser/Chromium:
+- Tentado novamente.
+- Bloqueado pelo ambiente com ERR_BLOCKED_BY_ADMINISTRATOR ao acessar 127.0.0.1.
+- Portanto, não é contabilizado como teste aprovado e não foi usado para inflar o total acima.

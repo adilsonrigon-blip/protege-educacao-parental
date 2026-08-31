@@ -1,0 +1,9 @@
+PROTEGE V13.14.1
+
+Novidades:
+- Endereço completo no pré-cadastro profissional: CEP, logradouro, número, complemento, bairro, cidade e UF.
+- Consulta automática do CEP via ViaCEP. Número e complemento permanecem manuais, pois não existem no CEP.
+- Endereço exibido na análise administrativa e copiado para o profissional após aprovação.
+- Efeito de destaque ao passar o mouse/focar opções dos menus público e administrativo.
+
+ORDEM: SQL -> Edge Function -> GitHub.

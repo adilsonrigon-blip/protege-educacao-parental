@@ -1,0 +1,16 @@
+PROTEGE V13.14.1 - RELATORIO DE TESTES
+
+Resultado:
+- Pytest funcional/regressão (V13.13.0 a V13.14.1): 37/37 aprovados
+- Contratos/regressão principal: 60/60 aprovados
+- Responsividade estrutural: 14/14 aprovados
+- CPF: aprovado
+- Celular: 8/8 aprovados
+- CEP V13.14.1: aprovado (máscara, validação e mapeamento com fetch simulado)
+- SEO: aprovado
+- Sintaxe JS: aprovada para pre-cadastro-profissional, CEP e V13.14.0
+- Todas as páginas HTML carregam o CSS V13.14.1: aprovado
+
+Total das suítes numeradas principais: 111/111 aprovados.
+
+Observação: a integração foi implementada com o endpoint oficial JSON do ViaCEP. O teste automatizado do CEP simula a resposta externa para não depender da rede durante a suíte.

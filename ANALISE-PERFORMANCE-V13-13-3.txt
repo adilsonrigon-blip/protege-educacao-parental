@@ -1,0 +1,18 @@
+PROTEGE V13.13.3 — ANÁLISE DE PERFORMANCE
+
+Conclusão da revisão do código e das migrações existentes:
+1. Os índices críticos já existem nas migrações do projeto:
+   - familias_interessadas(status) e created_at desc
+   - atendimentos(familia_id,data_hora), profissional_id/data_hora e data_hora
+   - atendimento_evolucoes(atendimento_id,...)
+   - agenda(data_inicio), familia_id/data_inicio, profissional_id/data_inicio e status/data_inicio
+   - profissionais(status), profissionais(ong_id)
+   - familias(created_at), familias(status), familias(ong_id)
+   - pre_cadastro_profissionais(status,created_at)
+2. Portanto, não foi criada uma nova migração de índices às cegas.
+3. O maior gargalo encontrado no front-end era excesso de dados transferidos para tarefas simples:
+   - o contador de novos interessados carregava todos os registros e filhos apenas para contar status='novo';
+   - o dashboard carregava todas as famílias com filhos/ONGs, até 500 atendimentos e toda a agenda apenas para mostrar três números e quatro compromissos.
+4. V13.13.3 altera esses pontos para usar count/head no Supabase e consultas limitadas a 4 registros de agenda.
+5. Isso reduz tráfego, serialização JSON, joins, processamento no navegador e tempo percebido do dashboard/menu.
+6. Se ainda houver lentidão, execute diagnostico-performance-v13.13.3.sql e envie o resultado. A partir dele dá para decidir se há bloat, estatísticas desatualizadas, índice não utilizado ou tabela que precisa de paginação.

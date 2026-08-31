@@ -1,0 +1,25 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.14.0
+
+Objetivo
+Versão consolidada com as melhorias sugeridas de produtividade, controle, performance, auditoria e segurança.
+
+Principais recursos
+1. Pré-cadastro profissional: observação interna, motivo obrigatório de recusa, histórico de status, administrador/data, aprovação e reenvio de acesso.
+2. Busca/filtros: mantidos e ampliados; conteúdos passam a ter busca e filtro de publicação.
+3. Paginação: profissionais e pré-cadastros paginados no servidor; famílias e atendimentos usam consultas paginadas do Supabase; auditoria também é paginada no servidor.
+4. Dashboard: famílias novas no mês, profissionais ativos, pendências, atendimentos do mês e série de 6 meses.
+5. Notificação: badge no menu com quantidade de pré-cadastros pendentes/em análise.
+6. Auditoria: nova página auditoria.html e tabela auditoria_eventos com triggers nas principais tabelas.
+7. Segurança: helper de autorização de administrador e RLS específico para as novas tabelas de auditoria/histórico. A Edge Function continua exigindo administrador ativo.
+8. Performance: índices adicionais para filtros usuais, ANALYZE nas tabelas principais e redução das listas principais por paginação.
+
+ARQUIVOS DE BANCO / EDGE
+- supabase-v13.14.0-produtividade-auditoria-seguranca.sql
+- administrar-profissional-index-v13140.ts
+
+ORDEM DE PUBLICAÇÃO
+1. Executar o SQL V13.14.0 uma única vez no Supabase SQL Editor.
+2. Substituir o conteúdo da Edge Function administrar-profissional pelo arquivo administrar-profissional-index-v13140.ts e clicar em Deploy updates.
+3. Publicar os arquivos web no GitHub Pages.
+
+A migração é incremental e não contém DELETE/TRUNCATE de dados existentes.

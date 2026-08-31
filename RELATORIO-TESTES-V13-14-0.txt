@@ -1,0 +1,15 @@
+PROTEGE V13.14.0 — RELATÓRIO DE TESTES
+
+Executados em 30/08/2026:
+- contracts.test.mjs: 60/60 aprovados
+- responsive.test.mjs: 14/14 aprovados
+- pytest (V13.13.0, V13.13.2, V13.13.3 e V13.14.0): 29/29 aprovados
+- validação de celular: 8/8 aprovados
+- CPF: suíte aprovada
+- SEO: suíte aprovada
+- Sintaxe JavaScript: aprovada para scripts principais e V13.14.0
+- Transpilação TypeScript da Edge Function: 0 diagnósticos
+
+Total de casos numerados: 111/111 aprovados, além das suítes CPF e SEO.
+
+Observação: não foi contabilizado teste visual real em navegador do ambiente automatizado. O ambiente já apresentou bloqueio administrativo ao acesso local do Chromium em testes anteriores. Os testes responsivos são estruturais/automatizados.

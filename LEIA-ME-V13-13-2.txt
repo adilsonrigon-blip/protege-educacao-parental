@@ -1,0 +1,16 @@
+PROTEGE EDUCAÇÃO PARENTAL — V13.13.2
+
+Correções desta versão:
+1. O menu público passa a exibir "Quero atuar", apontando para cadastro-profissional.html.
+2. Todos os menus laterais administrativos passam a exibir "Pré-cadastros profissionais".
+3. A tela Profissionais passa a ter acesso destacado para "Analisar pré-cadastros" e um bloco de análise/aprovação.
+4. O celular do pré-cadastro agora tem máscara (11) 99999-9999 e validação de DDD + celular brasileiro de 11 dígitos.
+5. A validação de celular ocorre também no Supabase, evitando que uma chamada direta à RPC grave telefone inválido.
+
+PUBLICAÇÃO
+- No GitHub Pages: publique os arquivos do pacote web da V13.13.2.
+- No Supabase SQL Editor: execute uma única vez supabase-v13.13.2-validacao-celular.sql.
+- NÃO é necessário alterar/deployar novamente a Edge Function administrar-profissional.
+
+IMPORTANTE
+O SQL V13.13.2 não apaga nem altera os pré-cadastros já existentes. A nova validação vale para novos envios.
