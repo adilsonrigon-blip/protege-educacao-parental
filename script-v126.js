@@ -538,7 +538,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         message.textContent = 'Acesso realizado. Abrindo painel...';
         setTimeout(()=>window.location.href='dashboard.html',350);
       } catch (err) {
-        message.textContent = 'Não foi possível entrar. Confira e-mail e senha.';
+        const authMessage=String(err?.message||'').toLowerCase();
+        message.textContent = authMessage.includes('banned') ? 'Seu pré-cadastro ainda não está liberado. Aguarde a aprovação da equipe Protege.' : 'Não foi possível entrar. Confira e-mail e senha.';
         console.error(err);
       }
     });

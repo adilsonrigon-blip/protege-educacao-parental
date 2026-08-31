@@ -45,6 +45,13 @@
     const msg = document.getElementById('professionalInterestMessage');
     const submit = document.getElementById('professionalInterestSubmit');
     const success = document.getElementById('professionalInterestSuccess');
+    const passwordInput = document.getElementById('professionalPassword');
+    const passwordConfirmInput = document.getElementById('professionalPasswordConfirm');
+    const passwordMatchError = document.getElementById('passwordMatchError');
+    document.querySelectorAll('[data-toggle-password]').forEach(btn => btn.addEventListener('click', () => {
+      const input=document.getElementById(btn.dataset.togglePassword); if(!input)return; const showing=input.type==='text'; input.type=showing?'password':'text'; btn.textContent=showing?'Mostrar':'Ocultar'; btn.setAttribute('aria-label', showing?'Mostrar senha':'Ocultar senha');
+    }));
+    [passwordInput,passwordConfirmInput].forEach(el=>el?.addEventListener('input',()=>{ if(passwordMatchError) passwordMatchError.hidden=true; }));
     cpfInput.addEventListener('input', () => { cpfInput.value = window.ProtegeCpf.formatarCpf(cpfInput.value); cpfError.hidden = true; });
     cpfInput.addEventListener('blur', () => { if (cpfInput.value && !window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; } });
     phoneInput.addEventListener('input', () => { phoneInput.value = window.ProtegeCelular.formatarCelular(phoneInput.value); phoneError.hidden = true; });
@@ -55,6 +62,8 @@
       if (!publicForm.reportValidity()) return;
       if (!window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; cpfInput.focus(); return; }
       if (!window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; phoneInput.focus(); return; }
+      if (!passwordInput || passwordInput.value.length < 8) { msg.textContent = 'Crie uma senha com pelo menos 8 caracteres.'; passwordInput?.focus(); return; }
+      if (passwordInput.value !== passwordConfirmInput?.value) { if(passwordMatchError) passwordMatchError.hidden=false; passwordConfirmInput?.focus(); return; }
       if (!window.ProtegeCep?.validarCep(cepInput?.value)) { setCepStatus('CEP inválido. Informe um CEP válido.','error'); cepInput?.focus(); return; }
       const fd = new FormData(publicForm);
       const estado = String(fd.get('estado') || '').trim().toUpperCase();
@@ -62,14 +71,15 @@
       submit.disabled = true; submit.textContent = 'Enviando...';
       try {
         const client = resolveClient();
-        const { data, error } = await client.rpc('enviar_pre_cadastro_profissional_v13141', {
-          p_nome: String(fd.get('nome') || '').trim(), p_email: String(fd.get('email') || '').trim().toLowerCase(), p_cpf: window.ProtegeCpf.somenteDigitos(fd.get('cpf')),
-          p_data_nascimento: fd.get('data_nascimento') || null, p_cep: window.ProtegeCep.somenteDigitos(fd.get('cep')), p_logradouro: String(fd.get('logradouro') || '').trim(), p_numero: String(fd.get('numero') || '').trim(), p_complemento: String(fd.get('complemento') || '').trim(), p_bairro: String(fd.get('bairro') || '').trim(), p_cidade: String(fd.get('cidade') || '').trim(), p_estado: estado, p_celular: window.ProtegeCelular.formatarCelular(fd.get('celular')),
-          p_especialidade: String(fd.get('especialidade') || '').trim(), p_formacao_origem: String(fd.get('formacao_origem') || '').trim(), p_formacao_educacao_parental: String(fd.get('formacao_educacao_parental') || ''),
-          p_como_conheceu: String(fd.get('como_conheceu') || ''), p_motivacao: String(fd.get('motivacao') || '').trim(), p_consentimento_lgpd: fd.get('consentimento_lgpd') === 'on'
-        });
+        const body = {
+          nome: String(fd.get('nome') || '').trim(), email: String(fd.get('email') || '').trim().toLowerCase(), cpf: window.ProtegeCpf.somenteDigitos(fd.get('cpf')),
+          data_nascimento: fd.get('data_nascimento') || null, cep: window.ProtegeCep.somenteDigitos(fd.get('cep')), logradouro: String(fd.get('logradouro') || '').trim(), numero: String(fd.get('numero') || '').trim(), complemento: String(fd.get('complemento') || '').trim(), bairro: String(fd.get('bairro') || '').trim(), cidade: String(fd.get('cidade') || '').trim(), estado, celular: window.ProtegeCelular.formatarCelular(fd.get('celular')),
+          especialidade: String(fd.get('especialidade') || '').trim(), formacao_origem: String(fd.get('formacao_origem') || '').trim(), formacao_educacao_parental: String(fd.get('formacao_educacao_parental') || ''),
+          como_conheceu: String(fd.get('como_conheceu') || ''), motivacao: String(fd.get('motivacao') || '').trim(), consentimento_lgpd: fd.get('consentimento_lgpd') === 'on', senha: passwordInput.value
+        };
+        const { data, error } = await client.functions.invoke('pre-cadastrar-profissional', { body });
         if (error) throw error;
-        if (data?.ok === false) throw new Error(data.message || 'Não foi possível enviar o pré-cadastro.');
+        if (data?.ok === false || data?.error) throw new Error(data?.message || data?.error || 'Não foi possível enviar o pré-cadastro.');
         publicForm.reset(); cpfError.hidden = true; phoneError.hidden = true; setCepStatus('', ''); [streetInput,neighborhoodInput,cityInput,stateInput].forEach(el=>el?.classList.remove('address-auto-filled')); publicForm.hidden = true; success.hidden = false;
       } catch (err) { msg.textContent = err?.message || 'Não foi possível enviar o pré-cadastro. Tente novamente.'; }
       finally { submit.disabled = false; submit.textContent = 'Enviar pré-cadastro'; }
@@ -103,9 +113,9 @@
     document.getElementById('preReviewName').textContent = current.nome; document.getElementById('preReviewEmail').textContent = current.email;
     document.getElementById('preReviewSummary').innerHTML = [
       ['CPF', window.ProtegeCpf.formatarCpf(current.cpf)], ['Nascimento', formatDate(current.data_nascimento)], ['CEP', window.ProtegeCep ? window.ProtegeCep.formatarCep(current.cep || '') || '—' : (current.cep || '—')], ['Endereço', [current.logradouro,current.numero,current.complemento,current.bairro].filter(Boolean).join(', ') || '—'], ['Local', `${current.cidade || '—'} / ${current.estado || '—'}`], ['Celular', window.ProtegeCelular ? window.ProtegeCelular.formatarCelular(current.celular || '') || '—' : (current.celular || '—')],
-      ['Especialidade', current.especialidade || '—'], ['Formação de origem', current.formacao_origem || '—'], ['Educação Parental', current.formacao_educacao_parental || '—'], ['Conheceu por', current.como_conheceu || '—'], ['Motivação', current.motivacao || '—'], ['Último acesso enviado',current.ultimo_acesso_enviado_em?formatDate(current.ultimo_acesso_enviado_em):'—']
+      ['Especialidade', current.especialidade || '—'], ['Formação de origem', current.formacao_origem || '—'], ['Educação Parental', current.formacao_educacao_parental || '—'], ['Conheceu por', current.como_conheceu || '—'], ['Motivação', current.motivacao || '—'], ['Senha de acesso', current.auth_user_id ? 'Definida pelo profissional' : 'Cadastro antigo — definir na aprovação']
     ].map(([k,v]) => `<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('');
-    notes.value = current.observacoes_admin || ''; rejectReason.value=current.motivo_recusa||''; reviewMsg.textContent = ''; document.getElementById('preInitialPassword').value = '';resendBtn.hidden=current.status!=='aprovado'; dialog.showModal();loadHistory(id);
+    notes.value = current.observacoes_admin || ''; rejectReason.value=current.motivo_recusa||''; reviewMsg.textContent = ''; const legacyField=document.getElementById('preLegacyPasswordField'); const passwordNote=document.getElementById('prePasswordDefinedNote'); const legacyPassword=document.getElementById('preInitialPassword'); const legacy=!current.auth_user_id; if(legacyField)legacyField.hidden=!legacy; if(passwordNote)passwordNote.hidden=legacy; if(legacyPassword)legacyPassword.value=''; if(resendBtn)resendBtn.hidden=true; dialog.showModal();loadHistory(id);
   }
   async function act(action, extra={}) { if (!current) return; reviewMsg.textContent='Processando...'; try { await invoke({ action, pre_cadastro_id:current.id, observacoes_admin:notes.value.trim(), ...extra }); dialog.close(); await load(); } catch(e){ reviewMsg.textContent=e.message || 'Não foi possível concluir a ação.'; } }
   function queueReload(){clearTimeout(debounceTimer);debounceTimer=setTimeout(()=>{page=1;load();},300);}
@@ -113,7 +123,7 @@
   pager?.addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(!b||b.disabled)return;const pages=Math.max(1,Math.ceil(total/pageSize));if(b.dataset.page==='prev'&&page>1)page--;if(b.dataset.page==='next'&&page<pages)page++;load();});
   document.getElementById('preMarkAnalysis').addEventListener('click',()=>act('set-pre-cadastro-status',{status:'em_analise'}));
   document.getElementById('preReject').addEventListener('click',()=>{const reason=rejectReason.value.trim();if(!reason){reviewMsg.textContent='Informe o motivo da recusa.';rejectReason.focus();return;}act('reject-pre-cadastro',{motivo_recusa:reason});});
-  document.getElementById('preApprove').addEventListener('click',()=>{ const password=document.getElementById('preInitialPassword').value; if(password.length<8){reviewMsg.textContent='Informe uma senha inicial com pelo menos 8 caracteres.';return;} act('approve-pre-cadastro',{password,status:document.getElementById('preApprovedStatus').value}); });
+  document.getElementById('preApprove').addEventListener('click',()=>{ const legacy=!current?.auth_user_id; const password=document.getElementById('preInitialPassword')?.value||''; if(legacy&&password.length<8){reviewMsg.textContent='Este é um pré-cadastro antigo. Informe uma senha inicial com pelo menos 8 caracteres.';document.getElementById('preInitialPassword')?.focus();return;} act('approve-pre-cadastro',{status:document.getElementById('preApprovedStatus').value,password:legacy?password:undefined}); });
   resendBtn?.addEventListener('click',async()=>{if(!current)return;reviewMsg.textContent='Enviando acesso...';try{await invoke({action:'resend-access',pre_cadastro_id:current.id,redirect_to:'https://protegeducparental.com.br/login.html'});reviewMsg.textContent='E-mail de recuperação/acesso enviado.';await loadHistory(current.id);}catch(e){reviewMsg.textContent=e.message||'Não foi possível reenviar o acesso.';}});
   load();
 })();

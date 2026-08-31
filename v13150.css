@@ -1,0 +1,10 @@
+/* PROTEGE V13.15.0 — senha criada pelo profissional no pré-cadastro */
+.password-section-title{margin-top:8px;padding-top:18px;border-top:1px solid rgba(34,76,67,.12);font-size:1rem;font-weight:800;color:#27564c;letter-spacing:.01em}
+.password-input-wrap{position:relative;display:flex;align-items:center}
+.password-input-wrap input{width:100%;padding-right:84px!important}
+.password-toggle{position:absolute;right:8px;border:0;background:transparent;color:#2f665a;font:inherit;font-size:.84rem;font-weight:700;padding:7px 8px;border-radius:8px;cursor:pointer}
+.password-toggle:hover,.password-toggle:focus-visible{background:rgba(47,102,90,.08);outline:none}
+.password-help{display:block;margin-top:6px;font-size:.78rem;line-height:1.45;color:#66746f}
+.approval-password-note{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;background:rgba(47,102,90,.07);border:1px solid rgba(47,102,90,.14);align-self:end}
+.approval-password-note strong{color:#285a50;font-size:.9rem}.approval-password-note span{font-size:.78rem;line-height:1.4;color:#60706b}
+@media(max-width:700px){.approval-password-note{grid-column:1/-1}.password-section-title{padding-top:14px}}

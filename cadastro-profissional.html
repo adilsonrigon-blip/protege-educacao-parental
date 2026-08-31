@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="pre-cadastro-profissional-v13131.css?v=13131">
   <link rel="stylesheet" href="v13132.css?v=13132">
 <link rel="stylesheet" href="v13141.css?v=13142">
+  <link rel="stylesheet" href="v13150.css?v=13150">
 </head>
 <body>
 <header class="site-header">
@@ -38,7 +39,7 @@
   </div>
 </header>
 <main>
-  <section class="professional-interest-hero"><div class="container"><span class="section-label">PROFISSIONAIS</span><h1>Faça parte do PROTEGE como profissional</h1><p class="professional-interest-intro">Preencha o pré-cadastro abaixo. A equipe Protege analisará sua formação, experiência e motivação. O envio não cria acesso à plataforma automaticamente.</p></div></section>
+  <section class="professional-interest-hero"><div class="container"><span class="section-label">PROFISSIONAIS</span><h1>Faça parte do PROTEGE como profissional</h1><p class="professional-interest-intro">Preencha o pré-cadastro abaixo. A equipe Protege analisará sua formação, experiência e motivação. Você cria sua senha agora, mas o acesso à plataforma só será liberado após aprovação da equipe Protege.</p></div></section>
   <section class="container"><div class="panel professional-interest-card">
     <form id="professionalInterestForm" class="professional-interest-grid" novalidate>
       <label>Nome completo *<input name="nome" required autocomplete="name" maxlength="160"></label>
@@ -59,12 +60,15 @@
       <label class="full-field">Você possui formação em Educação Parental? *<select name="formacao_educacao_parental" required><option value="">Selecione</option><option value="sim">Sim, tenho formação concluída</option><option value="cursando">Estou fazendo uma formação</option><option value="experiencia_sem_formacao">Já atuei na área, mas não tenho formação específica</option><option value="nao">Não tenho formação em Educação Parental</option></select></label>
       <label class="full-field">Como conheceu o PROTEGE? *<select name="como_conheceu" required><option value="">Selecione</option><option>Instagram</option><option>WhatsApp</option><option>Facebook</option><option>Indicação</option><option>Google</option><option>Evento / palestra</option><option>Outro</option></select></label>
       <label class="full-field">Por que você gostaria de participar do PROTEGE? *<textarea name="motivacao" required maxlength="2500"></textarea></label>
+      <div class="password-section-title full-field">Crie sua senha de acesso</div>
+      <label>Senha *<div class="password-input-wrap"><input id="professionalPassword" name="senha" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Mínimo de 8 caracteres"><button class="password-toggle" type="button" data-toggle-password="professionalPassword" aria-label="Mostrar senha">Mostrar</button></div><span class="password-help">Você usará esta senha depois que seu cadastro for aprovado. A equipe Protege não terá acesso a ela.</span></label>
+      <label>Confirmar senha *<div class="password-input-wrap"><input id="professionalPasswordConfirm" name="confirmar_senha" type="password" required minlength="8" maxlength="72" autocomplete="new-password" placeholder="Digite novamente"><button class="password-toggle" type="button" data-toggle-password="professionalPasswordConfirm" aria-label="Mostrar confirmação da senha">Mostrar</button></div><span id="passwordMatchError" class="field-error" hidden>As senhas não coincidem.</span></label>
       <label class="consent-row full-field"><input name="consentimento_lgpd" type="checkbox" required><span>Autorizo o tratamento destes dados pela equipe Protege para análise do meu pré-cadastro profissional, contato e eventual ingresso na plataforma.</span></label>
       <div class="registration-actions full-field"><a class="btn btn-secondary" href="index.html">Voltar</a><button id="professionalInterestSubmit" class="btn btn-primary" type="submit">Enviar pré-cadastro</button></div>
       <p id="professionalInterestMessage" class="form-message full-field" role="status" aria-live="polite"></p>
     </form>
     <div id="professionalInterestSuccess" class="professional-success" hidden><strong>Pré-cadastro recebido.</strong><br>A equipe Protege fará a análise e poderá entrar em contato pelos dados informados.</div>
-    <p class="privacy-note-v1313">Seus dados não criam um usuário de acesso. A criação do profissional e do login ocorre somente após aprovação administrativa.</p>
+    <p class="privacy-note-v1313">Sua senha é armazenada com segurança pelo sistema de autenticação e não fica gravada no pré-cadastro. O login só é liberado após aprovação administrativa.</p>
   </div></section>
 </main>
 <footer class="footer"><div class="container footer-wrap"><div><img src="logo-protege.jpeg" alt="Protege" class="footer-logo"><p>Protege - Educação Parental</p></div><div class="footer-right"><a href="login.html">Área do profissional</a><span>© 2026 Protege</span></div></div></footer>
@@ -73,7 +77,7 @@
 <script src="cpf-v13130.js?v=13130"></script>
 <script src="celular-v13132.js?v=13132"></script>
 <script src="cep-v13141.js?v=13141"></script>
-<script src="pre-cadastro-profissional-v13130.js?v=13141"></script>
+<script src="pre-cadastro-profissional-v13130.js?v=13150"></script>
 <script>
 (function(){
   const toggle=document.querySelector('.menu-toggle');
