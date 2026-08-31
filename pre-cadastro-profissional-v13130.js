@@ -24,6 +24,24 @@
     const cpfError = document.getElementById('cpfError');
     const phoneInput = document.getElementById('professionalPhone');
     const phoneError = document.getElementById('celularError');
+    const cepInput = document.getElementById('professionalCep');
+    const cepStatus = document.getElementById('cepStatus');
+    const streetInput = document.getElementById('professionalStreet');
+    const neighborhoodInput = document.getElementById('professionalNeighborhood');
+    const cityInput = document.getElementById('professionalCity');
+    const stateInput = document.getElementById('professionalState');
+    let cepController = null;
+    function setCepStatus(text,kind) { if (!cepStatus) return; cepStatus.textContent=text||''; cepStatus.className='cep-status'+(kind?' is-'+kind:''); }
+    function markAuto(el,value) { if (!el || !value) return; el.value=value; el.classList.add('address-auto-filled'); }
+    async function resolveCep() {
+      if (!cepInput || !window.ProtegeCep) return true;
+      cepInput.value=window.ProtegeCep.formatarCep(cepInput.value);
+      if (!cepInput.value) { setCepStatus('', ''); return false; }
+      if (!window.ProtegeCep.validarCep(cepInput.value)) { setCepStatus('CEP inválido. Informe 8 números.','error'); return false; }
+      cepController?.abort(); cepController=new AbortController(); setCepStatus('Consultando CEP...','loading');
+      try { const a=await window.ProtegeCep.consultarCep(cepInput.value,cepController.signal); markAuto(streetInput,a.logradouro); markAuto(neighborhoodInput,a.bairro); markAuto(cityInput,a.cidade); markAuto(stateInput,a.estado); setCepStatus('Endereço localizado. Confira e informe o número.','ok'); document.getElementById('professionalAddressNumber')?.focus(); return true; }
+      catch(err) { if(err?.name==='AbortError') return false; setCepStatus(err?.message||'Não foi possível consultar o CEP.','error'); return false; }
+    }
     const msg = document.getElementById('professionalInterestMessage');
     const submit = document.getElementById('professionalInterestSubmit');
     const success = document.getElementById('professionalInterestSuccess');
@@ -31,26 +49,28 @@
     cpfInput.addEventListener('blur', () => { if (cpfInput.value && !window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; } });
     phoneInput.addEventListener('input', () => { phoneInput.value = window.ProtegeCelular.formatarCelular(phoneInput.value); phoneError.hidden = true; });
     phoneInput.addEventListener('blur', () => { if (phoneInput.value && !window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; } });
+    if (cepInput) { cepInput.addEventListener('input', () => { cepInput.value=window.ProtegeCep.formatarCep(cepInput.value); setCepStatus('', ''); }); cepInput.addEventListener('blur', resolveCep); }
     publicForm.addEventListener('submit', async (ev) => {
       ev.preventDefault(); msg.textContent = '';
       if (!publicForm.reportValidity()) return;
       if (!window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; cpfInput.focus(); return; }
       if (!window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; phoneInput.focus(); return; }
+      if (!window.ProtegeCep?.validarCep(cepInput?.value)) { setCepStatus('CEP inválido. Informe um CEP válido.','error'); cepInput?.focus(); return; }
       const fd = new FormData(publicForm);
       const estado = String(fd.get('estado') || '').trim().toUpperCase();
       if (!/^[A-Z]{2}$/.test(estado)) { msg.textContent = 'Informe a UF com duas letras, por exemplo SP.'; return; }
       submit.disabled = true; submit.textContent = 'Enviando...';
       try {
         const client = resolveClient();
-        const { data, error } = await client.rpc('enviar_pre_cadastro_profissional', {
+        const { data, error } = await client.rpc('enviar_pre_cadastro_profissional_v13141', {
           p_nome: String(fd.get('nome') || '').trim(), p_email: String(fd.get('email') || '').trim().toLowerCase(), p_cpf: window.ProtegeCpf.somenteDigitos(fd.get('cpf')),
-          p_data_nascimento: fd.get('data_nascimento') || null, p_cidade: String(fd.get('cidade') || '').trim(), p_estado: estado, p_celular: window.ProtegeCelular.formatarCelular(fd.get('celular')),
+          p_data_nascimento: fd.get('data_nascimento') || null, p_cep: window.ProtegeCep.somenteDigitos(fd.get('cep')), p_logradouro: String(fd.get('logradouro') || '').trim(), p_numero: String(fd.get('numero') || '').trim(), p_complemento: String(fd.get('complemento') || '').trim(), p_bairro: String(fd.get('bairro') || '').trim(), p_cidade: String(fd.get('cidade') || '').trim(), p_estado: estado, p_celular: window.ProtegeCelular.formatarCelular(fd.get('celular')),
           p_especialidade: String(fd.get('especialidade') || '').trim(), p_formacao_origem: String(fd.get('formacao_origem') || '').trim(), p_formacao_educacao_parental: String(fd.get('formacao_educacao_parental') || ''),
           p_como_conheceu: String(fd.get('como_conheceu') || ''), p_motivacao: String(fd.get('motivacao') || '').trim(), p_consentimento_lgpd: fd.get('consentimento_lgpd') === 'on'
         });
         if (error) throw error;
         if (data?.ok === false) throw new Error(data.message || 'Não foi possível enviar o pré-cadastro.');
-        publicForm.reset(); cpfError.hidden = true; phoneError.hidden = true; publicForm.hidden = true; success.hidden = false;
+        publicForm.reset(); cpfError.hidden = true; phoneError.hidden = true; setCepStatus('', ''); [streetInput,neighborhoodInput,cityInput,stateInput].forEach(el=>el?.classList.remove('address-auto-filled')); publicForm.hidden = true; success.hidden = false;
       } catch (err) { msg.textContent = err?.message || 'Não foi possível enviar o pré-cadastro. Tente novamente.'; }
       finally { submit.disabled = false; submit.textContent = 'Enviar pré-cadastro'; }
     });
@@ -82,7 +102,7 @@
     current = rows.find(r => r.id === id); if (!current) return;
     document.getElementById('preReviewName').textContent = current.nome; document.getElementById('preReviewEmail').textContent = current.email;
     document.getElementById('preReviewSummary').innerHTML = [
-      ['CPF', window.ProtegeCpf.formatarCpf(current.cpf)], ['Nascimento', formatDate(current.data_nascimento)], ['Local', `${current.cidade || '—'} / ${current.estado || '—'}`], ['Celular', window.ProtegeCelular ? window.ProtegeCelular.formatarCelular(current.celular || '') || '—' : (current.celular || '—')],
+      ['CPF', window.ProtegeCpf.formatarCpf(current.cpf)], ['Nascimento', formatDate(current.data_nascimento)], ['CEP', window.ProtegeCep ? window.ProtegeCep.formatarCep(current.cep || '') || '—' : (current.cep || '—')], ['Endereço', [current.logradouro,current.numero,current.complemento,current.bairro].filter(Boolean).join(', ') || '—'], ['Local', `${current.cidade || '—'} / ${current.estado || '—'}`], ['Celular', window.ProtegeCelular ? window.ProtegeCelular.formatarCelular(current.celular || '') || '—' : (current.celular || '—')],
       ['Especialidade', current.especialidade || '—'], ['Formação de origem', current.formacao_origem || '—'], ['Educação Parental', current.formacao_educacao_parental || '—'], ['Conheceu por', current.como_conheceu || '—'], ['Motivação', current.motivacao || '—'], ['Último acesso enviado',current.ultimo_acesso_enviado_em?formatDate(current.ultimo_acesso_enviado_em):'—']
     ].map(([k,v]) => `<div><span>${escapeHtml(k)}</span><strong>${escapeHtml(v)}</strong></div>`).join('');
     notes.value = current.observacoes_admin || ''; rejectReason.value=current.motivo_recusa||''; reviewMsg.textContent = ''; document.getElementById('preInitialPassword').value = '';resendBtn.hidden=current.status!=='aprovado'; dialog.showModal();loadHistory(id);

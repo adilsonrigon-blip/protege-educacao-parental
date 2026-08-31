@@ -1,0 +1,16 @@
+/* Protege V13.14.1 - CEP automatico e microinteracoes de menu */
+:root{--protege-hover-bg:rgba(126,58,160,.085);--protege-hover-shadow:0 8px 20px rgba(88,43,112,.10)}
+.main-nav a{position:relative;border-radius:10px;padding:9px 10px;transition:color .18s ease,background-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.main-nav a:not(.nav-login)::after{content:"";position:absolute;left:12px;right:12px;bottom:4px;height:2px;border-radius:999px;background:var(--purple);transform:scaleX(0);transform-origin:center;transition:transform .18s ease}
+.main-nav a:hover,.main-nav a:focus-visible{color:var(--purple);background:var(--protege-hover-bg);transform:translateY(-1px);box-shadow:var(--protege-hover-shadow);outline:none}
+.main-nav a:not(.nav-login):hover::after,.main-nav a:not(.nav-login):focus-visible::after{transform:scaleX(1)}
+.main-nav .nav-login:hover,.main-nav .nav-login:focus-visible{background:var(--purple);color:#fff!important}
+.sidebar nav a{position:relative;transition:background-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
+.sidebar nav a:hover,.sidebar nav a:focus-visible{background:#f2e6f7;color:var(--purple);transform:translateX(4px);box-shadow:0 5px 14px rgba(88,43,112,.08);outline:none}
+.sidebar nav a.active{box-shadow:inset 3px 0 0 var(--purple)}
+.address-section-title{grid-column:1/-1;margin:2px 0 -2px;padding-top:8px;font-size:1rem;color:var(--ink);font-weight:850;display:flex;align-items:center;gap:9px}
+.address-section-title::before{content:"";width:4px;height:20px;border-radius:999px;background:linear-gradient(180deg,var(--purple),var(--pink))}
+.cep-field{position:relative}.cep-row-help{display:block;margin-top:7px;color:var(--muted);font-size:.78rem;font-weight:600;line-height:1.35}.cep-status{display:block;margin-top:7px;min-height:18px;font-size:.78rem;font-weight:700;color:var(--muted)}.cep-status.is-loading{color:var(--purple)}.cep-status.is-ok{color:#24866a}.cep-status.is-error{color:#b33a55}
+.address-auto-filled{background:#fbf8fd!important;border-color:#cdb7d8!important}
+@media(max-width:900px){.main-nav a:hover,.main-nav a:focus-visible{transform:none;box-shadow:none}.main-nav a:not(.nav-login)::after{display:none}}
+@media(prefers-reduced-motion:reduce){.main-nav a,.main-nav a::after,.sidebar nav a{transition:none!important}}

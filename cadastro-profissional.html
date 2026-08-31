@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="style-v126.css?v=13130">
   <link rel="stylesheet" href="pre-cadastro-profissional-v13131.css?v=13131">
   <link rel="stylesheet" href="v13132.css?v=13132">
+<link rel="stylesheet" href="v13141.css?v=13141">
 </head>
 <body>
 <header class="site-header">
@@ -44,8 +45,14 @@
       <label>E-mail *<input name="email" type="email" required autocomplete="email" maxlength="180"></label>
       <label>CPF *<input id="professionalCpf" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"><span class="cpf-help">O CPF é validado e usado somente pela administração para identificação e prevenção de cadastros duplicados.</span><span id="cpfError" class="field-error" hidden></span></label>
       <label>Data de nascimento *<input name="data_nascimento" type="date" required></label>
-      <label>Cidade *<input name="cidade" required autocomplete="address-level2" maxlength="120"></label>
-      <label>Estado (UF) *<input name="estado" required autocomplete="address-level1" maxlength="2" minlength="2" placeholder="SP"></label>
+      <div class="address-section-title">Endereço</div>
+      <label class="cep-field">CEP *<input id="professionalCep" name="cep" required inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" aria-describedby="cepStatus"><span class="cep-row-help">Digite o CEP e aguarde o preenchimento automático do endereço.</span><span id="cepStatus" class="cep-status" role="status" aria-live="polite"></span></label>
+      <label>Logradouro *<input id="professionalStreet" name="logradouro" required autocomplete="address-line1" maxlength="180" placeholder="Rua, avenida, alameda..."></label>
+      <label>Número *<input id="professionalAddressNumber" name="numero" required maxlength="20" placeholder="Ex.: 123"></label>
+      <label>Complemento<input id="professionalAddressComplement" name="complemento" maxlength="120" placeholder="Apto, bloco, sala (opcional)"></label>
+      <label>Bairro *<input id="professionalNeighborhood" name="bairro" required maxlength="120"></label>
+      <label>Cidade *<input id="professionalCity" name="cidade" required autocomplete="address-level2" maxlength="120"></label>
+      <label>Estado (UF) *<input id="professionalState" name="estado" required autocomplete="address-level1" maxlength="2" minlength="2" placeholder="SP"></label>
       <label>Número do celular *<input id="professionalPhone" name="celular" required inputmode="tel" autocomplete="tel" maxlength="15" placeholder="(11) 99999-9999" aria-describedby="celularError"><span id="celularError" class="field-error" hidden></span></label>
       <label>Especialidade / área de atuação *<input name="especialidade" required maxlength="160" placeholder="Ex.: Psicologia, Pedagogia, Educação Parental"></label>
       <label class="full-field">Qual sua formação de origem? *<textarea name="formacao_origem" required maxlength="1200" placeholder="Informe graduação, cursos ou formação principal."></textarea></label>
@@ -65,7 +72,8 @@
 <script src="config-v126.js?v=1391"></script>
 <script src="cpf-v13130.js?v=13130"></script>
 <script src="celular-v13132.js?v=13132"></script>
-<script src="pre-cadastro-profissional-v13130.js?v=13132"></script>
+<script src="cep-v13141.js?v=13141"></script>
+<script src="pre-cadastro-profissional-v13130.js?v=13141"></script>
 <script>
 (function(){
   const toggle=document.querySelector('.menu-toggle');
