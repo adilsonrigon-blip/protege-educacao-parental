@@ -1,0 +1,16 @@
+/* PROTEGE V13.25.0 - setas do banner 100% dentro do card */
+/* Mantém os controles dentro da moldura do banner em todos os desktops. */
+.banner-carousel-arrow.prev{left:14px!important}
+.banner-carousel-arrow.next{right:14px!important}
+/* Reserva uma faixa segura para a seta esquerda sem encostar no texto. */
+.home-banner-copy{padding-left:72px!important;padding-right:56px!important}
+@media(max-width:900px){
+  .banner-carousel-arrow.prev{left:10px!important}
+  .banner-carousel-arrow.next{right:10px!important}
+  .home-banner-copy{padding-left:58px!important;padding-right:42px!important}
+}
+@media(max-width:650px){
+  .banner-carousel-arrow.prev{left:8px!important}
+  .banner-carousel-arrow.next{right:8px!important}
+  .home-banner-copy{padding-left:50px!important;padding-right:28px!important}
+}
