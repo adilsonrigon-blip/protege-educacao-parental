@@ -1,0 +1,20 @@
+PROTEGE - V13.22.0
+
+Melhoria no cadastro/edição de imagens dos banners da Home.
+
+ALTERAÇÕES
+- Novo banner: botão "Escolher imagem".
+- Editar banner: botão muda para "Trocar imagem".
+- A imagem atual é mantida caso o administrador não selecione uma nova.
+- Orientação visível: imagem recomendada 1600 x 760 px, proporção aproximada 2,1:1.
+- Formatos aceitos: JPG, PNG e WebP.
+- Arquivo máximo: 5 MB.
+- Validação mínima: 1200 x 570 px e proporção horizontal compatível com o banner.
+- Prévia da nova imagem antes de salvar.
+
+BANCO DE DADOS
+- Nenhuma alteração no Supabase nesta versão.
+- Não é necessário executar SQL.
+
+PUBLICAÇÃO
+- Substitua os arquivos atuais do GitHub pelos arquivos da V13.22.0.

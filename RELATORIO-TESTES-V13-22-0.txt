@@ -1,0 +1,7 @@
+PROTEGE V13.22.0 - RELATÓRIO DE VALIDAÇÃO
+
+- Node/contracts/responsividade: 74/74 aprovados.
+- Python histórico + V13.22.0: testes aprovados.
+- Sintaxe de banners-admin-v13220.js: aprovada.
+- Referências locais HTML: 0 quebradas.
+- Validações específicas: botão Escolher/Trocar imagem, orientação 1600x760, tipos JPG/PNG/WebP, limite 5 MB, dimensões/proporção e responsividade.
