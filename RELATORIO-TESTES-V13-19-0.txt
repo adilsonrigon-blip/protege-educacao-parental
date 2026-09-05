@@ -1,0 +1,19 @@
+PROTEGE V13.19.0 — RELATÓRIO DE TESTES
+
+Resultado final:
+- Node/contracts/responsividade: 74 aprovados / 74
+- Pytest: 83 aprovados / 83
+- Sintaxe JS: script-v126.js e adolescentes-admin-v13190.js aprovados
+- Referências locais HTML: 0 arquivos ausentes
+
+Validações específicas V13.19.0:
+- Página Adolescentes exclusiva de administrador
+- Menu Adolescentes inserido somente para perfil admin
+- Busca, filtros, paginação e ficha administrativa
+- Edição de nome, nascimento, CPF, celular, e-mail, status e observações
+- Validação de CPF, celular e data de nascimento
+- Vínculo com ONG
+- Histórico de atendimentos
+- WhatsApp, impressão/PDF e novo atendimento pré-selecionado
+- RLS de UPDATE restrita a administrador
+- Auditoria de alterações do cadastro de adolescentes

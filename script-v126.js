@@ -1893,8 +1893,15 @@ async function initAdminNavigationAndGuard(){
   if(!document.body.dataset.requiresAuth)return null;
   const profile=await protegeCurrentAccessProfile();
   const nav=document.querySelector('.sidebar nav');
-  if(profile?.perfil==='admin'&&profile?.ativo!==false&&nav&&!nav.querySelector('a[href="conteudos.html"]')){
-    const link=document.createElement('a');link.href='conteudos.html';link.textContent='Conteúdos';if(location.pathname.endsWith('/conteudos.html')||location.pathname.endsWith('conteudos.html'))link.classList.add('active');const reports=nav.querySelector('a[href="relatorios.html"]');nav.insertBefore(link,reports||null);
+  if(profile?.perfil==='admin'&&profile?.ativo!==false&&nav){
+    if(!nav.querySelector('a[href="adolescentes.html"]')){
+      const adolescentsLink=document.createElement('a');adolescentsLink.href='adolescentes.html';adolescentsLink.textContent='Adolescentes';
+      if(location.pathname.endsWith('/adolescentes.html')||location.pathname.endsWith('adolescentes.html'))adolescentsLink.classList.add('active');
+      const attendances=nav.querySelector('a[href="atendimentos.html"]');nav.insertBefore(adolescentsLink,attendances||null);
+    }
+    if(!nav.querySelector('a[href="conteudos.html"]')){
+      const link=document.createElement('a');link.href='conteudos.html';link.textContent='Conteúdos';if(location.pathname.endsWith('/conteudos.html')||location.pathname.endsWith('conteudos.html'))link.classList.add('active');const reports=nav.querySelector('a[href="relatorios.html"]');nav.insertBefore(link,reports||null);
+    }
   }
   if(document.body.dataset.requiresAdmin&&profile?.perfil!=='admin'){
     document.body.innerHTML='<main class="access-denied"><div><img src="logo-protege.jpeg" alt="Protege"><h1>Acesso restrito</h1><p>Esta área é exclusiva para profissionais com perfil de administrador.</p><a class="btn btn-primary" href="dashboard.html">Voltar ao dashboard</a></div></main>';

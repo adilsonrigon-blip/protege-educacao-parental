@@ -1,0 +1,18 @@
+PROTEGE V13.19.0 — Gestão administrativa de Adolescentes
+
+Novidades:
+- Perfil Administrador recebe o menu “Adolescentes”.
+- Lista administrativa com busca, filtro por ONG, filtro por status e paginação.
+- Ficha do adolescente no mesmo padrão operacional de Família.
+- Edição de nome, nascimento, CPF, celular, e-mail, status e observações.
+- Vínculo do adolescente com ONG.
+- Histórico de atendimentos.
+- Ações WhatsApp, Imprimir/PDF e Novo atendimento com adolescente pré-selecionado.
+- Acesso à gestão e atualização restrito ao perfil administrador.
+- Auditoria de alterações no cadastro de adolescentes.
+
+IMPORTANTE — PUBLICAÇÃO:
+1. Execute uma única vez o arquivo supabase-v13.19.0-admin-adolescentes.sql no Supabase SQL Editor.
+2. Depois publique os arquivos da V13.19.0 no GitHub Pages.
+
+Pré-requisitos de banco: migrações V13.14.0, V13.17.0 e V13.18.0 já aplicadas.
