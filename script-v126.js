@@ -1894,6 +1894,11 @@ async function initAdminNavigationAndGuard(){
   const profile=await protegeCurrentAccessProfile();
   const nav=document.querySelector('.sidebar nav');
   if(profile?.perfil==='admin'&&profile?.ativo!==false&&nav){
+    if(!nav.querySelector('a[href="adolescentes-interessados.html"]')){
+      const leadLink=document.createElement('a');leadLink.href='adolescentes-interessados.html';leadLink.textContent='Adolescentes interessados';
+      if(location.pathname.endsWith('/adolescentes-interessados.html')||location.pathname.endsWith('adolescentes-interessados.html'))leadLink.classList.add('active');
+      const preProf=nav.querySelector('a[href="pre-cadastro-profissionais.html"]');nav.insertBefore(leadLink,preProf||null);
+    }
     if(!nav.querySelector('a[href="adolescentes.html"]')){
       const adolescentsLink=document.createElement('a');adolescentsLink.href='adolescentes.html';adolescentsLink.textContent='Adolescentes';
       if(location.pathname.endsWith('/adolescentes.html')||location.pathname.endsWith('adolescentes.html'))adolescentsLink.classList.add('active');
