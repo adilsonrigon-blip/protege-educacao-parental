@@ -1,0 +1,16 @@
+PROTEGE — V13.21.0
+
+Ajustes desta versão:
+1. Menu administrativo reorganizado com grupo recolhível “Cadastros”.
+   Submenu: Famílias interessadas, Adolescentes interessados, Pré-cadastros profissionais, Famílias, Adolescentes, Profissionais e ONGs.
+2. Scroll vertical no menu lateral administrativo em telas que não comportem todos os itens.
+3. Carrossel da Home corrigido para continuar a rotação automática mesmo quando o mouse permanece sobre o banner.
+   Rotação a cada 6 segundos, com reinício após setas, indicadores e swipe; pausa somente quando a aba fica oculta.
+4. Banner da Home ampliado no desktop para até 1360px, aproximando o alinhamento ao cabeçalho/Área do profissional.
+   A altura foi mantida controlada em 310px e as imagens usam object-fit: contain, sem corte.
+5. Responsividade preservada.
+
+IMPORTANTE:
+- Esta versão NÃO possui migração SQL.
+- Não é necessário executar nada no Supabase.
+- Basta publicar/substituir os arquivos no GitHub Pages.

@@ -1,0 +1,9 @@
+PROTEGE — RELATÓRIO DE TESTES V13.21.0
+
+- npm test: 74/74 aprovados
+- pytest: 92/92 aprovados
+- node --check banners-v13210.js: aprovado
+- Referências locais HTML: 0 ausentes
+- Páginas administrativas validadas com grupo Cadastros e CSS V13.21.0
+- Carrossel validado com autoplay de 6 segundos e sem pausa por hover
+- Banner validado com largura máxima de 1360px e altura controlada no desktop
