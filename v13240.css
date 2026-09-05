@@ -1,0 +1,29 @@
+/* PROTEGE V13.24.0 - contadores do submenu e ajuste das setas do banner */
+.sidebar-submenu a{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+.sidebar-submenu a .nav-badge{
+  flex:0 0 auto!important;
+  margin-left:auto!important;
+  display:inline-flex!important;
+  visibility:visible!important;
+}
+/* Mantém o texto dentro da largura e reserva espaço para o contador. */
+.sidebar-submenu a{overflow:visible!important}
+
+/* Setas do carrossel ficam apoiadas nas bordas, sem invadir o texto. */
+.banner-carousel-arrow.prev{left:-21px!important}
+.banner-carousel-arrow.next{right:-21px!important}
+@media(max-width:1450px){
+  .banner-carousel-arrow.prev{left:8px!important}
+  .banner-carousel-arrow.next{right:8px!important}
+  .home-banner-copy{padding-left:64px!important;padding-right:52px!important}
+}
+@media(max-width:650px){
+  .banner-carousel-arrow.prev{left:6px!important}
+  .banner-carousel-arrow.next{right:6px!important}
+  .home-banner-copy{padding-left:48px!important;padding-right:25px!important}
+}
