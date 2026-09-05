@@ -1,0 +1,11 @@
+/* ===== V13.16.1 · refinamentos visuais do carrossel e CRUD ===== */
+.home-banners{padding:22px 0 12px;background:#fff}
+.home-banner-slide{min-height:360px}
+.home-banner-image{width:100%;height:100%;min-height:360px;object-fit:contain;object-position:center;background:#faf4fc;padding:10px}
+.banner-image-preview{object-fit:contain;background:#faf4fc;padding:8px}
+.banner-detail-image{object-fit:contain;background:#faf4fc;padding:12px}
+.banner-form input[type="file"]{min-width:0;max-width:100%;overflow:hidden;padding:7px;line-height:1.35;font-size:12px;color:#6f6475;background:#fff}
+.banner-form input[type="file"]::file-selector-button{border:1px solid #d9c9e2;border-radius:9px;padding:9px 12px;margin-right:10px;background:#f7effb;color:var(--purple);font:inherit;font-weight:800;cursor:pointer;white-space:nowrap}
+.banner-form input[type="file"]::file-selector-button:hover{background:#efe2f5}
+@media(max-width:900px){.home-banner-image{min-height:280px;max-height:340px;padding:8px}}
+@media(max-width:650px){.home-banners{padding-top:14px}.home-banner-image{min-height:210px;max-height:250px;padding:6px}.banner-form input[type="file"]::file-selector-button{display:block;margin:0 0 7px 0;width:100%}}
