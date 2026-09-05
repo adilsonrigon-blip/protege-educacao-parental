@@ -7,10 +7,40 @@ const fmt=v=>{if(!v)return '—';try{return new Intl.DateTimeFormat('pt-BR',{dat
 async function client(){return window.ProtegeApp?.db||null}
 async function getAdminProfile(){try{const db=await client();if(!db)return null;const {data:{session}}=await db.auth.getSession();if(!session)return null;const {data}=await db.from('usuarios_perfis').select('perfil,ativo').eq('user_id',session.user.id).maybeSingle();return data}catch{return null}}
 async function pendingBadge(){
-  const link=qa('.sidebar nav a').find(a=>a.getAttribute('href')==='pre-cadastro-profissionais.html'); if(!link)return;
-  let badge=q('.pending-badge',link);if(!badge){badge=document.createElement('span');badge.className='nav-badge pending-badge';badge.textContent='0';link.appendChild(badge)}
-  try{const profile=await getAdminProfile();if(profile?.perfil!=='admin'||!profile?.ativo){badge.hidden=true;return}const db=await client();const {data,error}=await db.rpc('protege_pre_cadastro_pendentes');if(error)throw error;const n=Number(data||0);badge.textContent=String(n);badge.hidden=n===0;}catch{badge.hidden=true}
+  const professionalLink=qa('.sidebar nav a').find(a=>a.getAttribute('href')==='pre-cadastro-profissionais.html');
+  const adolescentLink=qa('.sidebar nav a').find(a=>a.getAttribute('href')==='adolescentes-interessados.html');
+  if(!professionalLink&&!adolescentLink)return;
+
+  const ensureBadge=(link,id,extraClass='')=>{
+    if(!link)return null;
+    let badge=id?q('#'+id,link):null;
+    if(!badge){badge=document.createElement('span');if(id)badge.id=id;badge.className=('nav-badge '+extraClass).trim();badge.textContent='0';link.appendChild(badge)}
+    badge.hidden=false;
+    return badge;
+  };
+  const professionalBadge=ensureBadge(professionalLink,'sidebarProfessionalPreCount','pending-badge');
+  const adolescentBadge=ensureBadge(adolescentLink,'sidebarAdolescentLeadCount','adolescent-pending-badge');
+
+  try{
+    const profile=await getAdminProfile();
+    if(profile?.perfil!=='admin'||!profile?.ativo){if(professionalBadge)professionalBadge.hidden=true;if(adolescentBadge)adolescentBadge.hidden=true;return}
+    const db=await client();if(!db)return;
+    const jobs=[];
+    if(professionalBadge)jobs.push((async()=>{
+      const {data,error}=await db.rpc('protege_pre_cadastro_pendentes');
+      if(error)throw error;
+      professionalBadge.textContent=String(Number(data||0));professionalBadge.hidden=false;
+    })());
+    if(adolescentBadge)jobs.push((async()=>{
+      const {count,error}=await db.from('adolescentes_interessados').select('id',{count:'exact',head:true}).eq('status','novo');
+      if(error)throw error;
+      adolescentBadge.textContent=String(Number(count||0));adolescentBadge.hidden=false;
+    })());
+    const results=await Promise.allSettled(jobs);
+    results.forEach(r=>{if(r.status==='rejected')console.warn('Protege: não foi possível atualizar um contador de pendências.',r.reason)});
+  }catch(err){console.warn('Protege: não foi possível atualizar os contadores de pendências.',err)}
 }
+window.ProtegeRefreshPendingBadges=pendingBadge;
 function ensureAuditNav(){const nav=q('.sidebar nav');if(!nav)return;const exists=qa('a',nav).some(a=>a.getAttribute('href')==='auditoria.html');if(exists)return;const a=document.createElement('a');a.href='auditoria.html';a.textContent='Auditoria';const rel=qa('a',nav).find(x=>x.getAttribute('href')==='relatorios.html');rel?.after(a)||nav.appendChild(a)}
 function localPager(tableSelector,pageSize=25){
  const table=q(tableSelector);if(!table)return;const tbody=q('tbody',table);if(!tbody)return;const host=document.createElement('div');host.className='protege-pagination';table.parentElement?.after(host);let page=1,observer;

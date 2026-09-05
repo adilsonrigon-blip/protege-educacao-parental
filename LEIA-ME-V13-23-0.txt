@@ -1,0 +1,10 @@
+PROTEGE - V13.23.0
+
+Ajuste dos contadores do menu administrativo:
+- Famílias interessadas: mantém o contador já existente.
+- Adolescentes interessados: exibe a quantidade de novos pré-cadastros pendentes.
+- Pré-cadastros profissionais: exibe a quantidade de cadastros pendentes/em análise pelo RPC existente.
+- Os contadores permanecem visíveis inclusive quando o valor é 0.
+- Atualização automática após alterações de status nos fluxos de adolescente e profissional.
+
+Não há alteração de banco de dados nesta versão.

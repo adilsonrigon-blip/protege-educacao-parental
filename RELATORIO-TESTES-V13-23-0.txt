@@ -1,0 +1,20 @@
+PROTEGE - V13.23.0 - RELATÓRIO DE TESTES
+
+Alteração:
+- Contador de Famílias interessadas preservado.
+- Novo contador de Adolescentes interessados no submenu Cadastros.
+- Novo contador de Pré-cadastros profissionais no submenu Cadastros.
+- Contadores permanecem visíveis quando zerados.
+- Atualização dos contadores após mudança de status.
+
+Validações executadas:
+- pytest: 102/102 aprovados.
+- npm test: 74/74 aprovados.
+- node --check nos JavaScripts modificados: aprovado.
+- 17/17 páginas administrativas com os três badges de contagem: aprovado.
+- Cache-bust do v13140.js atualizado para V13.23.0 nas páginas administrativas.
+
+Banco de dados:
+- Nenhuma migração SQL nova é necessária.
+- Profissionais reutilizam o RPC protege_pre_cadastro_pendentes já existente.
+- Adolescentes reutilizam a tabela adolescentes_interessados criada na V13.20.0.
