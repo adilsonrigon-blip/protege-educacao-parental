@@ -1,0 +1,18 @@
+PROTEGE V13.18.0 — FAMÍLIA OU ADOLESCENTE EM AGENDA/ATENDIMENTO
+
+Novidades:
+- Agenda permite selecionar Família OU Adolescente.
+- Novo Atendimento permite selecionar Família OU Adolescente.
+- Ao selecionar Família, Adolescente é limpo e bloqueado.
+- Ao selecionar Adolescente, Família é limpa e bloqueada.
+- O banco também impede que os dois sejam gravados no mesmo registro.
+- Histórico de atendimentos e consulta da agenda identificam corretamente adolescentes.
+- Agendamento de adolescente pode iniciar um atendimento mantendo o vínculo com o adolescente.
+
+ORDEM PARA PUBLICAR
+1. A V13.17.0 precisa já estar instalada, incluindo supabase-v13.17.0-cadastro-adolescente.sql.
+2. Execute no Supabase SQL Editor:
+   supabase-v13.18.0-agenda-atendimento-adolescente.sql
+3. Depois publique/substitua os arquivos do pacote GitHub V13.18.0.
+
+O SQL adiciona adolescente_id em agenda e atendimentos, libera leitura dos adolescentes apenas para usuários autenticados e cria a regra obrigatória Família XOR Adolescente.

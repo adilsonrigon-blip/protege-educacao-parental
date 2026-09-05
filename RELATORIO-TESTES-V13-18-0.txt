@@ -1,0 +1,19 @@
+PROTEGE V13.18.0 — RELATÓRIO DE TESTES
+
+Funcionalidades validadas:
+- Seleção de Adolescente em Novo Atendimento.
+- Seleção de Adolescente em Novo Agendamento.
+- Exclusividade Família OU Adolescente na interface.
+- Exclusividade Família XOR Adolescente no banco de dados.
+- Vínculo adolescente_id em atendimentos e agenda.
+- Carregamento dos adolescentes para profissionais autenticados.
+- Exibição correta de adolescente em histórico e agenda.
+- Fluxo Agenda -> Iniciar atendimento preservando adolescente.
+- Sintaxe JavaScript aprovada.
+
+Resultados:
+- Pytest: 77/77 aprovados.
+- Node contratos + responsividade: 74/74 aprovados.
+- Total automatizado: 151/151 aprovados.
+
+Observação: a migração V13.18.0 depende da tabela cadastros_adolescentes criada na V13.17.0.
