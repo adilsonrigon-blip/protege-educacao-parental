@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cadastro simples de adolescente no Protege Educação Parental.">
+  <title>Cadastro de Adolescente | Protege Educação Parental</title>
+  <link rel="canonical" href="https://protegeducparental.com.br/cadastro-adolescente.html">
+  <link rel="stylesheet" href="style-v126.css?v=13130">
+  <link rel="stylesheet" href="v13132.css?v=13132">
+  <link rel="stylesheet" href="v13141.css?v=13142">
+  <link rel="stylesheet" href="v13170.css?v=13170">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="index.html" aria-label="Protege Educação Parental"><img src="logo-protege.jpeg" alt="Protege Educação Parental"></a>
+    <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <nav class="main-nav">
+      <a href="index.html#sobre">Educação Parental</a>
+      <a href="index.html#como-funciona">Como funciona</a>
+      <a href="index.html#beneficios">Benefícios</a>
+      <a href="publicacoes.html">Notícias &amp; eventos</a>
+      <a href="index.html#contato">Contato</a>
+      <a class="nav-interest active-link" href="cadastre-se.html">Cadastre-se</a>
+      <a class="nav-login" href="login.html">Área do profissional</a>
+    </nav>
+  </div>
+</header>
+<main class="registration-page adolescent-registration-page">
+  <section class="registration-hero">
+    <div class="container registration-heading">
+      <span class="section-label">PROTEGE · ADOLESCENTE</span>
+      <h1>Cadastro de adolescente</h1>
+      <p>Preencha seus dados básicos. É rápido e a equipe Protege poderá entrar em contato pelos canais informados.</p>
+    </div>
+  </section>
+  <section class="registration-section">
+    <div class="container adolescent-registration-shell">
+      <form id="adolescentForm" class="registration-card adolescent-registration-card" novalidate>
+        <div class="form-section-title">
+          <span>01</span>
+          <div><h2>Seus dados</h2><p>Todos os campos abaixo são obrigatórios.</p></div>
+        </div>
+        <div class="form-grid adolescent-form-grid">
+          <label class="span-2">Nome completo
+            <input id="adolescentName" name="nome" type="text" required maxlength="160" autocomplete="name" placeholder="Nome completo">
+          </label>
+          <label>Data de nascimento
+            <input id="adolescentBirthDate" name="data_nascimento" type="date" required autocomplete="bday">
+            <span id="adolescentBirthError" class="field-error" hidden></span>
+          </label>
+          <label>CPF
+            <input id="adolescentCpf" name="cpf" type="text" required inputmode="numeric" maxlength="14" autocomplete="off" placeholder="000.000.000-00">
+            <span id="adolescentCpfError" class="field-error" hidden></span>
+          </label>
+          <label>Celular
+            <input id="adolescentPhone" name="celular" type="tel" required inputmode="tel" maxlength="15" autocomplete="tel" placeholder="(11) 99999-9999">
+            <span id="adolescentPhoneError" class="field-error" hidden></span>
+          </label>
+          <label>E-mail
+            <input id="adolescentEmail" name="email" type="email" required maxlength="180" autocomplete="email" placeholder="email@exemplo.com">
+          </label>
+        </div>
+        <div class="registration-actions">
+          <a class="btn btn-secondary" href="cadastre-se.html">Voltar</a>
+          <button id="adolescentSubmit" class="btn btn-primary" type="submit">Enviar cadastro</button>
+        </div>
+        <p id="adolescentMessage" class="form-message" role="status" aria-live="polite"></p>
+        <p class="privacy-note">Os dados serão utilizados pela equipe Protege exclusivamente para contato e gestão do cadastro.</p>
+      </form>
+      <div id="adolescentSuccess" class="adolescent-success" hidden>
+        <span aria-hidden="true">✓</span>
+        <h2>Cadastro recebido!</h2>
+        <p>Seus dados foram enviados com sucesso para a equipe Protege.</p>
+        <a class="btn btn-primary" href="index.html">Voltar para a Home</a>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="footer"><div class="container footer-wrap"><div><img src="logo-protege.jpeg" alt="Protege" class="footer-logo"><p>Protege - Educação Parental</p></div><div class="footer-right"><a href="login.html">Área do profissional</a><span>© <span id="year"></span> Protege</span></div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config-v126.js?v=1391"></script>
+<script src="cpf-v13130.js?v=13130"></script>
+<script src="celular-v13132.js?v=13132"></script>
+<script src="cadastros-v13170.js?v=13170"></script>
+</body>
+</html>

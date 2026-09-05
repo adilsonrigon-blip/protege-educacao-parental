@@ -1,0 +1,25 @@
+/* PROTEGE V13.17.0 — central de cadastros e cadastro simples de adolescente */
+.signup-choice-hero{padding:72px 0 34px;background:linear-gradient(180deg,#fbf7fd 0%,#fff 100%)}
+.signup-choice-heading{max-width:780px;text-align:center}
+.signup-choice-heading h1{margin:10px 0 14px;font-size:clamp(2rem,4vw,3.35rem);line-height:1.08;color:#302737}
+.signup-choice-heading p{max-width:650px;margin:0 auto;color:#74697a;font-size:1.08rem;line-height:1.65}
+.signup-choice-section{padding-top:26px;padding-bottom:84px}
+.signup-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.signup-choice-card{display:flex;min-height:330px;flex-direction:column;padding:30px;border:1px solid #eadff0;border-radius:24px;background:#fff;color:inherit;text-decoration:none;box-shadow:0 16px 42px rgba(69,44,78,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.signup-choice-card:hover,.signup-choice-card:focus-visible{transform:translateY(-4px);box-shadow:0 20px 48px rgba(69,44,78,.11);border-color:#d8bfe3;outline:none}
+.signup-choice-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:#f4eafa;color:#714781;font-size:1.6rem;margin-bottom:25px}
+.signup-choice-tag{font-size:.72rem;letter-spacing:.08em;font-weight:800;color:#8a7194}
+.signup-choice-card h2{margin:9px 0 10px;font-size:1.65rem;color:#302737}
+.signup-choice-card p{margin:0;color:#74697a;line-height:1.65}
+.signup-choice-link{margin-top:auto;padding-top:26px;color:#714781;font-weight:800}
+.adolescent-registration-shell{max-width:850px}
+.adolescent-registration-card{max-width:none}
+.adolescent-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.adolescent-success{max-width:650px;margin:0 auto;padding:50px 34px;text-align:center;border:1px solid #e6d8ec;border-radius:26px;background:#fff;box-shadow:0 16px 42px rgba(69,44,78,.07)}
+.adolescent-success>span{display:grid;width:58px;height:58px;place-items:center;margin:0 auto 18px;border-radius:50%;background:#eef8f1;color:#35734b;font-size:1.6rem;font-weight:800}
+.adolescent-success h2{margin:0 0 10px;color:#302737}
+.adolescent-success p{margin:0 0 24px;color:#74697a}
+.field-error{display:block;margin-top:6px;color:#a23c4a;font-size:.82rem;line-height:1.35}
+input.input-error{border-color:#a23c4a!important;box-shadow:0 0 0 3px rgba(162,60,74,.08)!important}
+@media(max-width:860px){.signup-choice-grid{grid-template-columns:1fr}.signup-choice-card{min-height:250px}.signup-choice-section{padding-bottom:58px}}
+@media(max-width:680px){.signup-choice-hero{padding:50px 0 24px}.signup-choice-card{padding:24px}.adolescent-form-grid{grid-template-columns:1fr}.adolescent-form-grid .span-2{grid-column:auto}}

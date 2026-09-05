@@ -1,0 +1,23 @@
+PROTEGE V13.17.0 — RELATÓRIO DE TESTES
+
+Funcionalidades validadas:
+- Home possui um único item de menu "Cadastre-se".
+- Central de cadastro exibe exatamente: Família, Profissional e Adolescente.
+- Família mantém o cadastro existente.
+- Profissional mantém o pré-cadastro existente.
+- Adolescente contém somente nome, data de nascimento, CPF, celular e e-mail.
+- Validação de CPF no navegador e no servidor.
+- Validação de celular brasileiro no navegador e no servidor.
+- Validação de e-mail e bloqueio de data de nascimento futura.
+- CPF duplicado é bloqueado no servidor.
+- RLS ativada na nova tabela; gravação pública ocorre pela função security definer.
+- Links locais das páginas principais: nenhum arquivo ausente.
+- Regras responsivas adicionadas para desktop, tablet e celular.
+
+Resultados:
+- Node contratos + responsividade: 74/74 aprovados.
+- Pytest regressão/funcionalidades, incluindo V13.17.0: 73/73 aprovados.
+- Sintaxe JavaScript cadastros-v13170.js: aprovada.
+
+Observação:
+Os dois testes históricos que exigiam os menus removidos foram atualizados para refletir a nova regra solicitada de centralização em "Cadastre-se".

@@ -1,0 +1,23 @@
+PROTEGE V13.17.0 — CENTRAL DE CADASTROS
+
+ALTERAÇÕES
+1. Menu público: os itens "Quero participar" e "Seja um profissional" foram substituídos por "Cadastre-se".
+2. Nova página cadastre-se.html com três opções:
+   - Família -> cadastro.html (fluxo existente preservado)
+   - Profissional -> cadastro-profissional.html (fluxo existente preservado)
+   - Adolescente -> cadastro-adolescente.html (novo)
+3. Novo cadastro simples de Adolescente com SOMENTE:
+   - Nome
+   - Data de nascimento
+   - CPF
+   - Celular
+   - E-mail
+4. Validações no navegador: campos obrigatórios, CPF, celular brasileiro, e-mail e data futura.
+5. Validações no Supabase e bloqueio de CPF duplicado.
+6. Layout responsivo e alinhado ao padrão visual atual do Protege.
+
+IMPORTANTE — SUPABASE
+Antes de publicar a V13.17.0, execute uma única vez no SQL Editor do Supabase:
+  supabase-v13.17.0-cadastro-adolescente.sql
+
+O script cria a tabela cadastros_adolescentes e a função segura enviar_cadastro_adolescente.
