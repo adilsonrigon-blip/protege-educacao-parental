@@ -1,0 +1,12 @@
+PROTEGE - V13.24.3
+
+Correção do pré-cadastro profissional:
+- O nome exibido da Edge Function é "pre-cadastrar-profissional", porém o endpoint/deployment real no Supabase é "swift-processor".
+- O front-end passa a invocar "swift-processor".
+- Novo arquivo versionado para evitar cache do navegador.
+- Não há alteração de banco de dados ou SQL nesta versão.
+
+Arquivos:
+- cadastro-profissional.html (substituir)
+- pre-cadastro-profissional-v13243.js (novo)
+- LEIA-ME-V13-24-3.txt (documentação)
