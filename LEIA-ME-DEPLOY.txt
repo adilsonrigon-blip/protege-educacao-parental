@@ -1,0 +1,17 @@
+PROTEGE V13.24.9 — SOMENTE ARQUIVOS DA CORREÇÃO
+
+GITHUB / SITE
+1. Substituir: pre-cadastro-profissionais.html
+2. Adicionar/substituir: pre-cadastro-profissional-v13248.js
+
+SUPABASE
+3. Edge Functions > administrar-profissional > Code
+4. Substituir o código pelo conteúdo de: administrar-profissional-index-v13142.ts
+5. Fazer Deploy updates.
+
+BANCO DE DADOS
+- Não executar SQL para esta correção.
+
+VALIDAÇÃO
+- Esta correção faz parte da V13.24.9, cuja suíte local teve 844/844 testes aprovados.
+- Após publicar, fazer o smoke test real de Aprovar e liberar acesso com um pré-cadastro de teste.
