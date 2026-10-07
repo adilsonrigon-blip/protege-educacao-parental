@@ -1,0 +1,11 @@
+PROTEGE - V13.24.2
+Correção do pré-cadastro profissional.
+
+Arquivos para publicar:
+- cadastro-profissional.html (substituir)
+- pre-cadastro-profissional-v13242.js (novo)
+
+Correção:
+O pré-cadastro agora lê SUPABASE_URL e SUPABASE_ANON_KEY de window.PROTEGE_CONFIG, que é o formato já utilizado pelo config-v126.js do projeto.
+
+Não requer SQL nem alteração no Supabase.
