@@ -1,0 +1,34 @@
+PROTEGE V13.24.12 - ACESSIBILIDADE / AUMENTO GLOBAL DE FONTES
+
+OBJETIVO
+Aumentar moderadamente a legibilidade do site inteiro sem alterar a identidade visual e sem provocar quebras de layout.
+
+ALTERACOES
+- Base tipografica aumentada para 17px em desktop/tablet e 16,5px no mobile.
+- Textos pequenos de menus, botoes, labels, tabelas, status, mensagens auxiliares, detalhes e formularios aumentados seletivamente.
+- Line-height global aumentado para melhorar leitura.
+- Ajuste responsivo da tela Minha Conta em tablet, detectado durante o teste visual, para evitar overflow no formulario de senha.
+- Cache-busting dos CSS alterados atualizado para v=132412 em todas as 26 paginas HTML.
+
+TESTES EXECUTADOS APOS AS ALTERACOES
+1. Suite completa da plataforma: 844 testes executados / 844 aprovados / 0 falhas.
+2. Sintaxe JavaScript: 23 arquivos verificados com node --check / 0 falhas.
+3. Referencias locais de HTML (scripts e CSS): 0 referencias ausentes.
+4. Verificacao estatica de layout em navegador Chromium, com CSS real embutido e scripts removidos para isolar layout:
+   - 26 paginas em desktop 1440x900
+   - 26 paginas em tablet 768x1024
+   - 26 paginas em mobile 390x844
+   Total: 78 verificacoes de layout.
+   Resultado final: 0 paginas com overflow horizontal.
+
+PROBLEMA ENCONTRADO DURANTE OS TESTES
+- Minha Conta apresentou overflow de 20px em tablet apos o aumento tipografico.
+- O layout foi corrigido para uma coluna nessa largura.
+- Toda a bateria visual foi executada novamente e terminou com 0 ocorrencias de overflow.
+
+OBSERVACAO
+Os testes de layout verificam estrutura e responsividade local. Conteudos dinamicos que dependem de sessao autenticada e dados reais do Supabase devem receber smoke test apos publicacao, sem alterar dados de producao desnecessariamente.
+
+BANCO / SUPABASE
+- Nenhuma alteracao SQL.
+- Nenhuma Edge Function alterada nesta versao.

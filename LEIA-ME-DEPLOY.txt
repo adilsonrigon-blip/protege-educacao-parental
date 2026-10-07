@@ -1,17 +1,15 @@
-PROTEGE V13.24.9 — SOMENTE ARQUIVOS DA CORREÇÃO
+PROTEGE V13.24.12
 
-GITHUB / SITE
-1. Substituir: pre-cadastro-profissionais.html
-2. Adicionar/substituir: pre-cadastro-profissional-v13248.js
+Este pacote contem SOMENTE os arquivos alterados para o aumento global de fontes.
+
+PUBLICACAO NO GITHUB
+1. Substitua os 26 arquivos .html presentes neste pacote.
+2. Substitua style.css.
+3. Substitua style-v126.css.
+4. Nao e necessario publicar os arquivos TXT para o site funcionar.
 
 SUPABASE
-3. Edge Functions > administrar-profissional > Code
-4. Substituir o código pelo conteúdo de: administrar-profissional-index-v13142.ts
-5. Fazer Deploy updates.
+- Nao executar SQL.
+- Nao alterar Edge Functions.
 
-BANCO DE DADOS
-- Não executar SQL para esta correção.
-
-VALIDAÇÃO
-- Esta correção faz parte da V13.24.9, cuja suíte local teve 844/844 testes aprovados.
-- Após publicar, fazer o smoke test real de Aprovar e liberar acesso com um pré-cadastro de teste.
+Os HTML foram incluidos porque atualizam o parametro de cache dos CSS para v=132412. Sem isso, alguns navegadores poderiam continuar exibindo a fonte antiga em cache.
