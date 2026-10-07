@@ -1,0 +1,15 @@
+/* Protege V13.24.4 — legibilidade do cadastro profissional */
+.professional-interest-intro{font-size:1.08rem;line-height:1.7}
+.professional-interest-grid label{font-size:1rem;line-height:1.45}
+.professional-interest-grid input,
+.professional-interest-grid select,
+.professional-interest-grid textarea{font-size:1rem}
+.cpf-help,.password-help,.cep-row-help,.privacy-note-v1313{font-size:.98rem;line-height:1.55}
+.field-error,.cep-status,.form-message{font-size:1rem;line-height:1.5}
+.consent-row{font-size:1rem;line-height:1.55}
+.password-section-title,.address-section-title{font-size:1.05rem}
+.registration-actions .btn{font-size:1rem}
+@media(max-width:760px){
+  .professional-interest-intro{font-size:1rem}
+  .professional-interest-grid label,.consent-row{font-size:.98rem}
+}

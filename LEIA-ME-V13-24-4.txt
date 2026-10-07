@@ -1,0 +1,15 @@
+PROTEGE - V13.24.4
+
+Arquivos para upload/substituição na raiz do GitHub:
+1. cadastro-profissional.html
+2. pre-cadastro-profissional-v13244.js
+3. pre-cadastro-profissional-v13244.css
+
+Alterações:
+- Mensagens amigáveis para erros da Edge Function, incluindo conflito 409 de cadastro duplicado.
+- Tratamento específico para 400/422, 401/403, 429 e erros 5xx.
+- Quando a Edge Function devolver uma mensagem útil, ela é aproveitada quando apropriado.
+- Fonte do formulário, textos auxiliares, consentimento, mensagens e botões ligeiramente aumentada.
+- Cache-busting atualizado para V13.24.4.
+
+Não há alteração de banco de dados nem da Edge Function nesta versão.
