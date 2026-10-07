@@ -1,0 +1,32 @@
+PROTEGE V13.24.6 - AUDITORIA DE REGRESSAO DOS CADASTROS
+
+Escopo verificado:
+- Cadastro público de famílias
+- Cadastro público de adolescentes
+- Cadastro público / pré-cadastro de profissionais
+- Famílias interessadas
+- Adolescentes interessados
+- Pré-cadastros de profissionais
+- Famílias
+- Adolescentes
+- Profissionais
+- ONGs
+- Contadores de pendências do menu
+
+Achado confirmado:
+1. pre-cadastro-profissionais.html carregava pre-cadastro-profissional-v13130.js, incompatível com window.PROTEGE_CONFIG atual.
+   Correção consolidada em pre-cadastro-profissional-v13246.js.
+2. O módulo antigo tentava atualizar professionalPreCount sem garantir que o elemento existia.
+   Correção consolidada com verificação de existência do elemento.
+
+Validações executadas:
+- Sintaxe de todos os 21 arquivos JavaScript do projeto: OK (0 falhas).
+- Existência dos scripts locais referenciados pelos 10 fluxos de cadastro: OK.
+- Configuração Supabase (PROTEGE_CONFIG) nos fluxos atuais: OK.
+- Cadastro profissional aponta para swift-processor: OK.
+- Módulos específicos de adolescentes: OK.
+- Contadores administrativos v13240: referências presentes.
+- Nova suíte tests/cadastros-regression.test.mjs: 10 testes.
+
+Limite importante:
+Estes são testes automatizados estáticos/contratuais executáveis localmente. Eles não substituem testes integrados contra o Supabase de produção com sessão administrativa real, pois isso exigiria credenciais e poderia alterar dados reais. O fluxo público de profissional já foi confirmado em produção pelo usuário: gravação na tabela pre_cadastro_profissionais.
