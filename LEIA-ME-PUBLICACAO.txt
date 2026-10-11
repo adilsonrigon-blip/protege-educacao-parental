@@ -1,0 +1,13 @@
+PROTEGE - V13.24.17 - TRAVESSIA
+
+CORREÇÃO: todas as imagens da Travessia estão na RAIZ, junto de travessia.html e travessia.css.
+
+PUBLICAÇÃO NO GITHUB:
+1. Extraia este ZIP no computador.
+2. Na raiz do repositório GitHub, clique em Add file > Upload files.
+3. Selecione TODOS os arquivos extraídos deste ZIP de uma vez.
+4. Faça Commit directly to the main branch.
+5. Aguarde o GitHub Pages atualizar e pressione Ctrl+F5 no site.
+
+Não é necessário criar diretórios.
+Não há SQL, Supabase ou Edge Function nesta atualização.
