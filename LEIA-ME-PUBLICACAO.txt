@@ -1,20 +1,22 @@
-PROTEGE V13.24.30 — QUEM SOMOS
+PROTEGE V13.24.31 — QUEM SOMOS CORRIGIDO
 
-NOVIDADES
-- Novo item público: Quem Somos.
-- Nova página pública quem-somos.html com identidade visual PROTEGE.
-- Novo item Admin: Quem Somos.
-- CRUD de pessoas: foto, nome, posição/cargo, biografia, LinkedIn, Instagram, Facebook, outra rede/site, ordem e publicado.
-- Fotos usam o bucket existente protege-conteudos.
-- Página pública mostra somente pessoas publicadas e respeita a ordem definida no Admin.
+CORREÇÕES:
+1. Admin Quem Somos usa o mesmo cliente Supabase já criado pelo script principal (ProtegeApp lexical), removendo o erro causado por window.ProtegeApp inexistente.
+2. Validação do perfil Admin feita pela sessão atual + usuarios_perfis.
+3. Quem Somos agora é item próprio no menu Admin; Conteúdos não fica mais marcado indevidamente.
+4. Corrigido HTML <head> duplicado e título da página administrativa.
+5. Página pública refeita com a identidade visual da referência fornecida: creme, terracota, verde, carvão, tipografia serifada, blocos e CTAs.
+6. Conteúdo público utiliza os textos/ideias visíveis na referência fornecida (Fortalecendo famílias..., Educação Parental, Transparência/SERMEP, 4 etapas) e mantém a equipe dinâmica cadastrada no Admin.
+7. CRUD preservado: foto, nome, posição/cargo, biografia, redes sociais, ordem e publicado.
 
-BANCO DE DADOS — OBRIGATÓRIO
-1. Antes de usar o cadastro, execute no SQL Editor do Supabase:
-   supabase-v13.24.30-quem-somos.sql
-2. Depois publique todos os demais arquivos deste ZIP na raiz do GitHub, substituindo os existentes.
+TESTES:
+- Suíte completa: 1028/1028 APROVADOS.
+- Testes específicos V13.24.31: 12/12 aprovados.
+- Sintaxe JavaScript: APROVADA.
+- Integração no Supabase de produção: PENDENTE DE TESTE APÓS PUBLICAÇÃO.
 
-TESTES
-- Suíte completa + regressões: 1010/1010 aprovados.
-- CRUD, publicação, redes sociais, upload de foto, menu público/admin e RLS: aprovados por testes automatizados.
-- Sintaxe dos novos JS: aprovada.
-- Integração real no Supabase de produção: PENDENTE após executar o SQL/publicar.
+SQL:
+- Se o SQL da V13.24.30 JÁ foi executado, NÃO precisa executar novamente.
+- Se ainda NÃO foi executado, execute supabase-v13.24.30-quem-somos.sql antes de usar o CRUD.
+
+Publique todos os arquivos deste ZIP na raiz do GitHub, substituindo os existentes.
