@@ -1,17 +1,14 @@
-PROTEGE V13.24.27 — COUNT DIRETO NO BANCO
+PROTEGE V13.24.28 — ADMIN CONTADORES + ALERTA
 
-A cada carregamento/refresh:
-- familias_interessadas: COUNT status='novo'
-- adolescentes_interessados: COUNT status='novo'
-- pre_cadastro_profissionais: COUNT status IN ('pendente','em_analise')
-O Dashboard também conta diretamente os pré-cadastros profissionais.
+- Ao identificar perfil Admin, carrega imediatamente os contadores.
+- F5/refresh/pageshow executa nova consulta.
+- Famílias/adolescentes: COUNT direto.
+- Profissionais: COUNT server-side autorizado pending-pre-count (mesma fonte da tela que já retorna os pendentes; evita RLS do navegador).
+- O grupo Cadastros recebe alerta rosa com o total de pendências.
+- Removido o segundo controlador de badges de v13140.js para não haver sobrescrita.
 
-TESTES ANTES DA GERAÇÃO:
-- Suíte completa: 910 / 910 aprovados.
-- 3 consultas COUNT diretas verificadas.
-- Sintaxe JS aprovada.
-- Cache padronizado em v=132427.
-- Integração real com Supabase de produção: PENDENTE DE TESTE NO SUPABASE.
+TESTES: 916/916 aprovados; sintaxe JS aprovada; testes específicos de bootstrap Admin, refresh, 3 contagens, alerta e não concorrência aprovados.
+Supabase produção: PENDENTE DE TESTE NO AMBIENTE PUBLICADO.
 
-Não requer SQL.
+Não requer SQL nem nova Edge Function.
 Publique TODOS os arquivos deste ZIP na raiz do GitHub, substituindo os existentes.

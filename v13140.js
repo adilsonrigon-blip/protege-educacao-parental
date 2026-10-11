@@ -6,41 +6,6 @@ const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmt=v=>{if(!v)return '—';try{return new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short'}).format(new Date(v))}catch{return String(v)}};
 async function client(){return window.ProtegeApp?.db||null}
 async function getAdminProfile(){try{const db=await client();if(!db)return null;const {data:{session}}=await db.auth.getSession();if(!session)return null;const {data}=await db.from('usuarios_perfis').select('perfil,ativo').eq('user_id',session.user.id).maybeSingle();return data}catch{return null}}
-async function pendingBadge(){
-  const professionalLink=qa('.sidebar nav a').find(a=>a.getAttribute('href')==='pre-cadastro-profissionais.html');
-  const adolescentLink=qa('.sidebar nav a').find(a=>a.getAttribute('href')==='adolescentes-interessados.html');
-  if(!professionalLink&&!adolescentLink)return;
-
-  const ensureBadge=(link,id,extraClass='')=>{
-    if(!link)return null;
-    let badge=id?q('#'+id,link):null;
-    if(!badge){badge=document.createElement('span');if(id)badge.id=id;badge.className=('nav-badge '+extraClass).trim();badge.textContent='0';link.appendChild(badge)}
-    badge.hidden=false;
-    return badge;
-  };
-  const professionalBadge=ensureBadge(professionalLink,'sidebarProfessionalPreCount','pending-badge');
-  const adolescentBadge=ensureBadge(adolescentLink,'sidebarAdolescentLeadCount','adolescent-pending-badge');
-
-  try{
-    const profile=await getAdminProfile();
-    if(profile?.perfil!=='admin'||!profile?.ativo){if(professionalBadge)professionalBadge.hidden=true;if(adolescentBadge)adolescentBadge.hidden=true;return}
-    const db=await client();if(!db)return;
-    const jobs=[];
-    if(professionalBadge)jobs.push((async()=>{
-      const {data,error}=await db.functions.invoke('administrar-profissional',{body:{action:'pending-pre-count'}});
-      if(error)throw error;if(data?.error)throw new Error(data.error);
-      professionalBadge.textContent=String(Number(data?.count||0));professionalBadge.hidden=false;
-    })());
-    if(adolescentBadge)jobs.push((async()=>{
-      const {count,error}=await db.from('adolescentes_interessados').select('id',{count:'exact',head:true}).eq('status','novo');
-      if(error)throw error;
-      adolescentBadge.textContent=String(Number(count||0));adolescentBadge.hidden=false;
-    })());
-    const results=await Promise.allSettled(jobs);
-    results.forEach(r=>{if(r.status==='rejected')console.warn('Protege: não foi possível atualizar um contador de pendências.',r.reason)});
-  }catch(err){console.warn('Protege: não foi possível atualizar os contadores de pendências.',err)}
-}
-window.ProtegeRefreshPendingBadges=pendingBadge;
 function ensureAuditNav(){const nav=q('.sidebar nav');if(!nav)return;const exists=qa('a',nav).some(a=>a.getAttribute('href')==='auditoria.html');if(exists)return;const a=document.createElement('a');a.href='auditoria.html';a.textContent='Auditoria';const rel=qa('a',nav).find(x=>x.getAttribute('href')==='relatorios.html');rel?.after(a)||nav.appendChild(a)}
 function localPager(tableSelector,pageSize=25){
  const table=q(tableSelector);if(!table)return;const tbody=q('tbody',table);if(!tbody)return;const host=document.createElement('div');host.className='protege-pagination';table.parentElement?.after(host);let page=1,observer;
@@ -48,8 +13,8 @@ function localPager(tableSelector,pageSize=25){
  function apply(){const all=rows();const pages=Math.max(1,Math.ceil(all.length/pageSize));page=Math.min(page,pages);all.forEach((r,i)=>r.hidden=!(i>=(page-1)*pageSize&&i<page*pageSize));host.hidden=all.length<=pageSize;host.innerHTML=all.length?`<button class="small-btn" data-p="prev" ${page<=1?'disabled':''}>← Anterior</button><span>Página <strong>${page}</strong> de ${pages} · ${all.length} registro(s)</span><button class="small-btn" data-p="next" ${page>=pages?'disabled':''}>Próxima →</button>`:'';}
  host.addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b||b.disabled)return;page+=b.dataset.p==='next'?1:-1;apply()});observer=new MutationObserver(()=>{page=1;apply()});observer.observe(tbody,{childList:true});setTimeout(apply,400);
 }
-async function dashboardEnhance(){const box=q('#dashboardV13140');if(!box)return;try{const db=await client();const [{data,error},{count:preCount,error:preError}]=await Promise.all([db.rpc('protege_dashboard_metricas'),db.from('pre_cadastro_profissionais').select('id',{count:'exact',head:true}).in('status',['pendente','em_analise'])]);if(error)throw error;if(preError)throw preError;const d=data||{};d.pre_cadastros_pendentes=Number(preCount||0);['familias_mes','profissionais_ativos','pre_cadastros_pendentes','atendimentos_mes'].forEach(k=>{const el=q(`[data-metric="${k}"]`);if(el)el.textContent=Number(d[k]||0)});const chart=q('#monthlyAttendanceChart');const max=Math.max(1,...(d.serie_mensal||[]).map(x=>Number(x.total||0)));chart.innerHTML=(d.serie_mensal||[]).map(x=>{const [y,m]=String(x.mes).split('-');const label=new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(new Date(Number(y),Number(m)-1,1)).replace('.','');const pct=Math.max(3,Math.round(Number(x.total||0)/max*100));return `<div class="monthly-bar-wrap"><b>${Number(x.total||0)}</b><div class="monthly-bar" style="height:${pct}%"></div><small>${esc(label)}</small></div>`}).join('')||'<div class="empty-state">Sem dados para o período.</div>';}catch(e){q('#monthlyAttendanceChart').innerHTML='<div class="empty-state">Execute a migração SQL V13.14.0 para ativar as métricas avançadas.</div>';}}
+async function dashboardEnhance(){const box=q('#dashboardV13140');if(!box)return;try{const db=await client();const {data,error}=await db.rpc('protege_dashboard_metricas');if(error)throw error;const d=data||{};['familias_mes','profissionais_ativos','pre_cadastros_pendentes','atendimentos_mes'].forEach(k=>{const el=q(`[data-metric="${k}"]`);if(el)el.textContent=Number(d[k]||0)});const chart=q('#monthlyAttendanceChart');const max=Math.max(1,...(d.serie_mensal||[]).map(x=>Number(x.total||0)));chart.innerHTML=(d.serie_mensal||[]).map(x=>{const [y,m]=String(x.mes).split('-');const label=new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(new Date(Number(y),Number(m)-1,1)).replace('.','');const pct=Math.max(3,Math.round(Number(x.total||0)/max*100));return `<div class="monthly-bar-wrap"><b>${Number(x.total||0)}</b><div class="monthly-bar" style="height:${pct}%"></div><small>${esc(label)}</small></div>`}).join('')||'<div class="empty-state">Sem dados para o período.</div>';}catch(e){q('#monthlyAttendanceChart').innerHTML='<div class="empty-state">Execute a migração SQL V13.14.0 para ativar as métricas avançadas.</div>';}}
 function contentTools(){const page=q('#testimonialsAdminPanel');if(!page)return;const tabs=q('.content-admin-tabs');if(!tabs)return;const toolbar=document.createElement('div');toolbar.className='content-v13140-toolbar';toolbar.innerHTML='<input id="contentGlobalSearch" class="table-search" type="search" placeholder="Buscar nos conteúdos"><select id="contentStatusFilter" class="table-filter"><option value="">Todos os status</option><option value="published">Publicados</option><option value="draft">Não publicados</option></select>';tabs.after(toolbar);const search=q('#contentGlobalSearch'),status=q('#contentStatusFilter');function filter(){const term=search.value.trim().toLowerCase();qa('.content-admin-item').forEach(el=>{const text=el.textContent.toLowerCase();const isPublished=/publicad/i.test(text)&&!/não publicad/i.test(text);el.hidden=!!term&&!text.includes(term)||status.value==='published'&&!isPublished||status.value==='draft'&&isPublished})}search.addEventListener('input',filter);status.addEventListener('change',filter)}
 async function auditPage(){const tbody=q('#auditTable tbody');if(!tbody)return;const search=q('#auditSearch'),tableFilter=q('#auditTableFilter'),actionFilter=q('#auditActionFilter'),pager=q('#auditPagination');let page=1,total=0;const pageSize=30;async function load(){tbody.innerHTML='<tr><td colspan="6" class="empty-state">Carregando...</td></tr>';try{const profile=await getAdminProfile();if(profile?.perfil!=='admin')throw new Error('Acesso exclusivo para administradores.');const db=await client();let query=db.from('auditoria_eventos').select('*',{count:'exact'}).order('created_at',{ascending:false});if(tableFilter.value)query=query.eq('tabela',tableFilter.value);if(actionFilter.value)query=query.eq('acao',actionFilter.value);const term=search.value.trim().replace(/[,%()]/g,' ');if(term)query=query.or(`tabela.ilike.%${term}%,registro_id.ilike.%${term}%,realizado_por_email.ilike.%${term}%`);const from=(page-1)*pageSize;const {data,error,count}=await query.range(from,from+pageSize-1);if(error)throw error;total=count||0;tbody.innerHTML=(data||[]).length?(data||[]).map(x=>`<tr><td>${esc(fmt(x.created_at))}</td><td><b>${esc(x.acao)}</b></td><td>${esc(x.tabela)}<small>${esc(x.registro_id||'—')}</small></td><td>${esc(x.realizado_por_email||'Sistema')}</td><td>${esc(x.origem||'—')}</td><td class="audit-change">${x.dados_anteriores?'<details><summary>Ver alteração</summary><code>'+esc(JSON.stringify({antes:x.dados_anteriores,depois:x.dados_novos},null,2))+'</code></details>':'—'}</td></tr>`).join(''):'<tr><td colspan="6" class="empty-state">Nenhum evento encontrado.</td></tr>';renderPager()}catch(e){tbody.innerHTML=`<tr><td colspan="6" class="empty-state">${esc(e.message||'Não foi possível carregar a auditoria.')}</td></tr>`}}function renderPager(){const pages=Math.max(1,Math.ceil(total/pageSize));pager.innerHTML=`<button class="small-btn" data-audit="prev" ${page<=1?'disabled':''}>← Anterior</button><span>Página <strong>${page}</strong> de ${pages} · ${total} evento(s)</span><button class="small-btn" data-audit="next" ${page>=pages?'disabled':''}>Próxima →</button>`}let timer;search.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{page=1;load()},300)});[tableFilter,actionFilter].forEach(x=>x.addEventListener('change',()=>{page=1;load()}));pager.addEventListener('click',e=>{const b=e.target.closest('[data-audit]');if(!b||b.disabled)return;page+=b.dataset.audit==='next'?1:-1;load()});load()}
-document.addEventListener('DOMContentLoaded',()=>{ensureAuditNav();pendingBadge();dashboardEnhance();contentTools();auditPage();});
+document.addEventListener('DOMContentLoaded',()=>{ensureAuditNav();dashboardEnhance();contentTools();auditPage();});
 })();

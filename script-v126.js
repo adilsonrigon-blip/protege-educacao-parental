@@ -496,6 +496,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('form').forEach(bindCepAutoFill);
   await ProtegeApp.requireAuth();
   const currentAccessProfile = await initAdminNavigationAndGuard();
+  if (currentAccessProfile?.perfil === 'admin' && currentAccessProfile?.ativo !== false) {
+    window.PROTEGE_ADMIN_READY = true;
+    document.dispatchEvent(new CustomEvent('protege:admin-ready',{detail:{profile:currentAccessProfile}}));
+  }
   if (document.body.dataset.requiresAdmin && currentAccessProfile?.perfil !== 'admin') return;
   if (document.getElementById('professionalGreeting')) await updateProfessionalGreeting();
 

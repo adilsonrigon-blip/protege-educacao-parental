@@ -27,3 +27,9 @@
   .banner-carousel-arrow.next{right:6px!important}
   .home-banner-copy{padding-left:48px!important;padding-right:25px!important}
 }
+
+/* V13.24.28 — alerta global de pendências no grupo Cadastros */
+.sidebar-group>summary{display:flex!important;align-items:center!important;gap:8px!important}
+.cadastro-alert-badge{margin-left:auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#f5488b;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;box-shadow:0 0 0 3px rgba(245,72,139,.14)}
+.cadastro-alert-badge[hidden]{display:none!important}
+.sidebar-group.has-pending>summary{font-weight:800}
