@@ -1,1 +1,5 @@
-PROTEGE V13.24.37 - Editor. Teste Chromium local: carregar HTML normal/negrito/italico, selecionar e formatar, sincronizar campo, reabrir, renderizar: PASSOU. Python: 1122 testes PASSOU. npm test PASSOU. JS: 26/26 PASSOU. Supabase real: NAO TESTADO. Artigos ja salvos com formatacao indevida precisam ser corrigidos e salvos. SQL: nao requer. Substituir 3 arquivos na raiz do GitHub.
+PROTEGE V13.24.38
+Substitua/adicione os 3 arquivos na raiz do repositorio GitHub.
+Mudanca: formulario de publicacoes integrado ao corpo da pagina, no padrao Quem Somos, sem janela modal.
+Validacao: Chromium abertura, fechamento, posicao e largura PASSOU. Python 1125 testes PASSOU. npm 1040 testes PASSOU.
+Nao altera banco de dados ou dados publicados.

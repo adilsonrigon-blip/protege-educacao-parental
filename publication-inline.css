@@ -1,0 +1,29 @@
+/* Editor de publicação no padrão do cadastro Quem Somos. */
+#publicationDialog.publication-inline-editor{
+  position:static!important;inset:auto!important;transform:none!important;
+  margin:18px 0 24px!important;width:100%!important;max-width:none!important;
+  max-height:none!important;overflow:visible!important;padding:0!important;
+  border:1px solid #eee4f0!important;border-radius:18px!important;
+  background:#fff!important;box-shadow:none!important;color:inherit!important;
+}
+#publicationDialog.publication-inline-editor:not([open]){display:none!important}
+#publicationDialog.publication-inline-editor[open]{display:block!important}
+#publicationDialog.publication-inline-editor::backdrop{display:none!important}
+#publicationDialog .create-dialog-shell{display:block!important;max-height:none!important;overflow:visible!important;padding:24px!important}
+#publicationDialog .dialog-head{position:static!important;padding:0!important;margin:0 0 20px!important;
+  border:0!important;background:transparent!important;align-items:flex-start!important}
+#publicationDialog .dialog-head h2{font-size:22px!important}
+#publicationDialog .publication-inline-description{margin:9px 0 0!important}
+#publicationDialog .content-form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px 22px!important;padding:0!important;overflow:visible!important;max-height:none!important}
+#publicationDialog .content-form label{min-width:0!important}
+#publicationDialog .content-form .full-field{grid-column:1/-1!important}
+#publicationDialog .content-form-actions{position:static!important;grid-column:1/-1!important;
+  display:flex!important;justify-content:flex-end!important;margin:12px -24px -24px!important;
+  padding:18px 24px!important;border-top:1px solid #eee6f1!important;background:#fff!important}
+#publicationDialog .protege-wysiwyg{max-width:100%!important}
+#publicationDialog .protege-wysiwyg-surface{min-height:230px!important;max-height:none!important;overflow:visible!important}
+@media(max-width:700px){
+ #publicationDialog .content-form{grid-template-columns:minmax(0,1fr)!important}
+ #publicationDialog .content-form-actions{flex-direction:column-reverse!important}
+ #publicationDialog .content-form-actions .btn{width:100%!important}
+}
