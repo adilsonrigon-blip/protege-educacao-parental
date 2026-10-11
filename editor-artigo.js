@@ -54,5 +54,53 @@ function addEditor(area){
  bar.addEventListener('click',e=>{const b=e.target.closest('button[data-format]');if(b)apply(b.dataset.format)});
  bar.addEventListener('change',e=>{const sel=e.target.closest('select[data-format]');if(sel){apply(sel.dataset.format,sel.value);sel.value=''}});
 }
-document.querySelectorAll('form textarea').forEach(addEditor);
+// WYSIWYG only for the publication body. Other forms remain plain text until their viewers support rich HTML.
+function wysiwyg(area){
+ const shell=document.createElement('div');shell.className='protege-wysiwyg';
+ const toolbar=document.createElement('div');toolbar.className='protege-wysiwyg-toolbar';toolbar.setAttribute('role','toolbar');toolbar.setAttribute('aria-label','Formatação do artigo');
+ const surface=document.createElement('div');surface.className='protege-wysiwyg-surface';surface.contentEditable='true';surface.setAttribute('role','textbox');surface.setAttribute('aria-multiline','true');surface.setAttribute('aria-label','Texto completo do artigo');
+ let savedRange=null;surface.addEventListener('mouseup',()=>{const sel=window.getSelection();if(sel.rangeCount)savedRange=sel.getRangeAt(0).cloneRange()});surface.addEventListener('keyup',()=>{const sel=window.getSelection();if(sel.rangeCount)savedRange=sel.getRangeAt(0).cloneRange()});function restore(){if(!savedRange)return;const sel=window.getSelection();sel.removeAllRanges();sel.addRange(savedRange)}
+ const buttons=[['bold','Negrito','N'],['italic','Itálico','I'],['underline','Sublinhado','S'],['insertUnorderedList','Lista','☷'],['removeFormat','Limpar','Limpar']];
+ for(const [cmd,title,label] of buttons){const b=document.createElement('button');b.type='button';b.title=title;b.setAttribute('aria-label',title);b.textContent=label;b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>{surface.focus();restore();document.execCommand(cmd,false,null);sync()});toolbar.appendChild(b)}
+ function selector(label,choices,command){const sel=document.createElement('select');sel.setAttribute('aria-label',label);for(const [v,t] of choices){const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}sel.addEventListener('change',()=>{if(!sel.value)return;surface.focus();restore();document.execCommand(command,false,sel.value);sync();sel.selectedIndex=0});toolbar.appendChild(sel)}
+ selector('Tamanho',[['','Tamanho'],['2','Pequeno'],['3','Normal'],['4','Grande'],['5','Título']],'fontSize');
+ selector('Fonte',[['','Fonte'],['Arial','Arial'],['Georgia','Georgia'],['Verdana','Verdana']],'fontName');
+ selector('Cor',[['','Cor'],['#7a3fa0','Roxo'],['#f5488b','Rosa'],['#268b88','Verde-água'],['#332b3a','Escuro']],'foreColor');
+ const link=document.createElement('button');link.type='button';link.textContent='Link';link.addEventListener('mousedown',e=>e.preventDefault());link.addEventListener('click',()=>{const url=prompt('Endereço do link (https://...)');if(url&&/^https:\/\/[^\s]+$/i.test(url)){surface.focus();restore();document.execCommand('createLink',false,url);sync()}});toolbar.appendChild(link);
+ shell.append(toolbar,surface);area.parentNode.insertBefore(shell,area);area.classList.add('protege-wysiwyg-source');
+ let last='';function load(){if(area.value===last)return;last=area.value;surface.innerHTML=toEditable(last)}
+ function sync(){const html=surface.innerHTML;last=html;area.value=html;area.dispatchEvent(new Event('input',{bubbles:true}))}
+ surface.addEventListener('input',sync);
+ area.addEventListener('change',load);
+ const observer=new MutationObserver(()=>{if(document.activeElement!==surface)load()});observer.observe(area,{attributes:true,attributeFilter:['value']});
+ const dialog=area.closest('dialog');if(dialog){dialog.addEventListener('close',load);dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-create-dialog]'))load()})}
+ const form=area.closest('form');if(form)form.addEventListener('submit',sync,true);
+ // Existing edit forms fill textarea.value programmatically; refresh when dialog is opened.
+ if(dialog)new MutationObserver(()=>{if(dialog.open)queueMicrotask(load)}).observe(dialog,{attributes:true,attributeFilter:['open']});
+ load();
+}
+function toEditable(value){
+ if(/^\s*</.test(value))return sanitize(value);
+ return render(value).replace(/<br>/g,'<br>');
+}
+function sanitize(value){
+ const root=document.createElement('div');root.innerHTML=String(value||'');
+ const allowed=new Set(['B','STRONG','I','EM','U','BR','P','DIV','SPAN','UL','OL','LI','H2','H3','A','FONT']);
+ const walk=node=>{for(const child of [...node.childNodes]){
+ if(child.nodeType===8){child.remove();continue}
+ if(child.nodeType!==1)continue;
+ if(!allowed.has(child.tagName)){const text=document.createTextNode(child.textContent||'');child.replaceWith(text);continue}
+ for(const a of [...child.attributes]){const k=a.name.toLowerCase(),v=a.value;
+ if(k==='href'&&child.tagName==='A'&&/^https:\/\/[^\s]+$/i.test(v))continue;
+ if(k==='color'&&child.tagName==='FONT'&&/^#[0-9a-f]{6}$/i.test(v))continue;
+ if(k==='face'&&child.tagName==='FONT'&&['Arial','Georgia','Verdana'].includes(v))continue;
+ if(k==='size'&&child.tagName==='FONT'&&/^[2-5]$/.test(v))continue;
+ if(k==='style'&&child.tagName==='SPAN'&&/^(?:color:\s*#[0-9a-f]{6}|font-family:\s*(?:Arial|Georgia|Verdana)|font-size:\s*(?:0\.85em|1\.2em))\s*;?$/i.test(v))continue;
+ child.removeAttribute(a.name)
+ }walk(child)
+ }};walk(root);return root.innerHTML;
+}
+const oldRender=render;
+window.ProtegeRichText.render=value=>/^\s*</.test(String(value||''))?sanitize(value):oldRender(value);
+document.querySelectorAll('form textarea[name="conteudo"]').forEach(wysiwyg);
 })();
