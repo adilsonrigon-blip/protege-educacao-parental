@@ -1,0 +1,30 @@
+/* PROTEJE — padronização de leitura v13.24.7
+   Somente parágrafos narrativos; preserva menus, formulários, banners e botões. */
+@media (min-width: 701px) {
+  main p:not(.section-label):not(.eyebrow):not(.badge):not(.tag):not(.status):not(.error):not(.success),
+  article p:not(.section-label):not(.eyebrow):not(.badge):not(.tag):not(.status),
+  .rich-text p, .article-body p, .conteudo p, .texto-conteudo p {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    line-height: 1.65;
+  }
+  /* Textos curtos de destaque não devem ganhar espaços artificiais. */
+  .hero p, .home-banner-copy p, .banner-carousel p,
+  .cta-section p, .home-testimonials-carousel p,
+  .section-heading p, .public-content-loading p,
+  .form-group p, .field-hint p, .alert p, .toast p,
+  nav p, header p, footer p {
+    text-align: inherit;
+  }
+}
+@media (max-width: 700px) {
+  main p, article p, .rich-text p, .article-body p,
+  .conteudo p, .texto-conteudo p {
+    text-align: left;
+    hyphens: none;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+  }
+}
