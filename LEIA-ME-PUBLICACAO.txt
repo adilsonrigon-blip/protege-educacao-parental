@@ -1,25 +1,17 @@
-PROTEGE V13.24.34 — QUEM SOMOS APROVADO
+PROTEGE V13.24.35 — REGRESSÕES CORRIGIDAS (ATUALIZADA)
 
-ALTERAÇÕES
-- Quem Somos implementado conforme o mockup visual aprovado.
-- Identidade visual PROTEGE preservada pela base style.css e menu global.
-- Conteúdo aprovado: Educação Parental, SERMEP/PROTEGE, Ana Paula Alves, 4 etapas, benefícios, equipe e jornadas.
-- Pessoas cadastradas no Admin continuam carregadas dinamicamente do Supabase.
-- Admin Quem Somos agora usa formulário INLINE em painel/card, no padrão das demais telas administrativas; não usa modal lateral.
-- Travessia mantém Quem Somos no menu.
+Inclui a foto real enviada da fundadora Ana Paula Alves na seção correspondente do Quem Somos.
+Mantém as correções do formulário Admin e do menu da Travessia.
 
-TESTES EXECUTADOS ANTES DA GERAÇÃO
-- JavaScript: 25/25 arquivos aprovados no node --check.
-- Python: 1051/1051 testes aprovados.
+TESTES
+- Teste específico da foto: arquivo empacotado, referência HTML, alt e object-fit validados.
+- Testes específicos V13.24.35: 13/13 aprovados.
+- Suíte Python completa: 1053/1053 aprovada.
 - npm test: aprovado.
-- Testes específicos de conteúdo, identidade, menu, CRUD, formulário inline e responsividade: aprovados.
-- Verificações finais de efeito crítico: aprovadas.
+- JavaScript alterado: sintaxe aprovada.
 
 SQL
 Não requer SQL novo.
 
-LIMITAÇÃO
-A integração real com o Supabase e a renderização no domínio publicado dependem do deploy no GitHub e não foram classificadas como testadas em produção.
-
 DEPLOY
-Copie todos os arquivos deste ZIP para a raiz do repositório GitHub, substituindo os existentes.
+Envie todos os arquivos deste ZIP para a raiz do GitHub, substituindo os existentes.
