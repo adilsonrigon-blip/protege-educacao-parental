@@ -1,39 +1,25 @@
-PROTEGE V13.24.33 — MODAL QUEM SOMOS
+PROTEGE V13.24.34 — QUEM SOMOS APROVADO
 
-CORREÇÃO PRINCIPAL
-O modal "Nova pessoa" estava usando classes próprias (dialog-card/form-grid/dialog-actions) que NÃO correspondiam às classes estilizadas pelo componente padrão do Admin.
+ALTERAÇÕES
+- Quem Somos implementado conforme o mockup visual aprovado.
+- Identidade visual PROTEGE preservada pela base style.css e menu global.
+- Conteúdo aprovado: Educação Parental, SERMEP/PROTEGE, Ana Paula Alves, 4 etapas, benefícios, equipe e jornadas.
+- Pessoas cadastradas no Admin continuam carregadas dinamicamente do Supabase.
+- Admin Quem Somos agora usa formulário INLINE em painel/card, no padrão das demais telas administrativas; não usa modal lateral.
+- Travessia mantém Quem Somos no menu.
 
-Agora ele usa exatamente o contrato visual já existente:
-- create-dialog-shell
-- content-form
-- full-field
-- check-field
-- content-form-actions
-
-Com isso, passam a valer os estilos já existentes do Admin para:
-- largura controlada do painel;
-- grade de duas colunas no desktop;
-- uma coluna no mobile;
-- inputs, textarea e URLs;
-- botão Escolher arquivo;
-- checkbox Publicado;
-- rodapé de ações;
-- espaçamentos e alinhamentos.
-
-REGRESSÕES PRESERVADAS
-- Quem Somos público mantém CSS base da Home.
-- Travessia mantém o item Quem Somos.
-- Correção Supabase/Admin preservada.
-
-TESTES
-- Suíte Python completa: 1049/1049 aprovada.
+TESTES EXECUTADOS ANTES DA GERAÇÃO
+- JavaScript: 25/25 arquivos aprovados no node --check.
+- Python: 1051/1051 testes aprovados.
 - npm test: aprovado.
-- Todos os JavaScripts: sintaxe aprovada.
-- Testes específicos do modal e contrato visual incluídos.
-- Tentativa de renderização headless com Chromium foi feita, mas o Chromium do ambiente não conseguiu produzir screenshot; portanto não estou classificando screenshot/browser real como aprovado.
+- Testes específicos de conteúdo, identidade, menu, CRUD, formulário inline e responsividade: aprovados.
+- Verificações finais de efeito crítico: aprovadas.
 
 SQL
-Não requer novo SQL.
+Não requer SQL novo.
 
-PUBLICAÇÃO
-Substitua todos os arquivos deste ZIP na raiz do GitHub.
+LIMITAÇÃO
+A integração real com o Supabase e a renderização no domínio publicado dependem do deploy no GitHub e não foram classificadas como testadas em produção.
+
+DEPLOY
+Copie todos os arquivos deste ZIP para a raiz do repositório GitHub, substituindo os existentes.
