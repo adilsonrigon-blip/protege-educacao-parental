@@ -71,3 +71,6 @@
  .team-editor .content-form-actions{flex-direction:column-reverse}
  .team-editor .content-form-actions .btn{width:100%}
 }
+
+.team-photo-field .field-help{display:block;margin-top:2px;color:#756c7c;font-size:11px;font-weight:500;line-height:1.45}
+.team-photo-field .field-help.is-error{color:#b42318;font-weight:700}

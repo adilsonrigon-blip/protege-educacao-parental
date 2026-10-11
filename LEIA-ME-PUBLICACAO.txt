@@ -1,17 +1,23 @@
-PROTEGE V13.24.35 — REGRESSÕES CORRIGIDAS (ATUALIZADA)
+PROTEGE V13.24.35 — MENU ÚNICO + FOTO VALIDADA
 
-Inclui a foto real enviada da fundadora Ana Paula Alves na seção correspondente do Quem Somos.
-Mantém as correções do formulário Admin e do menu da Travessia.
+MENU ÚNICO
+- 10/10 páginas públicas usam exatamente o mesmo header.
+- Itens e ordem fixos: Educação Parental, Como funciona, Benefícios, Travessia, Quem Somos, Notícias & eventos, Contato, Cadastre-se, Área do profissional.
+- Classes canônicas do PROTEGE: menu-toggle, main-nav, nav-login.
+- Mesmo style.css e menu-protege-v132420.css.
+- Comportamento mobile validado.
+
+ADMIN QUEM SOMOS
+- Mantida orientação/validação da foto: JPG/PNG/WEBP, vertical 3:4, 600x800 a 1800x2400 px, até 5 MB.
 
 TESTES
-- Teste específico da foto: arquivo empacotado, referência HTML, alt e object-fit validados.
-- Testes específicos V13.24.35: 13/13 aprovados.
-- Suíte Python completa: 1053/1053 aprovada.
+- Menu: 9/9.
+- Regressões: 13/13.
+- Foto: 4/4.
+- Suíte completa: 1082/1082.
+- JavaScript: 25/25.
 - npm test: aprovado.
-- JavaScript alterado: sintaxe aprovada.
+- Verificação final independente: 10/10 headers idênticos.
 
-SQL
-Não requer SQL novo.
-
-DEPLOY
-Envie todos os arquivos deste ZIP para a raiz do GitHub, substituindo os existentes.
+SQL: não requer.
+Produção/Supabase: pendente de validação após deploy.
