@@ -87,3 +87,11 @@
 .qs-steps-card{position:relative;z-index:3;margin-right:120px}
 @media(max-width:1100px){.qs-hero-family{right:-45px;width:35%}.qs-steps-card{margin-right:70px}}
 @media(max-width:900px){.qs-hero-family{display:none}.qs-steps-card{margin-right:0}.qs-hero-grid{grid-template-columns:1fr}.qs-hero{background:linear-gradient(135deg,#fffaf2,#f5edf8)}}
+
+/* V13.24.10: melhoria discreta de legibilidade, sem alterar o layout */
+.qs-page .qs-copy>p,.qs-page .qs-two-col>p{font-size:17px}
+.qs-page .qs-steps-card small{font-size:12.5px;line-height:1.5}
+.qs-page .qs-trust-grid p,.qs-page .qs-team .team-bio{font-size:14px;line-height:1.65}
+.qs-page .qs-lead{font-size:15px;line-height:1.7}
+.qs-page .qs-how-grid p,.qs-page .qs-benefit-grid p,.qs-page .qs-path-grid p{font-size:13.5px;line-height:1.6}
+@media(max-width:650px){.qs-page .qs-copy>p,.qs-page .qs-two-col>p{font-size:16px}}
