@@ -1,0 +1,18 @@
+/* V13.24.20 — navegação responsiva global PROTEGE */
+@media (min-width:901px){
+  .site-header .nav-wrap{width:min(1440px,calc(100% - 40px));gap:20px}
+  .site-header .brand{flex:0 0 auto}
+  .site-header .brand img{width:125px}
+  .site-header .main-nav{flex:1 1 auto;justify-content:flex-end;gap:clamp(10px,1.15vw,19px);font-size:13px}
+  .site-header .main-nav a{white-space:nowrap;flex:0 0 auto}
+  .site-header .main-nav .nav-login{padding:9px 12px}
+}
+/* Aciona o menu compacto ANTES de faltar espaço para os oito links. */
+@media (max-width:1279px){
+  .site-header .menu-toggle{display:block;cursor:pointer}
+  .site-header .main-nav{display:none}
+  .site-header .main-nav.open{display:flex;position:absolute;left:0;right:0;top:78px;background:#fff;padding:20px;flex-direction:column;align-items:stretch;gap:12px;border-bottom:1px solid var(--line,#e9e1ed);max-height:calc(100dvh - 78px);overflow-y:auto;white-space:normal;box-shadow:0 16px 30px rgba(40,25,50,.09)}
+  .site-header .main-nav.open a{white-space:normal;width:100%;padding:9px 12px}
+  .site-header .nav-wrap{width:min(1120px,calc(100% - 40px));height:78px}
+  .site-header .brand img{width:135px}
+}

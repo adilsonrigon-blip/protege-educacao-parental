@@ -1,0 +1,7 @@
+Suite completa: python -m unittest -q tests.test_full_platform
+----------------------------------------------------------------------
+Ran 894 tests in 0.544s
+
+OK
+
+Observação: testes automatizados de contrato e referências; validação visual em navegador e Supabase de produção não executadas.
