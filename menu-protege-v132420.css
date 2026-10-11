@@ -16,3 +16,9 @@
   .site-header .nav-wrap{width:min(1120px,calc(100% - 40px));height:78px}
   .site-header .brand img{width:135px}
 }
+
+/* V13.24.35 - Logo alinhado sem sobreposição */
+.site-header .nav-wrap{min-height:78px;box-sizing:border-box;align-items:center}
+.site-header .brand{height:78px;display:flex;align-items:center;justify-content:center;align-self:center;overflow:hidden;background:transparent;flex-shrink:0}
+.site-header .brand img{display:block;width:auto;max-width:125px;max-height:62px;height:auto;object-fit:contain;margin:0;position:static;transform:none}
+@media(max-width:1279px){.site-header .brand img{max-width:125px;max-height:62px}}
