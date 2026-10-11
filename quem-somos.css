@@ -95,3 +95,12 @@
 .qs-page .qs-lead{font-size:15px;line-height:1.7}
 .qs-page .qs-how-grid p,.qs-page .qs-benefit-grid p,.qs-page .qs-path-grid p{font-size:13.5px;line-height:1.6}
 @media(max-width:650px){.qs-page .qs-copy>p,.qs-page .qs-two-col>p{font-size:16px}}
+
+/* V13.24.11: leitura mais confortável na página Quem Somos */
+.qs-page .qs-copy>p,.qs-page .qs-two-col>p{font-size:18px;line-height:1.75}
+.qs-page .qs-steps-card small{font-size:13.5px}
+.qs-page .qs-trust-grid p,.qs-page .qs-team .team-bio{font-size:15px}
+.qs-page .qs-lead{font-size:16px}
+.qs-page .qs-how-grid p,.qs-page .qs-benefit-grid p,.qs-page .qs-path-grid p{font-size:14.5px;line-height:1.65}
+.qs-page .qs-center>p,.qs-page .qs-founder-meta{font-size:15px;line-height:1.65}
+@media(max-width:650px){.qs-page .qs-copy>p,.qs-page .qs-two-col>p{font-size:17px}}
