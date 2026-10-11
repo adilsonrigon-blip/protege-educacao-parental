@@ -76,10 +76,10 @@ function wysiwyg(area){
  toolbar.appendChild(colorGroup);
  const link=document.createElement('button');link.type='button';link.textContent='Link';link.addEventListener('mousedown',e=>e.preventDefault());link.addEventListener('click',()=>{const url=prompt('Endereço do link (https://...)');if(url&&/^https:\/\/[^\s]+$/i.test(url)){surface.focus();restore();document.execCommand('createLink',false,url);sync()}});toolbar.appendChild(link);
  shell.append(toolbar,surface);area.parentNode.insertBefore(shell,area);area.classList.add('protege-wysiwyg-source');
- let last='';function load(){if(area.value===last)return;last=area.value;surface.innerHTML=toEditable(last)}
- function sync(){const html=surface.innerHTML;last=html;area.value=html;area.dispatchEvent(new Event('input',{bubbles:true}))}
+ let last='';function load(){if(area.value===last)return;last=area.value;surface.innerHTML=toEditable(last);savedRange=null;surface.blur()}
+ function sync(){const html=sanitize(surface.innerHTML);last=html;area.value=html;area.dispatchEvent(new Event('input',{bubbles:true}))}
  surface.addEventListener('input',sync);
- area.addEventListener('change',load);
+ area.addEventListener('change',load);area.protegeEditor={load,flush:sync};
  const observer=new MutationObserver(()=>{if(document.activeElement!==surface)load()});observer.observe(area,{attributes:true,attributeFilter:['value']});
  const dialog=area.closest('dialog');if(dialog){dialog.addEventListener('close',load);dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-create-dialog]'))load()})}
  const form=area.closest('form');if(form)form.addEventListener('submit',sync,true);
@@ -103,7 +103,8 @@ function sanitize(value){
  if(k==='color'&&child.tagName==='FONT'&&/^#[0-9a-f]{6}$/i.test(v))continue;
  if(k==='face'&&child.tagName==='FONT'&&['Arial','Georgia','Verdana'].includes(v))continue;
  if(k==='size'&&child.tagName==='FONT'&&/^[2-5]$/.test(v))continue;
- if(k==='style'&&child.tagName==='SPAN'&&/^(?:color:\s*#[0-9a-f]{6}|font-family:\s*(?:Arial|Georgia|Verdana)|font-size:\s*(?:0\.85em|1\.2em))\s*;?$/i.test(v))continue;
+ if(k==='style'&&child.tagName==='SPAN'&&/^(?:font-weight:\s*(?:bold|700)|font-style:\s*italic|text-decoration(?:-line)?:\s*underline|color:\s*#[0-9a-f]{6}|font-family:\s*(?:Arial|Georgia|Verdana)|font-size:\s*(?:0\.85em|1\.2em))\s*;?$/i.test(v))continue;
+ if(k==='style'&&child.tagName==='SPAN'){const parts=v.split(';').map(x=>x.trim()).filter(Boolean);if(parts.length&&parts.every(x=>/^(?:font-weight:\s*(?:bold|700)|font-style:\s*italic|text-decoration(?:-line)?:\s*underline|color:\s*(?:#[0-9a-f]{6}|rgb\(\d+,\s*\d+,\s*\d+\))|font-family:\s*(?:Arial|Georgia|Verdana)(?:,\s*(?:sans-serif|serif))?|font-size:\s*(?:\d+(?:\.\d+)?(?:px|pt|em)))$/i.test(x)))continue;}
  child.removeAttribute(a.name)
  }walk(child)
  }};walk(root);return root.innerHTML;
