@@ -1,28 +1,17 @@
-PROTEGE V13.24.26 — CONTADORES / CACHE DOS SCRIPTS
+PROTEGE V13.24.27 — COUNT DIRETO NO BANCO
 
-Causa encontrada:
-A lógica dos contadores havia sido corrigida nos arquivos JavaScript, porém
-diversas páginas administrativas ainda carregavam versões antigas pelo parâmetro
-de cache, por exemplo v13140.js?v=13230 e v13240.js?v=13240/132424.
-Assim, ao navegar para outra tela, o navegador podia voltar a executar o código
-antigo e exibir 0.
+A cada carregamento/refresh:
+- familias_interessadas: COUNT status='novo'
+- adolescentes_interessados: COUNT status='novo'
+- pre_cadastro_profissionais: COUNT status IN ('pendente','em_analise')
+O Dashboard também conta diretamente os pré-cadastros profissionais.
 
-Correção:
-- Todas as páginas administrativas que usam v13140.js/v13240.js foram
-  padronizadas para ?v=132426.
-- Mantida a correção dos contadores já implementada nos dois scripts.
-- Dashboard e Adolescentes interessados foram incluídos em regressão específica.
+TESTES ANTES DA GERAÇÃO:
+- Suíte completa: 910 / 910 aprovados.
+- 3 consultas COUNT diretas verificadas.
+- Sintaxe JS aprovada.
+- Cache padronizado em v=132427.
+- Integração real com Supabase de produção: PENDENTE DE TESTE NO SUPABASE.
 
-TESTES EXECUTADOS ANTES DE GERAR O ZIP:
-- Suíte completa: 903 testes.
-- Resultado: 903 aprovados / 0 falhas.
-- Teste de ausência de referências antigas de cache: aprovado.
-- Dashboard carregando scripts v=132426: aprovado.
-- Adolescentes interessados carregando scripts v=132426: aprovado.
-- Sintaxe v13140.js: aprovada.
-- Sintaxe v13240.js: aprovada.
-- Integração real com Supabase de produção: não executada neste ambiente.
-
-PUBLICAÇÃO:
-Envie TODOS os arquivos deste ZIP para a raiz do GitHub e substitua os existentes.
-Não requer SQL nem alteração de Edge Function.
+Não requer SQL.
+Publique TODOS os arquivos deste ZIP na raiz do GitHub, substituindo os existentes.

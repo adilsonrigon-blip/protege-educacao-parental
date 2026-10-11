@@ -33,16 +33,15 @@ async function refresh(){
     if(professional) jobs.push((async()=>{
       // Usa a mesma fonte/critério da tela de Pré-cadastros profissionais.
       // Isso evita divergência entre a RPC legada e a listagem administrativa.
-      const {data,error}=await db.functions.invoke('administrar-profissional',{
-        body:{action:'pending-pre-count'}
-      });
+      const {count,error}=await db.from('pre_cadastro_profissionais')
+        .select('id',{count:'exact',head:true})
+        .in('status',['pendente','em_analise']);
       if(error) throw error;
-      if(data?.error) throw new Error(data.error);
-      const count=Number(data?.count);
-      if(!Number.isFinite(count)) throw new Error('Contagem de pré-cadastros pendentes inválida.');
-      professional.textContent=String(count);
+      professional.textContent=String(Number(count||0));
     })());
-    await Promise.allSettled(jobs);
+    const settled=await Promise.allSettled(jobs);
+    settled.forEach((r,i)=>{if(r.status==='rejected'){console.error('[PROTEGE] Falha no contador:',r.reason);}});
+
   }catch(e){ console.warn('Protege: contadores de pendências não puderam ser atualizados.',e); }
 }
 window.ProtegeRefreshPendingBadges=refresh;
