@@ -1,1 +1,1 @@
-V13.24.35: Barra compacta com Fonte e Tamanho lado a lado e cores por paleta circular. Substitua os 3 arquivos na raiz do GitHub. Python 1112 OK, npm 1035 OK, JS syntax OK. Validacao visual real no navegador e Supabase pendentes. SQL nao requerido.
+Correção V13.24.35: textos publicados com HTML misturado a texto normal agora são renderizados como HTML permitido, com sanitização de tags/atributos. Substituir arquivos na raiz do GitHub. Não requer SQL. Verificar publicação em produção após deploy.

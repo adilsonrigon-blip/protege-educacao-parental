@@ -88,7 +88,7 @@ function wysiwyg(area){
  load();
 }
 function toEditable(value){
- if(/^\s*</.test(value))return sanitize(value);
+ if(/<\/?(?:span|br|div|p|strong|b|em|i|u|ul|ol|li|h[23]|font|a)\b/i.test(value))return sanitize(value);
  return render(value).replace(/<br>/g,'<br>');
 }
 function sanitize(value){
@@ -109,6 +109,6 @@ function sanitize(value){
  }};walk(root);return root.innerHTML;
 }
 const oldRender=render;
-window.ProtegeRichText.render=value=>/^\s*</.test(String(value||''))?sanitize(value):oldRender(value);
+window.ProtegeRichText.render=value=>/<\/?(?:span|br|div|p|strong|b|em|i|u|ul|ol|li|h[23]|font|a)\b/i.test(String(value||''))?sanitize(value):oldRender(value);
 document.querySelectorAll('form textarea[name="conteudo"]').forEach(wysiwyg);
 })();
