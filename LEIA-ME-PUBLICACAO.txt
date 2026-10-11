@@ -1,22 +1,39 @@
-PROTEGE V13.24.31 — QUEM SOMOS CORRIGIDO
+PROTEGE V13.24.33 — MODAL QUEM SOMOS
 
-CORREÇÕES:
-1. Admin Quem Somos usa o mesmo cliente Supabase já criado pelo script principal (ProtegeApp lexical), removendo o erro causado por window.ProtegeApp inexistente.
-2. Validação do perfil Admin feita pela sessão atual + usuarios_perfis.
-3. Quem Somos agora é item próprio no menu Admin; Conteúdos não fica mais marcado indevidamente.
-4. Corrigido HTML <head> duplicado e título da página administrativa.
-5. Página pública refeita com a identidade visual da referência fornecida: creme, terracota, verde, carvão, tipografia serifada, blocos e CTAs.
-6. Conteúdo público utiliza os textos/ideias visíveis na referência fornecida (Fortalecendo famílias..., Educação Parental, Transparência/SERMEP, 4 etapas) e mantém a equipe dinâmica cadastrada no Admin.
-7. CRUD preservado: foto, nome, posição/cargo, biografia, redes sociais, ordem e publicado.
+CORREÇÃO PRINCIPAL
+O modal "Nova pessoa" estava usando classes próprias (dialog-card/form-grid/dialog-actions) que NÃO correspondiam às classes estilizadas pelo componente padrão do Admin.
 
-TESTES:
-- Suíte completa: 1028/1028 APROVADOS.
-- Testes específicos V13.24.31: 12/12 aprovados.
-- Sintaxe JavaScript: APROVADA.
-- Integração no Supabase de produção: PENDENTE DE TESTE APÓS PUBLICAÇÃO.
+Agora ele usa exatamente o contrato visual já existente:
+- create-dialog-shell
+- content-form
+- full-field
+- check-field
+- content-form-actions
 
-SQL:
-- Se o SQL da V13.24.30 JÁ foi executado, NÃO precisa executar novamente.
-- Se ainda NÃO foi executado, execute supabase-v13.24.30-quem-somos.sql antes de usar o CRUD.
+Com isso, passam a valer os estilos já existentes do Admin para:
+- largura controlada do painel;
+- grade de duas colunas no desktop;
+- uma coluna no mobile;
+- inputs, textarea e URLs;
+- botão Escolher arquivo;
+- checkbox Publicado;
+- rodapé de ações;
+- espaçamentos e alinhamentos.
 
-Publique todos os arquivos deste ZIP na raiz do GitHub, substituindo os existentes.
+REGRESSÕES PRESERVADAS
+- Quem Somos público mantém CSS base da Home.
+- Travessia mantém o item Quem Somos.
+- Correção Supabase/Admin preservada.
+
+TESTES
+- Suíte Python completa: 1049/1049 aprovada.
+- npm test: aprovado.
+- Todos os JavaScripts: sintaxe aprovada.
+- Testes específicos do modal e contrato visual incluídos.
+- Tentativa de renderização headless com Chromium foi feita, mas o Chromium do ambiente não conseguiu produzir screenshot; portanto não estou classificando screenshot/browser real como aprovado.
+
+SQL
+Não requer novo SQL.
+
+PUBLICAÇÃO
+Substitua todos os arquivos deste ZIP na raiz do GitHub.
