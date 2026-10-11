@@ -62,10 +62,18 @@ function wysiwyg(area){
  let savedRange=null;surface.addEventListener('mouseup',()=>{const sel=window.getSelection();if(sel.rangeCount)savedRange=sel.getRangeAt(0).cloneRange()});surface.addEventListener('keyup',()=>{const sel=window.getSelection();if(sel.rangeCount)savedRange=sel.getRangeAt(0).cloneRange()});function restore(){if(!savedRange)return;const sel=window.getSelection();sel.removeAllRanges();sel.addRange(savedRange)}
  const buttons=[['bold','Negrito','N'],['italic','Itálico','I'],['underline','Sublinhado','S'],['insertUnorderedList','Lista','☷'],['removeFormat','Limpar','Limpar']];
  for(const [cmd,title,label] of buttons){const b=document.createElement('button');b.type='button';b.title=title;b.setAttribute('aria-label',title);b.textContent=label;b.addEventListener('mousedown',e=>e.preventDefault());b.addEventListener('click',()=>{surface.focus();restore();document.execCommand(cmd,false,null);sync()});toolbar.appendChild(b)}
- function selector(label,choices,command){const sel=document.createElement('select');sel.setAttribute('aria-label',label);for(const [v,t] of choices){const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}sel.addEventListener('change',()=>{if(!sel.value)return;surface.focus();restore();document.execCommand(command,false,sel.value);sync();sel.selectedIndex=0});toolbar.appendChild(sel)}
- selector('Tamanho',[['','Tamanho'],['2','Pequeno'],['3','Normal'],['4','Grande'],['5','Título']],'fontSize');
+ function selector(label,choices,command){const sel=document.createElement('select');sel.className='protege-editor-select protege-editor-select-'+(label==='Fonte'?'font':'size');sel.setAttribute('aria-label',label);for(const [v,t] of choices){const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o)}sel.addEventListener('change',()=>{if(!sel.value)return;surface.focus();restore();document.execCommand(command,false,sel.value);sync();sel.selectedIndex=0});toolbar.appendChild(sel)}
+ // Compact, familiar word-processor controls: font family, point size, and color palette.
  selector('Fonte',[['','Fonte'],['Arial','Arial'],['Georgia','Georgia'],['Verdana','Verdana']],'fontName');
- selector('Cor',[['','Cor'],['#7a3fa0','Roxo'],['#f5488b','Rosa'],['#268b88','Verde-água'],['#332b3a','Escuro']],'foreColor');
+ selector('Tamanho',[['','Tamanho'],['2','12 px'],['3','14 px'],['4','18 px'],['5','24 px']],'fontSize');
+ const colorGroup=document.createElement('div');colorGroup.className='protege-color-group';colorGroup.setAttribute('role','group');colorGroup.setAttribute('aria-label','Cor do texto');
+ const colorLabel=document.createElement('span');colorLabel.className='protege-color-label';colorLabel.textContent='Cor';colorGroup.appendChild(colorLabel);
+ for(const [name,color] of [['Escuro','#332b3a'],['Roxo','#7a3fa0'],['Rosa','#f5488b'],['Verde-água','#268b88']]){
+  const swatch=document.createElement('button');swatch.type='button';swatch.className='protege-color-swatch';swatch.title='Cor: '+name;swatch.setAttribute('aria-label','Cor do texto: '+name);swatch.style.setProperty('--swatch',color);
+  swatch.addEventListener('mousedown',e=>e.preventDefault());
+  swatch.addEventListener('click',()=>{surface.focus();restore();document.execCommand('foreColor',false,color);sync()});colorGroup.appendChild(swatch);
+ }
+ toolbar.appendChild(colorGroup);
  const link=document.createElement('button');link.type='button';link.textContent='Link';link.addEventListener('mousedown',e=>e.preventDefault());link.addEventListener('click',()=>{const url=prompt('Endereço do link (https://...)');if(url&&/^https:\/\/[^\s]+$/i.test(url)){surface.focus();restore();document.execCommand('createLink',false,url);sync()}});toolbar.appendChild(link);
  shell.append(toolbar,surface);area.parentNode.insertBefore(shell,area);area.classList.add('protege-wysiwyg-source');
  let last='';function load(){if(area.value===last)return;last=area.value;surface.innerHTML=toEditable(last)}

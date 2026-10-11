@@ -8,3 +8,15 @@
 .protege-wysiwyg-source{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
 .protege-wysiwyg-surface h2,.protege-wysiwyg-surface h3{margin:12px 0 6px}
 @media(max-width:700px){.protege-wysiwyg-toolbar{gap:4px;padding:7px}.protege-wysiwyg-toolbar button,.protege-wysiwyg-toolbar select{font-size:12px!important;padding:5px 7px!important}.protege-wysiwyg-surface{min-height:200px}}
+/* V13.24.35: barra única e compacta, como em editores de documentos */
+.protege-wysiwyg-toolbar{display:flex!important;flex-flow:row wrap!important;align-items:center!important;justify-content:flex-start!important;gap:5px!important;padding:8px 10px!important;background:#faf8fc!important}
+.protege-wysiwyg-toolbar>button{width:34px!important;min-width:34px!important;max-width:none!important;height:34px!important;padding:4px!important;border:1px solid transparent!important;background:transparent!important;border-radius:6px!important;font-size:14px!important}
+.protege-wysiwyg-toolbar>button:hover{background:#eee4f4!important;border-color:#dac9e4!important}
+.protege-wysiwyg-toolbar select.protege-editor-select{display:inline-block!important;flex:0 0 auto!important;height:34px!important;min-width:0!important;max-width:none!important;margin:0!important;padding:4px 26px 4px 9px!important;border:1px solid #ded4e5!important;border-radius:6px!important;background-color:#fff!important;font:500 13px Arial,sans-serif!important;color:#332b3a!important;line-height:1.2!important;box-shadow:none!important}
+.protege-wysiwyg-toolbar select.protege-editor-select-font{width:116px!important}
+.protege-wysiwyg-toolbar select.protege-editor-select-size{width:88px!important}
+.protege-color-group{display:inline-flex;flex:0 0 auto;align-items:center;gap:5px;padding:0 7px;border-left:1px solid #e0d6e6;white-space:nowrap}
+.protege-color-label{font:500 12px Arial,sans-serif;color:#65566d}
+.protege-wysiwyg-toolbar .protege-color-swatch{width:22px!important;min-width:22px!important;height:22px!important;padding:0!important;border:2px solid #fff!important;border-radius:50%!important;background:var(--swatch)!important;box-shadow:0 0 0 1px #cbbbd5!important}
+.protege-wysiwyg-toolbar .protege-color-swatch:hover,.protege-wysiwyg-toolbar .protege-color-swatch:focus-visible{box-shadow:0 0 0 2px #7a3fa0!important}
+@media(max-width:700px){.protege-wysiwyg-toolbar{gap:4px!important}.protege-wysiwyg-toolbar select.protege-editor-select-font{width:105px!important}.protege-color-group{padding:0 3px}}
