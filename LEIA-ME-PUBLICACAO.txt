@@ -1,9 +1,18 @@
-PROTEGE V13.24.23 — Menu da Travessia alinhado à Home.
+PROTEGE V13.24.25 — CONTADOR DE PRÉ-CADASTROS
 
-Enviar à raiz do GitHub: travessia.html e travessia.css.
-A Home e a Travessia passam a carregar os mesmos CSS globais na mesma ordem,
-o mesmo HTML de menu (com links relativos ajustados), e o mesmo script.js.
-A Travessia usa aria-current=page sem alterar a aparência do menu.
-Nenhuma alteração de banco, SQL ou Edge Functions.
+Correção:
+- O menu lateral busca a quantidade ao carregar qualquer tela administrativa.
+- O Dashboard busca a mesma quantidade diretamente, sem precisar abrir antes
+  Pré-cadastros profissionais.
+- O card 'Pré-cadastros pendentes' e o badge lateral usam a action
+  administrar-profissional / pending-pre-count.
+- Cache atualizado para v=132425.
 
-VALIDAÇÃO: consultar TESTES-V13.24.23.txt.
+Testes antes da geração:
+- Suíte completa: 899 testes, todos aprovados.
+- Teste específico badge + card do Dashboard: aprovado.
+- Sintaxe JavaScript: aprovada.
+- Supabase de produção: não testado diretamente neste ambiente.
+
+Não requer SQL nem alteração da Edge Function.
+Envie todos os arquivos do ZIP para a raiz do GitHub e substitua os existentes.

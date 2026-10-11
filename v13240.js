@@ -34,9 +34,10 @@ async function refresh(){
       // Usa a mesma fonte/critério da tela de Pré-cadastros profissionais.
       // Isso evita divergência entre a RPC legada e a listagem administrativa.
       const {data,error}=await db.functions.invoke('administrar-profissional',{
-        body:{action:'list-pre-cadastros',page:1,page_size:1,q:'',status:'pendente'}
+        body:{action:'pending-pre-count'}
       });
       if(error) throw error;
+      if(data?.error) throw new Error(data.error);
       const count=Number(data?.count);
       if(!Number.isFinite(count)) throw new Error('Contagem de pré-cadastros pendentes inválida.');
       professional.textContent=String(count);
