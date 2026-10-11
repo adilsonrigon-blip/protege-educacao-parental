@@ -22,3 +22,8 @@
 .site-header .brand{height:78px;display:flex;align-items:center;justify-content:center;align-self:center;overflow:hidden;background:transparent;flex-shrink:0}
 .site-header .brand img{display:block;width:auto;max-width:125px;max-height:62px;height:auto;object-fit:contain;margin:0;position:static;transform:none}
 @media(max-width:1279px){.site-header .brand img{max-width:125px;max-height:62px}}
+
+/* V13.24.35d — logo no tamanho canônico da Home */
+.site-header .brand img{width:150px;max-width:150px;max-height:78px;height:auto}
+@media(max-width:1279px){.site-header .brand img{width:150px;max-width:150px;max-height:78px}}
+@media(max-width:760px){.site-header .brand img{width:138px;max-width:138px;max-height:68px}}

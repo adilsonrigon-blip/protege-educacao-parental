@@ -74,3 +74,16 @@
 
 .team-photo-field .field-help{display:block;margin-top:2px;color:#756c7c;font-size:11px;font-weight:500;line-height:1.45}
 .team-photo-field .field-help.is-error{color:#b42318;font-weight:700}
+
+/* V13.24.35d — hero Quem Somos alinhado à identidade PROTEGE */
+.qs-hero{position:relative;overflow:hidden;background:linear-gradient(100deg,#fffaf2 0%,#f9f0e6 54%,#f7e9ee 100%)}
+.qs-hero:before,.qs-hero:after{content:"";position:absolute;border-radius:50%;pointer-events:none;opacity:.48}
+.qs-hero:before{width:250px;height:250px;left:-115px;bottom:-130px;background:#f6b8b6}
+.qs-hero:after{width:290px;height:210px;right:22%;top:-105px;background:#ead0ef}
+.qs-hero-grid{position:relative;z-index:2;grid-template-columns:1.08fr .92fr}
+.qs-hero-family{position:absolute;z-index:-1;right:-72px;top:-56px;bottom:-56px;width:39%;overflow:hidden;border-radius:80px 0 0 80px;opacity:.96}
+.qs-hero-family:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(247,240,228,.92) 0%,rgba(247,240,228,.18) 38%,rgba(247,240,228,0) 68%)}
+.qs-hero-family img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.qs-steps-card{position:relative;z-index:3;margin-right:120px}
+@media(max-width:1100px){.qs-hero-family{right:-45px;width:35%}.qs-steps-card{margin-right:70px}}
+@media(max-width:900px){.qs-hero-family{display:none}.qs-steps-card{margin-right:0}.qs-hero-grid{grid-template-columns:1fr}.qs-hero{background:linear-gradient(135deg,#fffaf2,#f5edf8)}}

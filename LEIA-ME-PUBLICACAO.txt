@@ -1,9 +1,10 @@
-PROTEGE V13.24.35 - MENU PADRÃO DA HOME
+PROTEGE V13.24.35 — IDENTIDADE VISUAL CORRIGIDA
+Quem Somos: nova imagem familiar aprovada no hero e identidade visual PROTEGE.
+Logo: restaurado para 150px no desktop.
+Menu: padrão da Home aplicado às 10 telas públicas.
+Admin Quem Somos: validação de foto preservada.
 
-Home (index.html) é a referência única para estrutura e estilos do menu.
-Travessia e Quem Somos usam o mesmo header e pilha de CSS da Home.
-Logo limitado ao header sem sobreposição.
-Validação de fotos do Admin preservada.
-Testes Python completos e npm test aprovados; JS sintaxe validada.
+TESTES: Python 1102/1102; JavaScript 25/25; npm test aprovado.
+Verificação final: imagem presente, logo 150px e 10/10 menus idênticos.
 SQL: não requer.
-Validação visual no domínio publicado: pendente após deploy.
+Após o deploy, use Ctrl+F5.
