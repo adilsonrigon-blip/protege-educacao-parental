@@ -30,7 +30,17 @@ async function refresh(){
     const jobs=[];
     if(family) jobs.push((async()=>{const {count,error}=await db.from('familias_interessadas').select('id',{count:'exact',head:true}).eq('status','novo'); if(error)throw error; family.textContent=String(Number(count||0));})());
     if(adolescent) jobs.push((async()=>{const {count,error}=await db.from('adolescentes_interessados').select('id',{count:'exact',head:true}).eq('status','novo'); if(error)throw error; adolescent.textContent=String(Number(count||0));})());
-    if(professional) jobs.push((async()=>{const {data,error}=await db.rpc('protege_pre_cadastro_pendentes'); if(error)throw error; professional.textContent=String(Number(data||0));})());
+    if(professional) jobs.push((async()=>{
+      // Usa a mesma fonte/critério da tela de Pré-cadastros profissionais.
+      // Isso evita divergência entre a RPC legada e a listagem administrativa.
+      const {data,error}=await db.functions.invoke('administrar-profissional',{
+        body:{action:'list-pre-cadastros',page:1,page_size:1,q:'',status:'pendente'}
+      });
+      if(error) throw error;
+      const count=Number(data?.count);
+      if(!Number.isFinite(count)) throw new Error('Contagem de pré-cadastros pendentes inválida.');
+      professional.textContent=String(count);
+    })());
     await Promise.allSettled(jobs);
   }catch(e){ console.warn('Protege: contadores de pendências não puderam ser atualizados.',e); }
 }
