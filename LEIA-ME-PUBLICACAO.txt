@@ -1,13 +1,13 @@
-PROTEGE - V13.24.17 - TRAVESSIA
+PROTEGE V13.24.19 — MENU GLOBAL COM TRAVESSIA
 
-CORREÇÃO: todas as imagens da Travessia estão na RAIZ, junto de travessia.html e travessia.css.
+Correção:
+A opção Travessia estava apenas na página Travessia. Ao entrar em Cadastre-se
+(e em outras páginas públicas), o cabeçalho vinha do HTML antigo e o item sumia.
 
-PUBLICAÇÃO NO GITHUB:
-1. Extraia este ZIP no computador.
-2. Na raiz do repositório GitHub, clique em Add file > Upload files.
-3. Selecione TODOS os arquivos extraídos deste ZIP de uma vez.
-4. Faça Commit directly to the main branch.
-5. Aguarde o GitHub Pages atualizar e pressione Ctrl+F5 no site.
+Esta versão adiciona Travessia aos menus das páginas públicas que usam o mesmo
+cabeçalho, mantendo-a entre Benefícios e Notícias & eventos.
 
-Não é necessário criar diretórios.
-Não há SQL, Supabase ou Edge Function nesta atualização.
+Envie todos os arquivos deste pacote para a RAIZ do GitHub e confirme a
+substituição dos arquivos existentes.
+
+Não há SQL, Supabase ou Edge Functions nesta alteração.
