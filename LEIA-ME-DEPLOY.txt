@@ -1,15 +1,11 @@
-PROTEGE V13.24.12
+PROTEGE V13.24.15 - TRAVESSIA
 
-Este pacote contem SOMENTE os arquivos alterados para o aumento global de fontes.
+Substitua/adicione no GitHub mantendo a mesma estrutura:
+- index.html
+- travessia.html
+- travessia.css
+- pasta assets/travessia/ completa
 
-PUBLICACAO NO GITHUB
-1. Substitua os 26 arquivos .html presentes neste pacote.
-2. Substitua style.css.
-3. Substitua style-v126.css.
-4. Nao e necessario publicar os arquivos TXT para o site funcionar.
-
-SUPABASE
-- Nao executar SQL.
-- Nao alterar Edge Functions.
-
-Os HTML foram incluidos porque atualizam o parametro de cache dos CSS para v=132412. Sem isso, alguns navegadores poderiam continuar exibindo a fonte antiga em cache.
+Nao requer SQL.
+Nao requer alteracao no Supabase.
+Nao requer Edge Function.

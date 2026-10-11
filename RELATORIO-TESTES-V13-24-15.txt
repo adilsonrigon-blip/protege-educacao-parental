@@ -1,0 +1,21 @@
+PROTEGE V13.24.15 - TRAVESSIA
+Data: 2026-10-10
+
+ALTERACOES
+- Nova pagina travessia.html.
+- Nova opcao Travessia no menu da Home.
+- Identidade visual baseada no CSS oficial do PROTEGE (roxo, rosa e turquesa).
+- Fotografias de adolescentes incorporadas como arquivos WebP independentes e responsivos.
+- CTAs para cadastro de adolescente e pre-cadastro profissional.
+- Nenhuma alteracao de banco de dados, SQL ou Edge Functions.
+
+VALIDACOES EXECUTADAS
+- Suite automatizada existente do projeto: 878 testes executados / 878 aprovados / 0 falhas.
+- A suite inclui contratos, documentos HTML, sintaxe JS, referencias locais, SQL e Edge Functions existentes.
+- travessia.html foi detectada e aprovada pelo teste de documento HTML.
+- Referencias locais das paginas alteradas verificadas.
+
+LAYOUT
+- CSS responsivo implementado com breakpoints para desktop, tablet e celular.
+- A tentativa de renderizacao automatizada por navegador headless foi bloqueada pelo ambiente de execucao (ERR_BLOCKED_BY_ADMINISTRATOR). Portanto, nao e correto afirmar que houve validacao visual pixel a pixel em navegador real neste ambiente.
+- Recomenda-se smoke test visual apos publicacao no GitHub Pages em desktop/tablet/celular.
