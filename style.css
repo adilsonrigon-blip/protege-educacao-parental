@@ -458,3 +458,9 @@ input,select,textarea,button{font-size:max(15px,1em)}
 small{line-height:1.5}
 @media(max-width:650px){html{font-size:16.5px}.main-nav{font-size:15px}.data-table td{font-size:14.5px}}
 @media(max-width:900px){.account-password-form{grid-template-columns:1fr}.account-password-form .form-submit-cell{height:auto}}
+
+.article-format-toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:#f7f4f9;border:1px solid #e9e1ed;border-radius:10px;margin:8px 0}
+.article-format-toolbar button{border:1px solid #d9c7e4;background:#fff;color:#5a2c7c;border-radius:7px;padding:7px 12px;cursor:pointer;font-size:13px}
+.article-format-toolbar button:hover,.article-format-toolbar button:focus-visible{background:#eee0f4}
+.publication-detail-text h2{font-size:1.35em;margin:18px 0 8px}
+.article-list-item{padding-left:12px}
