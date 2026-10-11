@@ -498,7 +498,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const currentAccessProfile = await initAdminNavigationAndGuard();
   if (currentAccessProfile?.perfil === 'admin' && currentAccessProfile?.ativo !== false) {
     window.PROTEGE_ADMIN_READY = true;
-    document.dispatchEvent(new CustomEvent('protege:admin-ready',{detail:{profile:currentAccessProfile}}));
+    window.ProtegeRefreshPendingBadges = ()=>protegeLoadAdminPendingCounts(currentAccessProfile);
+    window.addEventListener('pageshow',()=>protegeLoadAdminPendingCounts(currentAccessProfile));
   }
   if (document.body.dataset.requiresAdmin && currentAccessProfile?.perfil !== 'admin') return;
   if (document.getElementById('professionalGreeting')) await updateProfessionalGreeting();
@@ -1893,6 +1894,38 @@ async function protegeCurrentAccessProfile(){
     if(error)throw error;protegeAccessProfileCache=data||null;return protegeAccessProfileCache;
   }catch(err){console.warn('Protege: não foi possível validar o perfil de acesso.',err);protegeAccessProfileCache=null;return null;}
 }
+async function protegeLoadAdminPendingCounts(profile){
+  if(profile?.perfil!=='admin'||profile?.ativo===false)return;
+  const family=document.getElementById('sidebarLeadCount');
+  const adolescent=document.getElementById('sidebarAdolescentLeadCount');
+  const professional=document.getElementById('sidebarProfessionalPreCount');
+  if(!family&&!adolescent&&!professional)return;
+  try{
+    const [fr,ar,pr]=await Promise.allSettled([
+      ProtegeApp.db.from('familias_interessadas').select('id',{count:'exact',head:true}).eq('status','novo'),
+      ProtegeApp.db.from('adolescentes_interessados').select('id',{count:'exact',head:true}).eq('status','novo'),
+      ProtegeApp.db.functions.invoke('administrar-profissional',{body:{action:'pending-pre-count'}})
+    ]);
+    let total=0;
+    if(fr.status==='fulfilled'&&!fr.value.error){const n=Number(fr.value.count||0);if(family)family.textContent=String(n);total+=n;}
+    else console.error('[PROTEGE] contador famílias:',fr.status==='rejected'?fr.reason:fr.value?.error);
+    if(ar.status==='fulfilled'&&!ar.value.error){const n=Number(ar.value.count||0);if(adolescent)adolescent.textContent=String(n);total+=n;}
+    else console.error('[PROTEGE] contador adolescentes:',ar.status==='rejected'?ar.reason:ar.value?.error);
+    if(pr.status==='fulfilled'&&!pr.value.error&&!pr.value.data?.error){
+      const n=Number(pr.value.data?.count||0);if(professional)professional.textContent=String(n);total+=n;
+      const dash=document.querySelector('[data-metric="pre_cadastros_pendentes"]');if(dash)dash.textContent=String(n);
+    } else console.error('[PROTEGE] contador profissionais:',pr.status==='rejected'?pr.reason:(pr.value?.error||pr.value?.data?.error));
+    const summary=document.querySelector('.sidebar-group>summary');
+    if(summary){
+      let alert=document.getElementById('sidebarCadastroAlert');
+      if(!alert){alert=document.createElement('span');alert.id='sidebarCadastroAlert';alert.className='cadastro-alert-badge';summary.appendChild(alert);}
+      alert.textContent=String(total);alert.hidden=total<=0;
+      summary.closest('.sidebar-group')?.classList.toggle('has-pending',total>0);
+    }
+  }catch(e){console.error('[PROTEGE] erro ao carregar contadores do Admin:',e);}
+}
+window.ProtegeLoadAdminPendingCounts=protegeLoadAdminPendingCounts;
+
 async function initAdminNavigationAndGuard(){
   if(!document.body.dataset.requiresAuth)return null;
   const profile=await protegeCurrentAccessProfile();
@@ -1911,6 +1944,9 @@ async function initAdminNavigationAndGuard(){
     if(!nav.querySelector('a[href="conteudos.html"]')){
       const link=document.createElement('a');link.href='conteudos.html';link.textContent='Conteúdos';if(location.pathname.endsWith('/conteudos.html')||location.pathname.endsWith('conteudos.html'))link.classList.add('active');const reports=nav.querySelector('a[href="relatorios.html"]');nav.insertBefore(link,reports||null);
     }
+  }
+  if(profile?.perfil==='admin'&&profile?.ativo!==false){
+    await protegeLoadAdminPendingCounts(profile);
   }
   if(document.body.dataset.requiresAdmin&&profile?.perfil!=='admin'){
     document.body.innerHTML='<main class="access-denied"><div><img src="logo-protege.jpeg" alt="Protege"><h1>Acesso restrito</h1><p>Esta área é exclusiva para profissionais com perfil de administrador.</p><a class="btn btn-primary" href="dashboard.html">Voltar ao dashboard</a></div></main>';

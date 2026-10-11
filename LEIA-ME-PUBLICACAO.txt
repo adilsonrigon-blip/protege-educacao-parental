@@ -1,14 +1,18 @@
-PROTEGE V13.24.28 — ADMIN CONTADORES + ALERTA
+PROTEGE V13.24.29
 
-- Ao identificar perfil Admin, carrega imediatamente os contadores.
-- F5/refresh/pageshow executa nova consulta.
-- Famílias/adolescentes: COUNT direto.
-- Profissionais: COUNT server-side autorizado pending-pre-count (mesma fonte da tela que já retorna os pendentes; evita RLS do navegador).
-- O grupo Cadastros recebe alerta rosa com o total de pendências.
-- Removido o segundo controlador de badges de v13140.js para não haver sobrescrita.
+CORREÇÃO ESTRUTURAL:
+A contagem foi movida para script-v126.js, dentro do bootstrap principal do Admin.
+initAdminNavigationAndGuard() agora AGUARDA a contagem logo após identificar perfil Admin.
+Assim, Dashboard, Famílias interessadas, Adolescentes interessados etc. carregam os números sem abrir Pré-cadastros antes.
+Refresh/pageshow chama a mesma rotina.
+v13240.js não escreve mais nos contadores, eliminando concorrência.
+Cadastros recebe alerta quando total pendente > 0.
 
-TESTES: 916/916 aprovados; sintaxe JS aprovada; testes específicos de bootstrap Admin, refresh, 3 contagens, alerta e não concorrência aprovados.
-Supabase produção: PENDENTE DE TESTE NO AMBIENTE PUBLICADO.
+Profissionais usam pending-pre-count server-side, a mesma fonte que já retorna 2 na tela de pré-cadastro.
+Famílias/adolescentes usam COUNT direto.
 
-Não requer SQL nem nova Edge Function.
-Publique TODOS os arquivos deste ZIP na raiz do GitHub, substituindo os existentes.
+TESTES: 920/920 aprovados; 12 regressões específicas V13.24.29; sintaxe JS aprovada; entrada direta em Dashboard/Famílias/Adolescentes/Pré-cadastros verificada.
+Supabase produção: pendente de validação após publicação.
+
+Não requer SQL ou mudança de Edge Function.
+Publique TODOS os arquivos do ZIP na raiz do GitHub, substituindo os existentes.
