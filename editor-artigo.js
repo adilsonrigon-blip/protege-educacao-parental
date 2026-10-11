@@ -76,13 +76,16 @@ function wysiwyg(area){
  toolbar.appendChild(colorGroup);
  const link=document.createElement('button');link.type='button';link.textContent='Link';link.addEventListener('mousedown',e=>e.preventDefault());link.addEventListener('click',()=>{const url=prompt('Endereço do link (https://...)');if(url&&/^https:\/\/[^\s]+$/i.test(url)){surface.focus();restore();document.execCommand('createLink',false,url);sync()}});toolbar.appendChild(link);
  shell.append(toolbar,surface);area.parentNode.insertBefore(shell,area);area.classList.add('protege-wysiwyg-source');
- let last='';function load(){if(area.value===last)return;last=area.value;surface.innerHTML=toEditable(last);savedRange=null;surface.blur()}
+ let last=null;function load(force=false){if(!force&&area.value===last)return;last=area.value;surface.innerHTML=toEditable(last);savedRange=null;surface.blur()}
  function sync(){const html=sanitize(surface.innerHTML);last=html;area.value=html;area.dispatchEvent(new Event('input',{bubbles:true}))}
  surface.addEventListener('input',sync);
- area.addEventListener('change',load);area.protegeEditor={load,flush:sync};
+ area.addEventListener('change',load);area.protegeEditor={load:()=>load(true),flush:sync};
+ const normalize=document.createElement('button');normalize.type='button';normalize.className='protege-editor-reset-all';normalize.textContent='Remover toda a formatação';normalize.title='Deixar o artigo inteiro com texto normal, sem alterar as palavras';
+ normalize.addEventListener('click',()=>{if(!confirm('Remover negrito, cores, fontes e demais formatações de todo o artigo?'))return;const plain=surface.innerText;surface.textContent=plain;surface.normalize();savedRange=null;sync()});
+ toolbar.appendChild(normalize);
  const observer=new MutationObserver(()=>{if(document.activeElement!==surface)load()});observer.observe(area,{attributes:true,attributeFilter:['value']});
  const dialog=area.closest('dialog');if(dialog){dialog.addEventListener('close',load);dialog.addEventListener('click',e=>{if(e.target.closest('[data-close-create-dialog]'))load()})}
- const form=area.closest('form');if(form)form.addEventListener('submit',sync,true);
+ const form=area.closest('form');if(form){form.addEventListener('submit',sync,true);form.addEventListener('reset',()=>queueMicrotask(()=>{last=null;load(true)}));}
  // Existing edit forms fill textarea.value programmatically; refresh when dialog is opened.
  if(dialog)new MutationObserver(()=>{if(dialog.open)queueMicrotask(load)}).observe(dialog,{attributes:true,attributeFilter:['open']});
  load();
