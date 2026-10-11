@@ -1,18 +1,20 @@
-PROTEGE V13.24.29
+PROTEGE V13.24.30 — QUEM SOMOS
 
-CORREÇÃO ESTRUTURAL:
-A contagem foi movida para script-v126.js, dentro do bootstrap principal do Admin.
-initAdminNavigationAndGuard() agora AGUARDA a contagem logo após identificar perfil Admin.
-Assim, Dashboard, Famílias interessadas, Adolescentes interessados etc. carregam os números sem abrir Pré-cadastros antes.
-Refresh/pageshow chama a mesma rotina.
-v13240.js não escreve mais nos contadores, eliminando concorrência.
-Cadastros recebe alerta quando total pendente > 0.
+NOVIDADES
+- Novo item público: Quem Somos.
+- Nova página pública quem-somos.html com identidade visual PROTEGE.
+- Novo item Admin: Quem Somos.
+- CRUD de pessoas: foto, nome, posição/cargo, biografia, LinkedIn, Instagram, Facebook, outra rede/site, ordem e publicado.
+- Fotos usam o bucket existente protege-conteudos.
+- Página pública mostra somente pessoas publicadas e respeita a ordem definida no Admin.
 
-Profissionais usam pending-pre-count server-side, a mesma fonte que já retorna 2 na tela de pré-cadastro.
-Famílias/adolescentes usam COUNT direto.
+BANCO DE DADOS — OBRIGATÓRIO
+1. Antes de usar o cadastro, execute no SQL Editor do Supabase:
+   supabase-v13.24.30-quem-somos.sql
+2. Depois publique todos os demais arquivos deste ZIP na raiz do GitHub, substituindo os existentes.
 
-TESTES: 920/920 aprovados; 12 regressões específicas V13.24.29; sintaxe JS aprovada; entrada direta em Dashboard/Famílias/Adolescentes/Pré-cadastros verificada.
-Supabase produção: pendente de validação após publicação.
-
-Não requer SQL ou mudança de Edge Function.
-Publique TODOS os arquivos do ZIP na raiz do GitHub, substituindo os existentes.
+TESTES
+- Suíte completa + regressões: 1010/1010 aprovados.
+- CRUD, publicação, redes sociais, upload de foto, menu público/admin e RLS: aprovados por testes automatizados.
+- Sintaxe dos novos JS: aprovada.
+- Integração real no Supabase de produção: PENDENTE após executar o SQL/publicar.
