@@ -1,0 +1,10 @@
+PROTEGE V13.24.23 — RELATÓRIO DE TESTES
+
+Suíte completa do projeto: 894 testes executados, 894 aprovados, 0 falhas.
+Contratos adicionais: 4 verificações aprovadas (CSS globais iguais aos da Home, ordem de links igual, script de menu igual, sem override de destaque).
+Referências locais HTML/CSS/JS/imagens: todas encontradas no projeto base.
+Teste visual automatizado com Chromium: NÃO EXECUTADO — navegador bloqueou navegação local neste ambiente (ERR_BLOCKED_BY_ADMINISTRATOR).
+Comparação visual real da página publicada: NÃO CONFIRMADA.
+Supabase/Edge Functions em produção: NÃO TESTADOS (não alterados).
+
+Correção técnica: menu da Travessia agora usa exatamente o mesmo conjunto/ordem de folhas de estilo e o mesmo script de navegação da Home.

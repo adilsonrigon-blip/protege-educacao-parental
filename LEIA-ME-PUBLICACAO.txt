@@ -1,13 +1,9 @@
-PROTEGE V13.24.19 — MENU GLOBAL COM TRAVESSIA
+PROTEGE V13.24.23 — Menu da Travessia alinhado à Home.
 
-Correção:
-A opção Travessia estava apenas na página Travessia. Ao entrar em Cadastre-se
-(e em outras páginas públicas), o cabeçalho vinha do HTML antigo e o item sumia.
+Enviar à raiz do GitHub: travessia.html e travessia.css.
+A Home e a Travessia passam a carregar os mesmos CSS globais na mesma ordem,
+o mesmo HTML de menu (com links relativos ajustados), e o mesmo script.js.
+A Travessia usa aria-current=page sem alterar a aparência do menu.
+Nenhuma alteração de banco, SQL ou Edge Functions.
 
-Esta versão adiciona Travessia aos menus das páginas públicas que usam o mesmo
-cabeçalho, mantendo-a entre Benefícios e Notícias & eventos.
-
-Envie todos os arquivos deste pacote para a RAIZ do GitHub e confirme a
-substituição dos arquivos existentes.
-
-Não há SQL, Supabase ou Edge Functions nesta alteração.
+VALIDAÇÃO: consultar TESTES-V13.24.23.txt.
