@@ -1,18 +1,28 @@
-PROTEGE V13.24.25 — CONTADOR DE PRÉ-CADASTROS
+PROTEGE V13.24.26 — CONTADORES / CACHE DOS SCRIPTS
+
+Causa encontrada:
+A lógica dos contadores havia sido corrigida nos arquivos JavaScript, porém
+diversas páginas administrativas ainda carregavam versões antigas pelo parâmetro
+de cache, por exemplo v13140.js?v=13230 e v13240.js?v=13240/132424.
+Assim, ao navegar para outra tela, o navegador podia voltar a executar o código
+antigo e exibir 0.
 
 Correção:
-- O menu lateral busca a quantidade ao carregar qualquer tela administrativa.
-- O Dashboard busca a mesma quantidade diretamente, sem precisar abrir antes
-  Pré-cadastros profissionais.
-- O card 'Pré-cadastros pendentes' e o badge lateral usam a action
-  administrar-profissional / pending-pre-count.
-- Cache atualizado para v=132425.
+- Todas as páginas administrativas que usam v13140.js/v13240.js foram
+  padronizadas para ?v=132426.
+- Mantida a correção dos contadores já implementada nos dois scripts.
+- Dashboard e Adolescentes interessados foram incluídos em regressão específica.
 
-Testes antes da geração:
-- Suíte completa: 899 testes, todos aprovados.
-- Teste específico badge + card do Dashboard: aprovado.
-- Sintaxe JavaScript: aprovada.
-- Supabase de produção: não testado diretamente neste ambiente.
+TESTES EXECUTADOS ANTES DE GERAR O ZIP:
+- Suíte completa: 903 testes.
+- Resultado: 903 aprovados / 0 falhas.
+- Teste de ausência de referências antigas de cache: aprovado.
+- Dashboard carregando scripts v=132426: aprovado.
+- Adolescentes interessados carregando scripts v=132426: aprovado.
+- Sintaxe v13140.js: aprovada.
+- Sintaxe v13240.js: aprovada.
+- Integração real com Supabase de produção: não executada neste ambiente.
 
-Não requer SQL nem alteração da Edge Function.
-Envie todos os arquivos do ZIP para a raiz do GitHub e substitua os existentes.
+PUBLICAÇÃO:
+Envie TODOS os arquivos deste ZIP para a raiz do GitHub e substitua os existentes.
+Não requer SQL nem alteração de Edge Function.
