@@ -49,7 +49,7 @@ function addEditor(area){
  replacement=`${text} (${url})`;
  }
  if(kind==='clear')replacement=text.replace(/\*\*|__|\*|\{\/?(?:cor|fonte|tam)(?::[^}]+)?\}/g,'').replace(/^## |^- /gm,'');
- area.setRangeText(replacement,a,b,'select');area.dispatchEvent(new Event('input',{bubbles:true}));area.focus();
+ area.setRangeText(replacement,a,b,'select');area.dispatchEvent(new Event('change',{bubbles:false}));area.focus();
  };
  bar.addEventListener('click',e=>{const b=e.target.closest('button[data-format]');if(b)apply(b.dataset.format)});
  bar.addEventListener('change',e=>{const sel=e.target.closest('select[data-format]');if(sel){apply(sel.dataset.format,sel.value);sel.value=''}});
@@ -76,8 +76,8 @@ function wysiwyg(area){
  toolbar.appendChild(colorGroup);
  const link=document.createElement('button');link.type='button';link.textContent='Link';link.addEventListener('mousedown',e=>e.preventDefault());link.addEventListener('click',()=>{const url=prompt('Endereço do link (https://...)');if(url&&/^https:\/\/[^\s]+$/i.test(url)){surface.focus();restore();document.execCommand('createLink',false,url);sync()}});toolbar.appendChild(link);
  shell.append(toolbar,surface);area.parentNode.insertBefore(shell,area);area.classList.add('protege-wysiwyg-source');
- let last=null;function load(force=false){if(!force&&area.value===last)return;last=area.value;surface.innerHTML=toEditable(last);savedRange=null;surface.blur()}
- function sync(){const html=sanitize(surface.innerHTML);last=html;area.value=html;area.dispatchEvent(new Event('input',{bubbles:true}))}
+ let last=null;function load(force=false){if(!force&&area.value===last)return;last=area.value;surface.innerHTML=toEditable(last);savedRange=null;surface.blur();document.execCommand('styleWithCSS',false,true)}
+ function sync(){const html=sanitize(surface.innerHTML);last=html;area.value=html;area.dispatchEvent(new Event('change',{bubbles:false}))}
  surface.addEventListener('input',sync);
  area.addEventListener('change',load);area.protegeEditor={load:()=>load(true),flush:sync};
  const normalize=document.createElement('button');normalize.type='button';normalize.className='protege-editor-reset-all';normalize.textContent='Remover toda a formatação';normalize.title='Deixar o artigo inteiro com texto normal, sem alterar as palavras';
@@ -107,7 +107,7 @@ function sanitize(value){
  if(k==='face'&&child.tagName==='FONT'&&['Arial','Georgia','Verdana'].includes(v))continue;
  if(k==='size'&&child.tagName==='FONT'&&/^[2-5]$/.test(v))continue;
  if(k==='style'&&child.tagName==='SPAN'&&/^(?:font-weight:\s*(?:bold|700)|font-style:\s*italic|text-decoration(?:-line)?:\s*underline|color:\s*#[0-9a-f]{6}|font-family:\s*(?:Arial|Georgia|Verdana)|font-size:\s*(?:0\.85em|1\.2em))\s*;?$/i.test(v))continue;
- if(k==='style'&&child.tagName==='SPAN'){const parts=v.split(';').map(x=>x.trim()).filter(Boolean);if(parts.length&&parts.every(x=>/^(?:font-weight:\s*(?:bold|700)|font-style:\s*italic|text-decoration(?:-line)?:\s*underline|color:\s*(?:#[0-9a-f]{6}|rgb\(\d+,\s*\d+,\s*\d+\))|font-family:\s*(?:Arial|Georgia|Verdana)(?:,\s*(?:sans-serif|serif))?|font-size:\s*(?:\d+(?:\.\d+)?(?:px|pt|em)))$/i.test(x)))continue;}
+ if(k==='style'&&['SPAN','DIV','P','B','STRONG','I','EM','U'].includes(child.tagName)){const parts=v.split(';').map(x=>x.trim()).filter(Boolean);if(parts.length&&parts.every(x=>/^(?:font-weight:\s*(?:bold|700)|font-style:\s*italic|text-decoration(?:-line)?:\s*underline|color:\s*(?:#[0-9a-f]{6}|rgb\(\d+,\s*\d+,\s*\d+\))|font-family:\s*(?:Arial|Georgia|Verdana)(?:,\s*(?:sans-serif|serif))?|font-size:\s*(?:\d+(?:\.\d+)?(?:px|pt|em)))$/i.test(x)))continue;}
  child.removeAttribute(a.name)
  }walk(child)
  }};walk(root);return root.innerHTML;
