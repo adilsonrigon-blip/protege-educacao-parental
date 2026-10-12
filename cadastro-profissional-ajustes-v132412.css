@@ -1,0 +1,43 @@
+/* PROTEJE v13.24.12 — ajuste exclusivo do cadastro profissional */
+body:has(.professional-interest-hero) .professional-interest-hero {
+  padding: 42px 0 14px;
+}
+body:has(.professional-interest-hero) .professional-interest-hero > .container {
+  width: min(920px, calc(100% - 40px));
+  max-width: 920px;
+  margin-inline: auto;
+}
+body:has(.professional-interest-hero) .professional-interest-hero h1 {
+  max-width: 840px;
+  margin: 12px 0 16px;
+  font-size: clamp(2rem, 3.5vw, 2.9rem);
+  line-height: 1.16;
+  text-wrap: balance;
+}
+body:has(.professional-interest-hero) .professional-interest-intro {
+  max-width: 840px;
+  margin: 0;
+  text-align: left !important;
+  text-justify: auto;
+  hyphens: none !important;
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.65;
+}
+body:has(.professional-interest-hero) main > section.container {
+  max-width: 960px;
+  width: min(960px, calc(100% - 40px));
+  margin-inline: auto;
+}
+body:has(.professional-interest-hero) .professional-interest-card {
+  width: 100%;
+  max-width: none;
+  margin: 14px auto 56px;
+  box-sizing: border-box;
+}
+@media (max-width: 760px) {
+  body:has(.professional-interest-hero) .professional-interest-hero { padding: 32px 0 10px; }
+  body:has(.professional-interest-hero) .professional-interest-hero > .container,
+  body:has(.professional-interest-hero) main > section.container { width: calc(100% - 32px); }
+  body:has(.professional-interest-hero) .professional-interest-card { margin-top: 10px; }
+}
