@@ -1,0 +1,23 @@
+/* PROTEJE V13.24.13 — escala de leitura baseada em Quem Somos.
+   Restrita ao conteúdo público; mantém navegação, formulários e controles. */
+:root { --proteje-texto-padrao: 18px; --proteje-texto-cartao: 16px; }
+/* Conteúdo narrativo, sem interferir em campos, tabelas, menus ou botões */
+body :is(main, .qs-page, .travessia-page) :is(section, article) p:not(.field-help):not(.form-help):not(.error):not(.status):not(.hint),
+body main > p {
+  font-size: var(--proteje-texto-padrao);
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+/* Cartões compactos conservam uma escala menor e consistente. */
+body :is(main, .qs-page, .travessia-page) :is(.card, .qs-how-grid article, .qs-benefit-grid article, .qs-path-grid article, .team-card, .territorio-card) p:not(.field-help):not(.form-help) {
+  font-size: var(--proteje-texto-cartao);
+  line-height: 1.6;
+}
+/* Preservar textos funcionais em interfaces e formulários. */
+body :is(main, .qs-page, .travessia-page) :is(form, .form-group, .field, .modal, .dialog, .toast, .alert, .table, table, nav, header, footer) p {
+  font-size: inherit;
+}
+@media (max-width: 600px) {
+  :root { --proteje-texto-padrao: 16px; --proteje-texto-cartao: 15px; }
+  body :is(main, .qs-page, .travessia-page) p { hyphens: none; text-align: left; }
+}
