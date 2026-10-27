@@ -58,3 +58,6 @@
 .travessia-page .tv-band h2{font-family:Georgia,serif;letter-spacing:.15em;font-weight:400;color:#173b40}
 .travessia-page .tv-photo{object-fit:contain;background:#f7f4ec;box-shadow:none}
 @media(max-width:640px){.travessia-page .tv-hero h1{font-size:40px}.travessia-page .tv-photo{height:auto;max-height:440px}.travessia-page .tv-photo-wrap{min-height:0}}
+
+/* Capas e links de leitura */
+.tv-book-cover{display:block;width:100%;height:auto;aspect-ratio:297/258;object-fit:contain;background:#fff;border:1px solid #ddd;border-radius:3px}.tv-reading{display:flex;flex-direction:column;align-items:flex-start}.tv-reading .btn{margin-top:auto}.tv-reading p{margin-bottom:18px}.tv-coming-soon{display:inline-block;padding:12px 17px;border:1px solid #c56e51;color:#b45d43;font-size:12px;letter-spacing:.08em;margin-top:auto}
