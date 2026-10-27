@@ -45,3 +45,16 @@
 
 /* Travessias: complementos inspirados na referência fornecida */
 .travessia-page .tv-heading-left{text-align:left;margin-left:0}.tv-reading-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}.tv-reading h3{font-family:Georgia,serif;font-weight:500;font-size:24px;margin:18px 0 8px}.tv-reading p{line-height:1.65;color:var(--tv-muted)}.tv-book{height:285px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box;overflow:hidden}.tv-book span{font-family:Georgia,serif;font-size:clamp(23px,2.8vw,38px);line-height:1.1;font-weight:bold;transform:rotate(-5deg)}.tv-book-purple{background:radial-gradient(ellipse,#fff 37%,#a43fd1 38%,#f5e9fa 74%);color:#54247a}.tv-book-yellow{background:radial-gradient(ellipse,#fff6bb 36%,#ffcc12 37%,#fff4d8 75%);color:#157e8b}.tv-book-green{background:linear-gradient(145deg,#e6f1e8,#9fc8b7);color:#173e42}.tv-reading-note{font-size:12px;color:var(--tv-muted);margin-top:20px}.tv-academy{background:#f0ebe1}.tv-academy-grid{display:grid;grid-template-columns:1fr .8fr;gap:70px;align-items:center}.tv-academy h2{font-family:Georgia,serif;font-size:clamp(30px,3.5vw,44px);line-height:1.14}.tv-academy p{line-height:1.7}.tv-academy-card{background:#fffaf1;padding:32px;border:1px solid #e8dfd1}.tv-academy-card small{letter-spacing:.13em;color:#aa6d4d;font-size:11px}.tv-academy-card h3{font-family:Georgia,serif;font-size:30px;margin:12px 0}.tv-academy-card strong{font-size:14px}@media(max-width:700px){.tv-reading-grid{grid-template-columns:1fr;gap:30px}.tv-book{height:240px}.tv-academy-grid{grid-template-columns:1fr;gap:24px}.tv-reading h3{font-size:22px}}
+
+/* Travessias — hierarquia editorial inspirada na referência, sem alterar o menu compartilhado */
+.travessia-page .tv-hero{background:#f7f4ec}
+.travessia-page .tv-hero h1{font-family:Georgia,serif;font-weight:400;letter-spacing:-.025em;color:#173b40;font-size:clamp(40px,4.4vw,61px)}
+.travessia-page .tv-hero h1 em{font-style:italic;color:#173b40}
+.travessia-page .tv-kicker{background:transparent;color:#a95b3d;padding:0;border-radius:0;letter-spacing:.16em}
+.travessia-page .tv-welcome{background:#173b40}
+.travessia-page .tv-welcome h2,.travessia-page .tv-heading h2,.travessia-page .tv-questions h2{font-family:Georgia,serif;font-weight:400}
+.travessia-page .tv-welcome p{color:#e6eeea}
+.travessia-page .tv-band{background:#dfe9dc}
+.travessia-page .tv-band h2{font-family:Georgia,serif;letter-spacing:.15em;font-weight:400;color:#173b40}
+.travessia-page .tv-photo{object-fit:contain;background:#f7f4ec;box-shadow:none}
+@media(max-width:640px){.travessia-page .tv-hero h1{font-size:40px}.travessia-page .tv-photo{height:auto;max-height:440px}.travessia-page .tv-photo-wrap{min-height:0}}
