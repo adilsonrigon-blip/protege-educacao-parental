@@ -35,3 +35,15 @@
 .travessia-page .tv-hero h1 em,.travessia-page .tv-band h2,.travessia-page .tv-territories strong{color:var(--pg-purple)!important}
 .travessia-page a[class*=btn],.travessia-page a[class*=button],.travessia-page button{border-radius:10px!important}
 @media(max-width:700px){.qs-new p,.travessia-page p{text-align:left!important;hyphens:none!important}.qs-new .q-sermep{padding:45px 0!important}}
+
+/* Travessia: enquadramento dos quatro territorios sem cortar o topo dos rostos. */
+.travessia-page .tv-cards .tv-card img{
+  width:100%!important;
+  height:210px!important;
+  min-height:0!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+}
+@media(max-width:640px){
+  .travessia-page .tv-cards .tv-card img{height:220px!important;object-position:center top!important}
+}
