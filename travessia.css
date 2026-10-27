@@ -61,3 +61,16 @@
 
 /* Capas e links de leitura */
 .tv-book-cover{display:block;width:100%;height:auto;aspect-ratio:297/258;object-fit:contain;background:#fff;border:1px solid #ddd;border-radius:3px}.tv-reading{display:flex;flex-direction:column;align-items:flex-start}.tv-reading .btn{margin-top:auto}.tv-reading p{margin-bottom:18px}.tv-coming-soon{display:inline-block;padding:12px 17px;border:1px solid #c56e51;color:#b45d43;font-size:12px;letter-spacing:.08em;margin-top:auto}
+
+/* Revisão Travessias: legibilidade, citação e parágrafos justificados */
+.travessia-page .tv-hero .tv-lead,
+.travessia-page .tv-intro p,
+.travessia-page .tv-welcome p:not(.tv-quote),
+.travessia-page .tv-card p,
+.travessia-page .tv-questions p,
+.travessia-page .tv-path p,
+.travessia-page .tv-reading p,
+.travessia-page .tv-academy p,
+.travessia-page .tv-heading p:not(.tv-note){text-align:justify;text-justify:inter-word;hyphens:auto;overflow-wrap:break-word;}
+.travessia-page .tv-welcome .tv-quote{font-family:Georgia,serif;font-style:italic;font-size:clamp(21px,2.15vw,29px);line-height:1.42;color:#f0a17e!important;margin-top:26px;font-weight:400;text-align:left;}
+@media(max-width:640px){.travessia-page .tv-hero .tv-lead,.travessia-page .tv-intro p,.travessia-page .tv-welcome p:not(.tv-quote),.travessia-page .tv-card p,.travessia-page .tv-questions p,.travessia-page .tv-path p,.travessia-page .tv-reading p,.travessia-page .tv-academy p,.travessia-page .tv-heading p:not(.tv-note){text-align:left;}}
