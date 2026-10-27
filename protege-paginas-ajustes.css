@@ -1,0 +1,37 @@
+/* Ajustes visuais das páginas Quem Somos e Travessia. Sem alteração de dados dinâmicos. */
+:root{--pg-purple:#7b3fa1;--pg-purple-dark:#5e2987;--pg-ink:#30283a;--pg-muted:#71677b;--pg-soft:#f8f5fa;--pg-line:#e8dfed}
+/* Reaproveitar a linguagem tipográfica e os fundos da plataforma PROTEGE */
+.qs-new,.travessia-page{background:#fff!important;color:var(--pg-ink)!important;font-family:Arial,Helvetica,sans-serif!important}
+.qs-new h1,.qs-new h2,.qs-new h3,.travessia-page h1,.travessia-page h2,.travessia-page h3{font-family:Arial,Helvetica,sans-serif!important;color:var(--pg-ink)!important;font-weight:750!important;letter-spacing:-.025em;line-height:1.17}
+.qs-new h1,.travessia-page h1{font-size:clamp(32px,4vw,52px)!important}
+.qs-new h2,.travessia-page h2{font-size:clamp(27px,3vw,38px)!important}
+.qs-new h3,.travessia-page h3{font-size:clamp(19px,2vw,25px)!important}
+.qs-new .q-label{color:var(--pg-purple)!important}
+.qs-new .q-hero,.qs-new .q-section,.qs-new .q-team,.qs-new .q-ana{background:#fff!important}
+.qs-new .q-section:nth-of-type(even),.qs-new .q-ana,.qs-new .q-team{background:var(--pg-soft)!important}
+.qs-new .q-sermep{background:#f6f1f9!important;color:var(--pg-ink)!important;padding:64px 0!important}
+.qs-new .q-sermep h2,.qs-new .q-sermep h3,.qs-new .q-sermep p,.qs-new .q-sermep strong{color:var(--pg-ink)!important}
+.qs-new .q-sermep .q-four>div{border-color:var(--pg-line)!important}
+.qs-new .q-illustration,.qs-new .q-social{background:#f1eaf7!important}
+.qs-new .q-button{background:var(--pg-purple)!important;color:#fff!important;border:1px solid var(--pg-purple)!important;border-radius:10px!important}
+.qs-new .q-outline{background:#fff!important;color:var(--pg-purple)!important}
+.qs-new .q-profile,.qs-new .q-person,.qs-new .q-partner-card{background:#fff!important;border:1px solid var(--pg-line)!important;border-radius:14px!important}
+.qs-new .q-three article{border-color:#c9a6db!important}
+.qs-new .q-footer,.q-footer{background:#fff!important}
+/* Textos corridos justificados sem forçar títulos e botões */
+.qs-new p,.qs-new .team-public-grid p,.travessia-page p,.travessia-page .tv-card p,.travessia-page .tv-path p{text-align:justify!important;text-justify:inter-word!important;hyphens:auto;overflow-wrap:break-word;word-spacing:normal}
+.qs-new .q-social p,.travessia-page .tv-heading p,.travessia-page .tv-band p{text-align:center!important}
+/* Travessia com os mesmos padrões de botões, cards, fundos e fontes */
+.travessia-page .tv-hero{background:#fbf8fd!important}
+.travessia-page .tv-soft,.travessia-page .tv-band{background:var(--pg-soft)!important}
+.travessia-page .tv-welcome{background:#f3edf8!important;color:var(--pg-ink)!important}
+.travessia-page .tv-welcome h2,.travessia-page .tv-welcome p{color:var(--pg-ink)!important}
+.travessia-page .tv-welcome .tv-quote{color:var(--pg-purple-dark)!important;font-style:italic!important;font-size:clamp(19px,2.2vw,26px)!important;font-weight:600!important}
+.travessia-page .tv-kicker,.travessia-page .tv-heading small{color:var(--pg-purple)!important}
+.travessia-page .tv-card,.travessia-page .tv-path,.travessia-page .tv-benefit,.travessia-page .tv-question,.travessia-page .tv-territories{border-color:var(--pg-line)!important;border-radius:14px!important}
+.travessia-page .tv-path.family,.travessia-page .tv-path.prof{background:#f8f4fa!important}
+.travessia-page .tv-photo,.travessia-page .tv-welcome img,.travessia-page .tv-intro img{border-radius:16px!important}
+.travessia-page .tv-benefit{border-left-color:var(--pg-purple)!important}
+.travessia-page .tv-hero h1 em,.travessia-page .tv-band h2,.travessia-page .tv-territories strong{color:var(--pg-purple)!important}
+.travessia-page a[class*=btn],.travessia-page a[class*=button],.travessia-page button{border-radius:10px!important}
+@media(max-width:700px){.qs-new p,.travessia-page p{text-align:left!important;hyphens:none!important}.qs-new .q-sermep{padding:45px 0!important}}
