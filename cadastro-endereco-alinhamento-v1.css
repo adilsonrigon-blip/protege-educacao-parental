@@ -1,0 +1,36 @@
+/* PROTEGE — ajuste exclusivo da seção de endereço do cadastro público. */
+.public-cadastro-v138 .address-grid-alinhada {
+  display: grid;
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 18px;
+  align-items: start;
+}
+.public-cadastro-v138 .address-grid-alinhada > label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  grid-column: span 20;
+  gap: 8px;
+}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(1) {grid-column: span 5;}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(2) {grid-column: span 15;}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(3) {grid-column: span 4;}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(4) {grid-column: span 8;}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(5) {grid-column: span 8;}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(6) {grid-column: span 15;}
+.public-cadastro-v138 .address-grid-alinhada > label:nth-child(7) {grid-column: span 5;}
+.public-cadastro-v138 .address-grid-alinhada > label input {
+  width: 100%; box-sizing: border-box; min-width: 0; margin: 0;
+}
+@media (max-width: 700px) {
+ .public-cadastro-v138 .address-grid-alinhada {grid-template-columns: repeat(2,minmax(0,1fr));}
+ .public-cadastro-v138 .address-grid-alinhada > label,
+ .public-cadastro-v138 .address-grid-alinhada > label:nth-child(n) {grid-column: span 2;}
+ .public-cadastro-v138 .address-grid-alinhada > label:nth-child(3),
+ .public-cadastro-v138 .address-grid-alinhada > label:nth-child(7) {grid-column: span 1;}
+}
+@media (max-width: 420px) {
+ .public-cadastro-v138 .address-grid-alinhada {grid-template-columns: minmax(0,1fr);}
+ .public-cadastro-v138 .address-grid-alinhada > label:nth-child(n) {grid-column: span 1;}
+}
