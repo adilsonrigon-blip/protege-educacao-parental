@@ -1,0 +1,14 @@
+Paginas com menu verificadas: 10: cadastre-se.html, cadastro-adolescente.html, publicacoes.html, travessia.html, cadastro-profissional.html, quem-somos.html, publicacao.html, cadastro.html, banner.html, index.html
+Links internos inspecionados: 137
+Destinos locais ausentes: []
+Node --check: {'script.js': 0, 'script-v126.js': 0, 'menu-ativo-v132414.js': 0}
+npm test retorno: 1
+Saida npm test:
+
+> protege-educacao-parental-tests@13.24.9 test
+> node --check script-v126.js && node --check script.js && node --test tests/cadastros-regression.test.mjs
+
+
+Could not find 'tests/cadastros-regression.test.mjs'
+
+Limitacoes: sem testes em navegador mobile real; suite completa indisponivel se arquivos de teste ausentes.

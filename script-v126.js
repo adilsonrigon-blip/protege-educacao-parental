@@ -507,12 +507,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-  const toggle = document.querySelector('.menu-toggle');
-  const nav = document.querySelector('.main-nav');
-  if (toggle && nav) toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open);
-  });
+  // Menu público controlado pelo script compartilhado.
 
 
   const loginPasswordInput = document.getElementById('password');
@@ -635,51 +630,6 @@ function initInterestForm() {
   const message = document.getElementById('interestMessage');
   const submit = document.getElementById('interestSubmitBtn');
   bindCepAutoFill(form);
-  const cpf1=form.elements.namedItem('cpf_responsavel1');
-  const cpf2=form.elements.namedItem('cpf_responsavel2');
-  const cpf1Feedback=document.getElementById('cpf1Feedback');
-  const cpf2Feedback=document.getElementById('cpf2Feedback');
-  const digits=v=>String(v||'').replace(/\D/g,'');
-  function validCpf(v){
-    const n=digits(v);
-    if(n.length!==11||/^(\d)\1{10}$/.test(n))return false;
-    for(let len=9;len<=10;len++){
-      let sum=0;for(let i=0;i<len;i++)sum+=Number(n[i])*(len+1-i);
-      if(Number(n[len])!==((sum*10)%11)%10)return false;
-    }
-    return true;
-  }
-  function formatCpf(v){const n=digits(v).slice(0,11);return n.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/(\d{3})(\d{1,2})$/,'$1-$2');}
-  let checkVersion=0,checkedCpf='',duplicate=false,checking=false;
-  function feedback(input,element,msg){input.setCustomValidity(msg);element.textContent=msg;element.style.color=msg?'#a52b42':'';}
-  function localDuplicate(cpf){return (ProtegeApp.getLocalLeads?.()||[]).some(x=>digits(x.cpf_responsavel1)===cpf);}
-  async function checkCpf(){
-    const cpf=digits(cpf1.value),version=++checkVersion;
-    checkedCpf='';duplicate=false;checking=false;
-    if(!validCpf(cpf)){feedback(cpf1,cpf1Feedback,cpf.length===0?'':'CPF inválido. Confira os números informados.');return false;}
-    feedback(cpf1,cpf1Feedback,'');checking=true;cpf1Feedback.textContent='Verificando CPF...';
-    try{
-      let exists;
-      if(ProtegeApp.configured){
-        const {data,error}=await ProtegeApp.db.rpc('cpf_responsavel1_ja_cadastrado',{p_cpf:cpf});
-        if(error)throw error;
-        exists=data===true;
-      }else exists=localDuplicate(cpf);
-      if(version!==checkVersion)return false;
-      checking=false;checkedCpf=cpf;duplicate=exists;
-      feedback(cpf1,cpf1Feedback,exists?'Este CPF já está cadastrado na base de famílias do PROTEGE.':'');
-      return !exists;
-    }catch(err){
-      if(version!==checkVersion)return false;
-      checking=false;feedback(cpf1,cpf1Feedback,'Não foi possível verificar o CPF. Tente novamente.');
-      return false;
-    }
-  }
-  let debounce;
-  cpf1.addEventListener('input',()=>{cpf1.value=formatCpf(cpf1.value);++checkVersion;checkedCpf='';clearTimeout(debounce);feedback(cpf1,cpf1Feedback,'');if(digits(cpf1.value).length===11)debounce=setTimeout(checkCpf,350);});
-  cpf1.addEventListener('blur',()=>{clearTimeout(debounce);if(digits(cpf1.value).length)checkCpf();});
-  cpf2.addEventListener('input',()=>{cpf2.value=formatCpf(cpf2.value);feedback(cpf2,cpf2Feedback,cpf2.value&&!validCpf(cpf2.value)?'CPF inválido. Confira os números informados.':'');});
-  cpf2.addEventListener('blur',()=>feedback(cpf2,cpf2Feedback,cpf2.value&&!validCpf(cpf2.value)?'CPF inválido. Confira os números informados.':''));
 
   function updateRemoveButtons() {
     const buttons = rows.querySelectorAll('.remove-child');
@@ -695,17 +645,12 @@ function initInterestForm() {
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    if(!validCpf(cpf1.value)){feedback(cpf1,cpf1Feedback,'CPF inválido. Confira os números informados.');cpf1.reportValidity();return;}
-    if(cpf2.value&&!validCpf(cpf2.value)){feedback(cpf2,cpf2Feedback,'CPF inválido. Confira os números informados.');cpf2.reportValidity();return;}
-    if (!form.reportValidity()) return;
-    if(checkedCpf!==digits(cpf1.value)||checking||duplicate){if(!await checkCpf())return;}
     if (!form.reportValidity()) return;
     submit.disabled=true; submit.textContent='Enviando...'; message.textContent='';
     const fd=new FormData(form);
     const id=ProtegeApp.uid();
     const family={
       id,
-      cpf_responsavel1:digits(cpf1.value),cpf_responsavel2:digits(cpf2.value)||null,
       responsavel1:String(fd.get('responsavel1')).trim(), responsavel2:String(fd.get('responsavel2')||'').trim()||null,
       telefone:String(fd.get('telefone')).trim(), email:String(fd.get('email')||'').trim()||null,
       cep:String(fd.get('cep')).trim(), logradouro:String(fd.get('logradouro')).trim(), numero:String(fd.get('numero')).trim(),
@@ -727,10 +672,10 @@ function initInterestForm() {
         if(res.error) throw res.error;
         message.textContent='Cadastro enviado com sucesso! A equipe Protege entrará em contato com você.';
       }
-      form.reset();checkedCpf='';cpf1Feedback.textContent='';cpf2Feedback.textContent=''; rows.innerHTML=`<div class="child-row"><label><span class="mobile-label">Nome do filho(a)</span><input name="childName[]" type="text" required placeholder="Nome"></label><label><span class="mobile-label">Idade</span><input name="childAge[]" type="number" required min="0" max="99" placeholder="Idade"></label><button class="small-btn remove-child" type="button" aria-label="Excluir filho" disabled>Excluir</button></div>`;
+      form.reset(); rows.innerHTML=`<div class="child-row"><label><span class="mobile-label">Nome do filho(a)</span><input name="childName[]" type="text" required placeholder="Nome"></label><label><span class="mobile-label">Idade</span><input name="childAge[]" type="number" required min="0" max="99" placeholder="Idade"></label><button class="small-btn remove-child" type="button" aria-label="Excluir filho" disabled>Excluir</button></div>`;
       message.scrollIntoView({behavior:'smooth',block:'center'});
     } catch(err) {
-      console.error(err); if(err.code==='23505'){feedback(cpf1,cpf1Feedback,'Este CPF já está cadastrado na base de famílias do PROTEGE.');message.textContent='Cadastro não enviado: CPF já cadastrado.';}else message.textContent='Não foi possível enviar agora. Tente novamente em alguns instantes.';
+      console.error(err); message.textContent='Não foi possível enviar agora. Tente novamente em alguns instantes.';
     } finally { submit.disabled=false; submit.textContent='Enviar cadastro'; updateRemoveButtons(); }
   });
   updateRemoveButtons();

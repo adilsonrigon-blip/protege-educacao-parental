@@ -201,12 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-  const toggle = document.querySelector('.menu-toggle');
-  const nav = document.querySelector('.main-nav');
-  if (toggle && nav) toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open);
-  });
+  // Menu público controlado pelo script compartilhado.
 
   // LOGIN REAL COM SUPABASE; fallback demonstrativo enquanto o projeto não estiver configurado.
   const loginForm = document.getElementById('loginForm');
