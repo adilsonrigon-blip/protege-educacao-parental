@@ -44,3 +44,11 @@
   .site-header .nav-wrap{width:calc(100% - 24px)}
   .site-header .main-nav.open{padding:12px;gap:4px}
 }
+
+/* Mobile: mantém o botão clicável e o painel acima do conteúdo da Home. */
+@media(max-width:1279px){
+  .site-header{position:relative;z-index:1000}
+  .site-header .nav-wrap{position:relative}
+  .site-header .menu-toggle{position:relative;z-index:1002;pointer-events:auto;touch-action:manipulation}
+  .site-header .main-nav.open{z-index:1001;top:100%;}
+}

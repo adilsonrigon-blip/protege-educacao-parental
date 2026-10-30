@@ -1,0 +1,41 @@
+/* PROTEGE: consentimento em uma unica linha flexivel, independente das regras globais de label. */
+.public-cadastro-v138 #interestForm .consent-row-v3 {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left !important;
+}
+.public-cadastro-v138 #interestForm .consent-row-v3 > input[type="checkbox"] {
+  display: block !important;
+  position: static !important;
+  flex: 0 0 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  margin: 2px 0 0 !important;
+  padding: 0 !important;
+  align-self: flex-start !important;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.public-cadastro-v138 #interestForm .consent-row-v3 > label {
+  display: block !important;
+  position: static !important;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
+  text-align: left !important;
+  cursor: pointer;
+}
+@media (max-width: 700px) {
+  .public-cadastro-v138 #interestForm .consent-row-v3 { gap: 10px !important; padding: 14px !important; }
+}

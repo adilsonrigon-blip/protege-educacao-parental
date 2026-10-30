@@ -26,35 +26,36 @@
     }
     if (active) active.setAttribute('aria-current', 'page');
   }
-  // Navegação mobile centralizada: o mesmo comportamento em todas as páginas públicas.
+  // Único controlador do menu na Home: evita duplo toggle.
   const toggle = document.querySelector('.site-header .menu-toggle');
   if (toggle) {
-    toggle.setAttribute('aria-controls', nav.id || 'protege-main-nav');
     if (!nav.id) nav.id = 'protege-main-nav';
-    toggle.setAttribute('aria-expanded', nav.classList.contains('open') ? 'true' : 'false');
-    // Os HTMLs legados já registram um clique que alterna .open.
-    // Executar após esses handlers evita uma segunda alternância.
-    toggle.addEventListener('click', () => {
-      queueMicrotask(() => toggle.setAttribute('aria-expanded', String(nav.classList.contains('open'))));
+    toggle.setAttribute('aria-controls', nav.id);
+    toggle.setAttribute('type', 'button');
+    const setOpen = (open) => {
+      nav.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    };
+    setOpen(false);
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      setOpen(!nav.classList.contains('open'));
     });
-    function closeMobileMenu() {
-      nav.classList.remove('open');
-      toggle.setAttribute('aria-expanded', 'false');
-    }
     nav.addEventListener('click', (event) => {
-      if (event.target.closest('a[href]')) closeMobileMenu();
+      if (event.target.closest('a[href]')) setOpen(false);
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && nav.classList.contains('open')) {
-        closeMobileMenu();
+        setOpen(false);
         toggle.focus();
       }
     });
     document.addEventListener('click', (event) => {
-      if (nav.classList.contains('open') && !nav.contains(event.target) && !toggle.contains(event.target)) closeMobileMenu();
+      if (nav.classList.contains('open') && !nav.contains(event.target) && !toggle.contains(event.target)) setOpen(false);
     });
     window.addEventListener('resize', () => {
-      if (window.innerWidth >= 1280) closeMobileMenu();
+      if (window.innerWidth >= 1280) setOpen(false);
     });
   }
   refresh();

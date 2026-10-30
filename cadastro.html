@@ -30,6 +30,8 @@
 <link rel="stylesheet" href="tipografia-padrao-v132413.css?v=132413">
 <link rel="stylesheet" href="ajustes-consentimento-menu-v132414.css?v=132414">
 <link rel="stylesheet" href="cadastro-endereco-alinhamento-v1.css?v=1">
+<link rel="stylesheet" href="cadastro-mobile-v2.css?v=2">
+<link rel="stylesheet" href="cadastro-consentimento-v3.css?v=3">
 </head>
 <body class="public-cadastro-v138">
   <header class="site-header">
@@ -135,10 +137,10 @@
             </label>
           </div>
 
-          <label class="consent-row">
-            <input name="consentimento" type="checkbox" required>
-            <span>Autorizo o envio dessas informações à equipe Protege para contato sobre o programa.</span>
-          </label>
+          <div class="consent-row consent-row-v3" role="group" aria-label="Autorização de contato">
+            <input id="consentimentoProtege" name="consentimento" type="checkbox" required>
+            <label for="consentimentoProtege">Autorizo o envio dessas informações à equipe Protege para contato sobre o programa.</label>
+          </div>
 
           <div class="registration-actions">
             <a class="btn btn-secondary" href="index.html">Voltar</a>
