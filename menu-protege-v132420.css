@@ -27,3 +27,20 @@
 .site-header .brand img{width:150px;max-width:150px;max-height:78px;height:auto}
 @media(max-width:1279px){.site-header .brand img{width:150px;max-width:150px;max-height:78px}}
 @media(max-width:760px){.site-header .brand img{width:138px;max-width:138px;max-height:68px}}
+
+/* Ajustes mobile incrementais: menu acessível sem alterar identidade visual */
+@media (max-width:1279px){
+  .site-header{position:relative;z-index:1000}
+  .site-header .nav-wrap{position:relative}
+  .site-header .menu-toggle{touch-action:manipulation;min-width:44px;min-height:44px}
+  .site-header .main-nav.open{
+    top:100%;z-index:1001;max-height:calc(100dvh - 78px);
+    overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+    box-sizing:border-box;
+  }
+  .site-header .main-nav.open a{display:block;min-height:44px;box-sizing:border-box;overflow-wrap:anywhere}
+}
+@media (max-width:480px){
+  .site-header .nav-wrap{width:calc(100% - 24px)}
+  .site-header .main-nav.open{padding:12px;gap:4px}
+}
