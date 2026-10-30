@@ -57,3 +57,10 @@
  .site-header .main-nav.open{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
  .site-header .menu-toggle{display:block!important;cursor:pointer;pointer-events:auto!important}
 }
+
+/* V7: touch targets and accessible menu overlay. */
+@media (max-width:1279px){
+  .site-header .main-nav.open{display:flex!important;z-index:10010!important;visibility:visible!important;pointer-events:auto!important;}
+  .site-header .menu-toggle{z-index:10011!important;position:relative;pointer-events:auto!important;}
+  .site-header .main-nav.open a{min-height:44px;display:flex;align-items:center;}
+}

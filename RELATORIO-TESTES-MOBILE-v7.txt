@@ -1,0 +1,15 @@
+PROTEGE Mobile v7 — relatorio de verificacao (2026-10-30)
+Base: projeto completo local + pacote v6 consolidado.
+
+Correcoes: pacote v6 omitia menu-ativo-v132414.js; v7 inclui o controlador e atualiza a referencia em 10 paginas. CSS do menu reforcado para mobile.
+
+TESTES EXECUTADOS
+- npm test: APROVADO (suite de regressao recriada nesta versao com 5 verificacoes estaticas; a suite original estava ausente).
+- node --check: 28 arquivos JS; 28 aprovados.
+- Arquivos e links locais de paginas publicas: verificados por testes estaticos.
+- ZIP: testzip sem erro.
+
+LIMITACOES IMPORTANTES
+- Testes de clique e layout em Chromium foram tentados em 116 cenarios (29 paginas x 4 resolucoes), mas TODOS foram BLOQUEADOS pelo ambiente (ERR_BLOCKED_BY_ADMINISTRATOR). Nao ha aprovacao de navegador real.
+- Sem credenciais Supabase nem ambiente autenticado, nao foi possivel verificar cadastro real, persistencia CPF, admin, login, CRUD, envios ou integracao de dados.
+- Os testes estaticos nao demonstram que TODAS as funcionalidades funcionam em mobile. Nao homologado para producao.
