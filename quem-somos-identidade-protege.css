@@ -1,0 +1,33 @@
+/* Identidade oficial PROTEGE: escopo restrito a Quem Somos. */
+.qs-identidade{background:#fff;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.qs-identidade h1,.qs-identidade h2,.qs-identidade h3,.qs-identidade .team-card h3{font-family:inherit;color:var(--ink);font-weight:800;line-height:1.15;letter-spacing:-.025em}
+.qs-identidade h1{font-size:clamp(36px,5vw,62px)}
+.qs-identidade h2{font-size:clamp(29px,3.6vw,45px)}
+.qs-identidade h3{font-size:clamp(21px,2.2vw,28px)}
+.qs-identidade .q-label,.qs-identidade .q-three small{color:var(--purple);font-weight:800;letter-spacing:.12em}
+.qs-identidade .q-button{background:var(--purple);color:#fff!important;border-radius:12px;padding:13px 20px;font-size:14px;font-weight:800;box-shadow:0 10px 24px rgba(122,63,160,.18);transition:background .2s,transform .2s}
+.qs-identidade .q-button:hover{background:var(--purple-dark);transform:translateY(-1px)}
+.qs-identidade .q-hero{background:linear-gradient(135deg,#fff 0%,#fbf7fc 55%,#f7ffff 100%)}
+.qs-identidade .q-essence,.qs-identidade .q-partnership{background:#fff}
+.qs-identidade .q-ana,.qs-identidade .q-team{background:var(--soft)}
+.qs-identidade .q-sermep{background:linear-gradient(120deg,var(--purple-dark),var(--purple),#8d4ab4);color:#fff}
+.qs-identidade .q-sermep h2,.qs-identidade .q-sermep h3,.qs-identidade .q-sermep p{color:#fff}
+.qs-identidade .q-sermep .q-label{color:#f4cce0}
+.qs-identidade .q-sermep .q-four>div{border-color:rgba(255,255,255,.38)}
+.qs-identidade .q-illustration{background:linear-gradient(155deg,#f2e5f8,#e7f7f5);border-radius:30px;overflow:hidden}
+.qs-identidade .q-rings i{border-color:var(--purple)}
+.qs-identidade .q-rings i:last-child{border-color:var(--pink)}
+.qs-identidade .q-three article{border-color:var(--pink)}
+.qs-identidade .q-profile,.qs-identidade .q-partner-card,.qs-identidade .team-card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 28px rgba(76,42,91,.05)}
+.qs-identidade .q-profile img{object-fit:cover;object-position:center 25%;border-radius:12px}
+.qs-identidade .team-photo{background:var(--soft);border-radius:12px}
+.qs-identidade .team-photo img{object-fit:contain}
+.qs-identidade .q-social{background:linear-gradient(120deg,#f2e5f8,#e7f7f5)}
+.qs-identidade p,.qs-identidade .team-bio,.qs-identidade .team-bio p{font-size:16px;line-height:1.7;color:var(--muted);text-align:left;hyphens:none}
+.qs-identidade .q-sermep p{color:#fff}
+.qs-identidade .q-social p,.qs-identidade .q-illustration p{text-align:center}
+.qs-identidade .q-team .team-public-grid{max-width:100%;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.qs-identidade .q-keywords{border-color:var(--line);color:var(--purple)}
+@media(max-width:900px){.qs-identidade .q-hero-grid,.qs-identidade .q-two{gap:32px}}
+@media(max-width:700px){.qs-identidade .q-hero-grid,.qs-identidade .q-two,.qs-identidade .q-ana-grid{grid-template-columns:minmax(0,1fr)}.qs-identidade .q-ana-grid{gap:24px}.qs-identidade .q-profile{max-width:380px}.qs-identidade .q-team .team-public-grid{grid-template-columns:1fr}.qs-identidade .q-four{grid-template-columns:repeat(2,minmax(0,1fr))}.qs-identidade .q-keywords{flex-wrap:wrap}}
+@media(max-width:380px){.qs-identidade .q-four{grid-template-columns:1fr}}
