@@ -61,12 +61,39 @@
     const neighborhoodInput = document.getElementById('professionalNeighborhood');
     const cityInput = document.getElementById('professionalCity');
     const stateInput = document.getElementById('professionalState');
+    const countryInput=document.getElementById('professionalCountry');
+    const typeInput=document.getElementById('professionalDocumentType');
+    const numberInput=document.getElementById('professionalDocumentNumber');
+    const international=()=>countryInput.value!=='BR';
+    function switchCountry(){
+      const foreign=international();
+      document.getElementById('cpfField').hidden=foreign;
+      document.getElementById('documentTypeField').hidden=!foreign;
+      document.getElementById('documentNumberField').hidden=!foreign;
+      cpfInput.required=!foreign;numberInput.required=foreign;
+      cepInput.required=!foreign;
+      cepInput.maxLength=foreign?20:9;
+      stateInput.maxLength=foreign?120:2;stateInput.minLength=foreign?0:2;
+      stateInput.placeholder=foreign?'Estado / região':'SP';
+      phoneInput.maxLength=foreign?22:15;
+      phoneInput.placeholder=foreign?'+351 912 345 678':'(11) 99999-9999';
+      cpfError.hidden=true;phoneError.hidden=true;
+    }
+    countryInput.addEventListener('change',switchCountry);switchCountry();
+    async function loadSpecialties(){
+      const select=document.getElementById('professionalSpecialty');
+      try {const {data,error}=await resolveClient().from('profissoes').select('nome').eq('ativo',true).order('nome');if(error)throw error;
+        select.innerHTML='<option value="">Selecione a profissão</option>';
+        (data||[]).forEach(p=>{const opt=document.createElement('option');opt.value=p.nome;opt.textContent=p.nome;select.append(opt)});
+      }catch(e){select.innerHTML='<option value="">Profissões indisponíveis — tente novamente</option>';console.error(e)}
+    }
+    loadSpecialties();
     let cepController = null;
     function setCepStatus(text,kind) { if (!cepStatus) return; cepStatus.textContent=text||''; cepStatus.className='cep-status'+(kind?' is-'+kind:''); }
     function markAuto(el,value) { if (!el || !value) return; el.value=value; el.classList.add('address-auto-filled'); }
     async function resolveCep() {
-      if (!cepInput || !window.ProtegeCep) return true;
-      cepInput.value=window.ProtegeCep.formatarCep(cepInput.value);
+      if (international() || !cepInput || !window.ProtegeCep) return true;
+      if (!international()) cepInput.value=window.ProtegeCep.formatarCep(cepInput.value);
       if (!cepInput.value) { setCepStatus('', ''); return false; }
       if (!window.ProtegeCep.validarCep(cepInput.value)) { setCepStatus('CEP inválido. Informe 8 números.','error'); return false; }
       cepController?.abort(); cepController=new AbortController(); setCepStatus('Consultando CEP...','loading');
@@ -83,28 +110,29 @@
       const input=document.getElementById(btn.dataset.togglePassword); if(!input)return; const showing=input.type==='text'; input.type=showing?'password':'text'; btn.textContent=showing?'Mostrar':'Ocultar'; btn.setAttribute('aria-label', showing?'Mostrar senha':'Ocultar senha');
     }));
     [passwordInput,passwordConfirmInput].forEach(el=>el?.addEventListener('input',()=>{ if(passwordMatchError) passwordMatchError.hidden=true; }));
-    cpfInput.addEventListener('input', () => { cpfInput.value = window.ProtegeCpf.formatarCpf(cpfInput.value); cpfError.hidden = true; });
-    cpfInput.addEventListener('blur', () => { if (cpfInput.value && !window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; } });
-    phoneInput.addEventListener('input', () => { phoneInput.value = window.ProtegeCelular.formatarCelular(phoneInput.value); phoneError.hidden = true; });
-    phoneInput.addEventListener('blur', () => { if (phoneInput.value && !window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; } });
-    if (cepInput) { cepInput.addEventListener('input', () => { cepInput.value=window.ProtegeCep.formatarCep(cepInput.value); setCepStatus('', ''); }); cepInput.addEventListener('blur', resolveCep); }
+    cpfInput.addEventListener('input', () => { if (!international()) cpfInput.value = window.ProtegeCpf.formatarCpf(cpfInput.value); cpfError.hidden = true; });
+    cpfInput.addEventListener('blur', () => { if (!international() && cpfInput.value && !window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; } });
+    phoneInput.addEventListener('input', () => { if (!international()) phoneInput.value = window.ProtegeCelular.formatarCelular(phoneInput.value); phoneError.hidden = true; });
+    phoneInput.addEventListener('blur', () => { if (!international() && phoneInput.value && !window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; } });
+    if (cepInput) { cepInput.addEventListener('input', () => { if (!international()) cepInput.value=window.ProtegeCep.formatarCep(cepInput.value); setCepStatus('', ''); }); cepInput.addEventListener('blur', resolveCep); }
     publicForm.addEventListener('submit', async (ev) => {
       ev.preventDefault(); msg.textContent = '';
       if (!publicForm.reportValidity()) return;
-      if (!window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; cpfInput.focus(); return; }
-      if (!window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; phoneInput.focus(); return; }
+      if (!international() && !window.ProtegeCpf.validarCpf(cpfInput.value)) { cpfError.textContent = 'CPF inválido. Confira os números informados.'; cpfError.hidden = false; cpfInput.focus(); return; }
+      if (!international() && !window.ProtegeCelular.validarCelular(phoneInput.value)) { phoneError.textContent = 'Celular inválido. Informe DDD válido e número no formato (11) 99999-9999.'; phoneError.hidden = false; phoneInput.focus(); return; }
       if (!passwordInput || passwordInput.value.length < 8) { msg.textContent = 'Crie uma senha com pelo menos 8 caracteres.'; passwordInput?.focus(); return; }
       if (passwordInput.value !== passwordConfirmInput?.value) { if(passwordMatchError) passwordMatchError.hidden=false; passwordConfirmInput?.focus(); return; }
-      if (!window.ProtegeCep?.validarCep(cepInput?.value)) { setCepStatus('CEP inválido. Informe um CEP válido.','error'); cepInput?.focus(); return; }
+      if (!international() && !window.ProtegeCep?.validarCep(cepInput?.value)) { setCepStatus('CEP inválido. Informe um CEP válido.','error'); cepInput?.focus(); return; }
+      if (international() && (!/^\+[1-9]\d{6,14}$/.test(phoneInput.value.replace(/[\s().-]/g,'')) || !numberInput.value.trim())) {msg.textContent='Informe celular internacional com DDI (+) e documento válido.';return;}
       const fd = new FormData(publicForm);
       const estado = String(fd.get('estado') || '').trim().toUpperCase();
-      if (!/^[A-Z]{2}$/.test(estado)) { msg.textContent = 'Informe a UF com duas letras, por exemplo SP.'; return; }
+      if (!international() && !/^[A-Z]{2}$/.test(estado)) { msg.textContent = 'Informe a UF com duas letras, por exemplo SP.'; return; }
       submit.disabled = true; submit.textContent = 'Enviando...';
       try {
         const client = resolveClient();
         const body = {
-          nome: String(fd.get('nome') || '').trim(), email: String(fd.get('email') || '').trim().toLowerCase(), cpf: window.ProtegeCpf.somenteDigitos(fd.get('cpf')),
-          data_nascimento: fd.get('data_nascimento') || null, cep: window.ProtegeCep.somenteDigitos(fd.get('cep')), logradouro: String(fd.get('logradouro') || '').trim(), numero: String(fd.get('numero') || '').trim(), complemento: String(fd.get('complemento') || '').trim(), bairro: String(fd.get('bairro') || '').trim(), cidade: String(fd.get('cidade') || '').trim(), estado, celular: window.ProtegeCelular.formatarCelular(fd.get('celular')),
+          nome: String(fd.get('nome') || '').trim(), email: String(fd.get('email') || '').trim().toLowerCase(), cpf: international()?null:window.ProtegeCpf.somenteDigitos(fd.get('cpf')), pais:String(fd.get('pais')||'BR'),tipo_documento:international()?String(fd.get('tipo_documento')||''): 'cpf',numero_documento:international()?String(fd.get('numero_documento')||'').trim():window.ProtegeCpf.somenteDigitos(fd.get('cpf')),
+          data_nascimento: fd.get('data_nascimento') || null, cep: international()?String(fd.get('cep')||'').trim():window.ProtegeCep.somenteDigitos(fd.get('cep')), logradouro: String(fd.get('logradouro') || '').trim(), numero: String(fd.get('numero') || '').trim(), complemento: String(fd.get('complemento') || '').trim(), bairro: String(fd.get('bairro') || '').trim(), cidade: String(fd.get('cidade') || '').trim(), estado, celular: international()?String(fd.get('celular')||'').trim():window.ProtegeCelular.formatarCelular(fd.get('celular')),
           especialidade: String(fd.get('especialidade') || '').trim(), formacao_origem: String(fd.get('formacao_origem') || '').trim(), formacao_educacao_parental: String(fd.get('formacao_educacao_parental') || ''),
           como_conheceu: String(fd.get('como_conheceu') || ''), motivacao: String(fd.get('motivacao') || '').trim(), consentimento_lgpd: fd.get('consentimento_lgpd') === 'on', senha: passwordInput.value
         };

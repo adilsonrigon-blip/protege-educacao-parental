@@ -1196,7 +1196,7 @@ async function initProfessionalsPage(){
       <div class="detail-card"><span>Status atual</span><b>${ProtegeApp.esc(p.status||'—')}</b></div>
       <div class="detail-card"><span>Data de cadastro</span><b>${ProtegeApp.formatDate(p.created_at)}</b></div>
       <div class="detail-card"><span>Última alteração</span><b>${ProtegeApp.formatDate(p.updated_at)}</b><small>${ProtegeApp.esc(p.updated_by_email||'—')}</small></div>`;
-    const df=document.getElementById('professionalEditForm');if(df){df.elements.nome.value=p.nome||'';df.elements.email.value=p.email||'';df.elements.telefone.value=p.telefone||'';df.elements.especialidade.value=p.especialidade||'';df.elements.ong_id.value=p.ong_id||'';}
+    const df=document.getElementById('professionalEditForm');if(df){df.elements.nome.value=p.nome||'';df.elements.email.value=p.email||'';df.elements.telefone.value=p.telefone||'';df.elements.especialidade.value=p.especialidade||'';['pais','tipo_documento','numero_documento','logradouro','cidade','estado','cep'].forEach(k=>{if(df.elements[k])df.elements[k].value=p[k]||((k==='pais')?'BR':'')});df.elements.ong_id.value=p.ong_id||'';}
     document.getElementById('professionalEditSection').hidden=true;document.getElementById('professionalDetailCards').hidden=false;document.getElementById('editProfessionalBtn').hidden=false;
     document.getElementById('detailProfessionalProfile').value=p.perfil==='admin'?'admin':'profissional';
     document.getElementById('detailProfessionalStatus').value=p.status==='inativo'?'inativo':'ativo';
@@ -1367,7 +1367,7 @@ async function initProfessionalsPage(){
       const result=await ProtegeApp.createProfessionalWithAccess({
         nome,email,password,
         telefone:String(fd.get('telefone')||'').trim()||null,
-        especialidade:String(fd.get('especialidade')||'').trim()||null,
+        especialidade:String(fd.get('especialidade')||'').trim()||null, pais:String(fd.get('pais')||'BR'), tipo_documento:String(fd.get('tipo_documento')||'cpf'),numero_documento:String(fd.get('numero_documento')||'').trim()||null,logradouro:String(fd.get('logradouro')||'').trim()||null,cidade:String(fd.get('cidade')||'').trim()||null,estado:String(fd.get('estado')||'').trim()||null,cep:String(fd.get('cep')||'').trim()||null,
         perfil:String(fd.get('perfil')||'profissional'),
         status:String(fd.get('status')||'ativo'),
         ong_id:String(fd.get('ong_id')||'')||null
@@ -1408,7 +1408,7 @@ async function initProfessionalsPage(){
   document.getElementById('cancelProfessionalEdit')?.addEventListener('click',()=>{document.getElementById('professionalDetailCards').hidden=false;document.getElementById('professionalEditSection').hidden=true;document.getElementById('editProfessionalBtn').hidden=false;});
   document.getElementById('professionalEditForm')?.addEventListener('submit',async e=>{
     e.preventDefault();if(!activeProfessional)return;const fd=new FormData(e.currentTarget),m=document.getElementById('professionalEditMessage'),b=document.getElementById('saveProfessionalEdit');
-    const patch={nome:String(fd.get('nome')||'').trim(),email:String(fd.get('email')||'').trim().toLowerCase(),telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,ong_id:String(fd.get('ong_id')||'')||null};
+    const patch={nome:String(fd.get('nome')||'').trim(),email:String(fd.get('email')||'').trim().toLowerCase(),telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null, pais:String(fd.get('pais')||'BR'), tipo_documento:String(fd.get('tipo_documento')||'cpf'),numero_documento:String(fd.get('numero_documento')||'').trim()||null,logradouro:String(fd.get('logradouro')||'').trim()||null,cidade:String(fd.get('cidade')||'').trim()||null,estado:String(fd.get('estado')||'').trim()||null,cep:String(fd.get('cep')||'').trim()||null,ong_id:String(fd.get('ong_id')||'')||null};
     if(!patch.nome||!patch.email){m.textContent='Nome e e-mail são obrigatórios.';return;}b.disabled=true;m.textContent='Salvando alterações...';
     try{await ProtegeApp.updateProfessionalDetails(activeProfessional.id,patch);m.textContent='Dados atualizados com sucesso.';await refresh();setTimeout(()=>dialog.close(),450);}
     catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}finally{b.disabled=false;}

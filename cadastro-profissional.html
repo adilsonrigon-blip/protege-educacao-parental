@@ -27,7 +27,7 @@
 <link rel="stylesheet" href="cadastro-profissional-ajustes-v132412.css?v=132412">
 <link rel="stylesheet" href="tipografia-padrao-v132413.css?v=132413">
 <link rel="stylesheet" href="ajustes-consentimento-menu-v132414.css?v=132414">
-</head>
+<link rel="stylesheet" href="profissionais-internacionais.css?v=1"></head>
 <body>
 <header class="site-header">
   <div class="container nav-wrap">
@@ -52,7 +52,10 @@
     <form id="professionalInterestForm" class="professional-interest-grid" novalidate>
       <label>Nome completo *<input name="nome" required autocomplete="name" maxlength="160"></label>
       <label>E-mail *<input name="email" type="email" required autocomplete="email" maxlength="180"></label>
-      <label>CPF *<input id="professionalCpf" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"><span class="cpf-help">O CPF é validado e usado somente pela administração para identificação e prevenção de cadastros duplicados.</span><span id="cpfError" class="field-error" hidden></span></label>
+      <label id="cpfField">CPF *<input id="professionalCpf" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"><span class="cpf-help">O CPF é validado e usado somente pela administração para identificação e prevenção de cadastros duplicados.</span><span id="cpfError" class="field-error" hidden></span></label>
+      <label>País de residência *<select name="pais" id="professionalCountry" required><option value="BR">Brasil</option><option value="PT">Portugal</option><option value="US">Estados Unidos</option><option value="AR">Argentina</option><option value="ES">Espanha</option><option value="OTHER">Outro país</option></select></label>
+      <label id="documentTypeField" hidden>Tipo de documento *<select name="tipo_documento" id="professionalDocumentType"><option value="passaporte">Passaporte</option><option value="identidade_estrangeira">Identidade estrangeira</option><option value="outro">Outro documento</option></select></label>
+      <label id="documentNumberField" hidden>Número do documento *<input name="numero_documento" id="professionalDocumentNumber" maxlength="60"></label>
       <label>Data de nascimento *<input name="data_nascimento" type="date" required></label>
       <div class="address-section-title">Endereço</div>
       <label class="cep-field">CEP *<input id="professionalCep" name="cep" required inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" aria-describedby="cepStatus"><span class="cep-row-help">Digite o CEP e aguarde o preenchimento automático do endereço.</span><span id="cepStatus" class="cep-status" role="status" aria-live="polite"></span></label>
@@ -63,7 +66,7 @@
       <label>Cidade *<input id="professionalCity" name="cidade" required autocomplete="address-level2" maxlength="120"></label>
       <label>Estado (UF) *<input id="professionalState" name="estado" required autocomplete="address-level1" maxlength="2" minlength="2" placeholder="SP"></label>
       <label>Número do celular *<input id="professionalPhone" name="celular" required inputmode="tel" autocomplete="tel" maxlength="15" placeholder="(11) 99999-9999" aria-describedby="celularError"><span id="celularError" class="field-error" hidden></span></label>
-      <label>Especialidade / área de atuação *<input name="especialidade" required maxlength="160" placeholder="Ex.: Psicologia, Pedagogia, Educação Parental"></label>
+      <label>Especialidade / área de atuação *<select name="especialidade" id="professionalSpecialty" required><option value="">Carregando profissões...</option></select></label>
       <label class="full-field">Qual sua formação de origem? *<textarea name="formacao_origem" required maxlength="1200" placeholder="Informe graduação, cursos ou formação principal."></textarea></label>
       <label class="full-field">Você possui formação em Educação Parental? *<select name="formacao_educacao_parental" required><option value="">Selecione</option><option value="sim">Sim, tenho formação concluída</option><option value="cursando">Estou fazendo uma formação</option><option value="experiencia_sem_formacao">Já atuei na área, mas não tenho formação específica</option><option value="nao">Não tenho formação em Educação Parental</option></select></label>
       <label class="full-field">Como conheceu o PROTEGE? *<select name="como_conheceu" required><option value="">Selecione</option><option>Instagram</option><option>WhatsApp</option><option>Facebook</option><option>Indicação</option><option>Google</option><option>Evento / palestra</option><option>Outro</option></select></label>
@@ -85,7 +88,7 @@
 <script src="cpf-v13130.js?v=13130"></script>
 <script src="celular-v13132.js?v=13132"></script>
 <script src="cep-v13141.js?v=13141"></script>
-<script src="pre-cadastro-profissional-v13244.js?v=13244"></script>
+<script src="pre-cadastro-profissional-v13244.js?v=132501"></script>
 <script>
 (function(){
   const toggle=document.querySelector('.menu-toggle');

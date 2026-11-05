@@ -1,0 +1,19 @@
+PROTEJE — ALTERAÇÕES INCREMENTAIS / PROFISSIONAIS INTERNACIONAIS
+
+ATENÇÃO: PACOTE DE HOMOLOGAÇÃO, NÃO PUBLICAR DIRETAMENTE EM PRODUÇÃO.
+
+Ordem sugerida: (1) backup do Supabase; (2) revisar constraints/triggers e aplicar SQL em homologação; (3) atualizar Edge Functions (administrar-profissional e função publicada no endpoint swift-processor); (4) publicar arquivos web; (5) testes integrados de ponta a ponta; (6) só então publicar em produção.
+
+Incluído: campo país, documento alternativo, telefone internacional, endereço, combo de profissões, tela administrativa de profissões, Edge Functions atualizadas e SQL.
+
+LIMITAÇÕES IMPORTANTES:
+- O pacote original não contém tests/cadastros-regression.test.mjs; npm test falha por ausência desse arquivo.
+- Sem conexão real com Supabase, não foi possível executar migração, publicar funções ou testar RLS e fluxos de Auth.
+- SQL pode exigir remoção/ajuste pontual de constraints ou triggers antigos de CPF/UF, que não foram inventariados no banco real.
+- O CRUD de profissões usa RLS e exige login admin; não foi testado em produção.
+- O arquivo da Edge Function de pré-cadastro deve substituir a função que atende o endpoint swift-processor, mesmo que o nome visível no painel seja pre-cadastrar-profissional.
+- O frontend administrativo pode exigir refinamento de sincronização de campos ao editar cadastros legados; valide antes de publicar.
+- A validação internacional de telefone segue o padrão básico E.164; não substitui uma biblioteca completa de números internacionais.
+- A alteração não comprova autorização legal de exercício profissional.
+
+TESTES LOCAIS: node --check nos arquivos JS alterados: aprovados. npm test: bloqueado (arquivo de regressão ausente). TypeScript: análise parcial, sem runtime Deno / dependências npm: da Edge Function.
