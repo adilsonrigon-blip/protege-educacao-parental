@@ -1,0 +1,9 @@
+PROTEJE - Incremental autocomplete e endereço internacional (homologação)
+Base: PROTEJE_Profissionais_Internacionais_Incremental_HOMOLOGACAO.zip
+Arquivos: cadastro-profissional.html, profissionais.html, pre-cadastro-profissional-v13244.js, proteje-autocomplete.js, proteje-autocomplete.css.
+Instalar SOBRE a versão incremental internacional anterior. NÃO substituir o projeto inteiro.
+País: lista ISO 3166-1 (249 países/territórios), pesquisa por nome sem acento, armazena ISO alpha-2.
+Profissão: autocomplete por datalist carregado da tabela profissoes; exige valor existente e ativo.
+País antes de documento; CEP obrigatório apenas para Brasil, código postal opcional fora.
+Dependências: Supabase com tabela profissoes e políticas de leitura; Edge Functions e SQL da versão internacional anterior.
+Limitações: não houve teste integrado com Supabase de produção ou browser real.

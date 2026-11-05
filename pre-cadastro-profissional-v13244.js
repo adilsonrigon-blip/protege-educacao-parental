@@ -72,6 +72,9 @@
       document.getElementById('documentNumberField').hidden=!foreign;
       cpfInput.required=!foreign;numberInput.required=foreign;
       cepInput.required=!foreign;
+      const cepLabel=cepInput.closest('label');if(cepLabel&&cepLabel.firstChild?.nodeType===3)cepLabel.firstChild.textContent=foreign?'Código postal (opcional)':'CEP *';
+      cepInput.placeholder=foreign?'Código postal (se houver)':'00000-000';cepInput.inputMode=foreign?'text':'numeric';
+      document.querySelector('.cep-row-help')?.replaceChildren(document.createTextNode(foreign?'Informe o código postal, se houver.':'Digite o CEP e aguarde o preenchimento automático do endereço.')); 
       cepInput.maxLength=foreign?20:9;
       stateInput.maxLength=foreign?120:2;stateInput.minLength=foreign?0:2;
       stateInput.placeholder=foreign?'Estado / região':'SP';
@@ -80,14 +83,6 @@
       cpfError.hidden=true;phoneError.hidden=true;
     }
     countryInput.addEventListener('change',switchCountry);switchCountry();
-    async function loadSpecialties(){
-      const select=document.getElementById('professionalSpecialty');
-      try {const {data,error}=await resolveClient().from('profissoes').select('nome').eq('ativo',true).order('nome');if(error)throw error;
-        select.innerHTML='<option value="">Selecione a profissão</option>';
-        (data||[]).forEach(p=>{const opt=document.createElement('option');opt.value=p.nome;opt.textContent=p.nome;select.append(opt)});
-      }catch(e){select.innerHTML='<option value="">Profissões indisponíveis — tente novamente</option>';console.error(e)}
-    }
-    loadSpecialties();
     let cepController = null;
     function setCepStatus(text,kind) { if (!cepStatus) return; cepStatus.textContent=text||''; cepStatus.className='cep-status'+(kind?' is-'+kind:''); }
     function markAuto(el,value) { if (!el || !value) return; el.value=value; el.classList.add('address-auto-filled'); }
@@ -124,6 +119,7 @@
       if (passwordInput.value !== passwordConfirmInput?.value) { if(passwordMatchError) passwordMatchError.hidden=false; passwordConfirmInput?.focus(); return; }
       if (!international() && !window.ProtegeCep?.validarCep(cepInput?.value)) { setCepStatus('CEP inválido. Informe um CEP válido.','error'); cepInput?.focus(); return; }
       if (international() && (!/^\+[1-9]\d{6,14}$/.test(phoneInput.value.replace(/[\s().-]/g,'')) || !numberInput.value.trim())) {msg.textContent='Informe celular internacional com DDI (+) e documento válido.';return;}
+      const prof=publicForm.elements.especialidade; if(!prof.value.trim()){msg.textContent='Selecione uma profissão cadastrada.';prof.focus();return;}
       const fd = new FormData(publicForm);
       const estado = String(fd.get('estado') || '').trim().toUpperCase();
       if (!international() && !/^[A-Z]{2}$/.test(estado)) { msg.textContent = 'Informe a UF com duas letras, por exemplo SP.'; return; }
