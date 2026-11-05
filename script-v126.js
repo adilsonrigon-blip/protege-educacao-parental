@@ -731,7 +731,41 @@ async function initLeadsPage() {
   function openFromQuery(){ const id=new URLSearchParams(location.search).get('id'); if(id&&leads.some(x=>x.id===id)){openLead(id); history.replaceState({},'',location.pathname);} }
   tbody.addEventListener('click',e=>{const b=e.target.closest('.view-lead');if(b)openLead(b.dataset.id);});
   search.addEventListener('input',render); filter.addEventListener('change',render);
-  editForm.addEventListener('submit',async e=>{e.preventDefault();if(!active)return;const msg=document.getElementById('leadDialogMessage');msg.textContent='Salvando...';try{await ProtegeApp.updateLead(active.id,{status:document.getElementById('leadEditStatus').value,observacoes:document.getElementById('leadNotes').value.trim()||null});msg.textContent='Alterações salvas.';await refresh();setTimeout(()=>dialog.close(),450);}catch(err){msg.textContent='Não foi possível salvar.';console.error(err);}});
+  editForm.addEventListener('submit',async e=>{
+    e.preventDefault();if(!active)return;
+    const msg=document.getElementById('leadDialogMessage');
+    const status=document.getElementById('leadEditStatus').value;
+    const observacoes=document.getElementById('leadNotes').value.trim()||null;
+    const saveButton=editForm.querySelector('button[type="submit"]');
+    if(status==='convertido'&&active.status!=='convertido'){
+      msg.textContent='Para converter, selecione Aprovado ou use o botão Converter em família.';return;
+    }
+    if(active.status==='convertido'&&status!=='convertido'){
+      msg.textContent='Uma família convertida não pode voltar a um status anterior por esta tela.';return;
+    }
+    if(status==='aprovado'&&!confirm(`Aprovar ${active.responsavel1} e cadastrar a família e seus filhos?`))return;
+    if(saveButton)saveButton.disabled=true;
+    msg.textContent=status==='aprovado'?'Aprovando e cadastrando família e filhos...':'Salvando...';
+    try{
+      if(status==='aprovado'){
+        // A RPC faz a inserção de família/filhos e a mudança para "convertido" na mesma transação.
+        // Não marcar "aprovado" isoladamente: isso deixaria a família fora da tabela familias.
+        await ProtegeApp.updateLead(active.id,{observacoes});
+        const familyId=await ProtegeApp.convertLead(active.id);
+        if(!familyId)throw new Error('A conversão não retornou o identificador da família.');
+        msg.textContent='Família e filhos cadastrados com sucesso.';
+        await refresh();
+        window.location.href=`familias.html?id=${encodeURIComponent(familyId)}`;
+      }else{
+        await ProtegeApp.updateLead(active.id,{status,observacoes});
+        msg.textContent='Alterações salvas.';await refresh();
+        setTimeout(()=>dialog.close(),450);
+      }
+    }catch(err){
+      console.error(err);
+      msg.textContent=`Não foi possível concluir a operação: ${err?.message||'erro inesperado'}. Nenhuma aprovação foi confirmada nesta tela.`;
+    }finally{if(saveButton)saveButton.disabled=false;}
+  });
   document.getElementById('convertLeadBtn').addEventListener('click',async()=>{
     if(!active)return;
     const btn=document.getElementById('convertLeadBtn');
@@ -1126,6 +1160,17 @@ async function initProfessionalsPage(){
   const form=document.getElementById('professionalForm');
   const msg=document.getElementById('professionalMessage');
   const search=document.getElementById('professionalSearch');
+  // O filtro só pode ser preenchido por interação explícita, nunca pelo autofill do navegador.
+  if(search){
+    search.value='';
+    search.readOnly=true;
+    const unlockSearch=()=>{search.readOnly=false;};
+    search.addEventListener('pointerdown',unlockSearch,{once:true});
+    search.addEventListener('focus',unlockSearch,{once:true});
+    window.addEventListener('pageshow',event=>{
+      if(event.persisted){search.value='';search.readOnly=true;}
+    });
+  }
   const profileFilter=document.getElementById('professionalProfileFilter');
   const statusFilter=document.getElementById('professionalStatusFilter');
   const resultCount=document.getElementById('professionalResultCount');
@@ -1196,7 +1241,7 @@ async function initProfessionalsPage(){
       <div class="detail-card"><span>Status atual</span><b>${ProtegeApp.esc(p.status||'—')}</b></div>
       <div class="detail-card"><span>Data de cadastro</span><b>${ProtegeApp.formatDate(p.created_at)}</b></div>
       <div class="detail-card"><span>Última alteração</span><b>${ProtegeApp.formatDate(p.updated_at)}</b><small>${ProtegeApp.esc(p.updated_by_email||'—')}</small></div>`;
-    const df=document.getElementById('professionalEditForm');if(df){df.elements.nome.value=p.nome||'';df.elements.email.value=p.email||'';df.elements.telefone.value=p.telefone||'';df.elements.especialidade.value=p.especialidade||'';['pais','tipo_documento','numero_documento','logradouro','cidade','estado','cep'].forEach(k=>{if(df.elements[k])df.elements[k].value=p[k]||((k==='pais')?'BR':'')});df.elements.ong_id.value=p.ong_id||'';}
+    const df=document.getElementById('professionalEditForm');if(df){df.elements.nome.value=p.nome||'';df.elements.email.value=p.email||'';df.elements.telefone.value=p.telefone||'';df.elements.especialidade.value=p.especialidade||'';df.elements.ong_id.value=p.ong_id||'';}
     document.getElementById('professionalEditSection').hidden=true;document.getElementById('professionalDetailCards').hidden=false;document.getElementById('editProfessionalBtn').hidden=false;
     document.getElementById('detailProfessionalProfile').value=p.perfil==='admin'?'admin':'profissional';
     document.getElementById('detailProfessionalStatus').value=p.status==='inativo'?'inativo':'ativo';
@@ -1367,7 +1412,7 @@ async function initProfessionalsPage(){
       const result=await ProtegeApp.createProfessionalWithAccess({
         nome,email,password,
         telefone:String(fd.get('telefone')||'').trim()||null,
-        especialidade:String(fd.get('especialidade')||'').trim()||null, pais:String(fd.get('pais')||'BR'), tipo_documento:String(fd.get('tipo_documento')||'cpf'),numero_documento:String(fd.get('numero_documento')||'').trim()||null,logradouro:String(fd.get('logradouro')||'').trim()||null,cidade:String(fd.get('cidade')||'').trim()||null,estado:String(fd.get('estado')||'').trim()||null,cep:String(fd.get('cep')||'').trim()||null,
+        especialidade:String(fd.get('especialidade')||'').trim()||null,
         perfil:String(fd.get('perfil')||'profissional'),
         status:String(fd.get('status')||'ativo'),
         ong_id:String(fd.get('ong_id')||'')||null
@@ -1408,7 +1453,7 @@ async function initProfessionalsPage(){
   document.getElementById('cancelProfessionalEdit')?.addEventListener('click',()=>{document.getElementById('professionalDetailCards').hidden=false;document.getElementById('professionalEditSection').hidden=true;document.getElementById('editProfessionalBtn').hidden=false;});
   document.getElementById('professionalEditForm')?.addEventListener('submit',async e=>{
     e.preventDefault();if(!activeProfessional)return;const fd=new FormData(e.currentTarget),m=document.getElementById('professionalEditMessage'),b=document.getElementById('saveProfessionalEdit');
-    const patch={nome:String(fd.get('nome')||'').trim(),email:String(fd.get('email')||'').trim().toLowerCase(),telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null, pais:String(fd.get('pais')||'BR'), tipo_documento:String(fd.get('tipo_documento')||'cpf'),numero_documento:String(fd.get('numero_documento')||'').trim()||null,logradouro:String(fd.get('logradouro')||'').trim()||null,cidade:String(fd.get('cidade')||'').trim()||null,estado:String(fd.get('estado')||'').trim()||null,cep:String(fd.get('cep')||'').trim()||null,ong_id:String(fd.get('ong_id')||'')||null};
+    const patch={nome:String(fd.get('nome')||'').trim(),email:String(fd.get('email')||'').trim().toLowerCase(),telefone:String(fd.get('telefone')||'').trim()||null,especialidade:String(fd.get('especialidade')||'').trim()||null,ong_id:String(fd.get('ong_id')||'')||null};
     if(!patch.nome||!patch.email){m.textContent='Nome e e-mail são obrigatórios.';return;}b.disabled=true;m.textContent='Salvando alterações...';
     try{await ProtegeApp.updateProfessionalDetails(activeProfessional.id,patch);m.textContent='Dados atualizados com sucesso.';await refresh();setTimeout(()=>dialog.close(),450);}
     catch(err){m.textContent='Não foi possível atualizar: '+(err?.message||'erro');}finally{b.disabled=false;}

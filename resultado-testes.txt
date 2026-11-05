@@ -1,0 +1,5 @@
+
+> protege-educacao-parental-tests@13.24.9 test
+> node --check script-v126.js && node --check script.js && node --test tests/cadastros-regression.test.mjs
+
+Could not find 'tests/cadastros-regression.test.mjs'

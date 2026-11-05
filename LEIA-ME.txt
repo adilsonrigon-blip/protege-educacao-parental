@@ -1,1 +1,11 @@
-PROTEGE V13.24.37 - Editor. Teste Chromium local: carregar HTML normal/negrito/italico, selecionar e formatar, sincronizar campo, reabrir, renderizar: PASSOU. Python: 1122 testes PASSOU. npm test PASSOU. JS: 26/26 PASSOU. Supabase real: NAO TESTADO. Artigos ja salvos com formatacao indevida precisam ser corrigidos e salvos. SQL: nao requer. Substituir 3 arquivos na raiz do GitHub.
+CORREÇÃO INCREMENTAL - FAMÍLIAS
+
+Arquivos: script-v126.js (inclui correção anterior do autofill de profissionais) e familias-interessadas.html.
+
+Aprovar em Famílias interessadas agora chama converter_interesse_em_familia e grava família/filhos; o status final é convertido.
+
+PRÉ-REQUISITO: RPC converter_interesse_em_familia instalada e permissão de administrador. Consulte supabase-v13-usuarios-perfis.sql no projeto.
+
+A correção do autofill em profissionais.html do pacote anterior é separada; inclua profissionais.html daquele pacote se ainda não foi implantado.
+
+Não é possível validar conexão Supabase real nesta sessão. Faça homologação com cadastro de teste e confira as tabelas familias, filhos e familias_interessadas.
