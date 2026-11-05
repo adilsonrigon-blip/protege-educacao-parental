@@ -1,0 +1,19 @@
+PROTEJE — Pacote incremental de pesquisa CBO (HOMOLOGAÇÃO)
+
+Pré-requisitos:
+1. Instalar o pacote Profissionais Internacionais e o pacote Autocomplete Países/Profissões anteriores.
+2. Aplicar supabase-cbo-preparacao.sql no SQL Editor de um projeto de HOMOLOGAÇÃO.
+3. Baixar o arquivo oficial “CBO2002 - Ocupação - Arquivo CSV” no portal do Ministério do Trabalho e Emprego:
+   https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/servicos/downloads/downloads
+4. Executar localmente: python importar_cbo.py caminho/arquivo.csv
+5. Conferir o arquivo supabase-cbo-importacao.sql gerado e executá-lo no SQL Editor de homologação.
+6. Publicar os quatro arquivos JS/CSS/HTML deste ZIP na raiz do site.
+
+Observações:
+- A lista completa NÃO foi incluída neste ZIP: o CSV oficial não estava acessível para download no ambiente de geração. Não afirme que a importação ocorreu.
+- Busca paginada até 40 sugestões por consulta; sem limite global de registros pesquisáveis.
+- Os registros da tabela profissões já existentes são preservados.
+- A consulta exige que as políticas RLS permitam SELECT nas profissões ativas.
+- Para versões antigas da tabela sem codigo_cbo, executar SQL antes de publicar.
+- Não testado contra Supabase real, nem em navegador desktop/mobile. Validar antes de produção.
+- A lista da CBO é brasileira; profissões adicionais internacionais podem ser incluídas pelo administrador.
